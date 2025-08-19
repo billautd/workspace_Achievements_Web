@@ -1,3 +1,6 @@
 .metadata
 logs
 target
+bin
+.project
+.settings
