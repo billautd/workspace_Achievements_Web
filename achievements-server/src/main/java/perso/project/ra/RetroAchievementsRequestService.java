@@ -1,8 +1,8 @@
 package perso.project.ra;
 
-import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -10,6 +10,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,6 +31,7 @@ import perso.project.model.MainModel;
 import perso.project.model.enums.CompletionStatusEnum;
 import perso.project.model.enums.UserAwardData;
 import perso.project.utils.LoggingUtils;
+import perso.project.utils.SleepUtils;
 
 @ApplicationScoped
 public class RetroAchievementsRequestService {
@@ -156,8 +158,7 @@ public class RetroAchievementsRequestService {
 					foundGameData.getUserAwards().add(data);
 				}
 				mapCompletionStatus(foundGameData);
-				Log.debug(foundGameData.getTitle() + " (" + foundGameData.getId() + ") is now "
-						+ foundGameData.getCompletionStatus());
+
 			});
 		} catch (JsonProcessingException e) {
 			Log.error("Error reading response body as GameData", e);
@@ -214,38 +215,6 @@ public class RetroAchievementsRequestService {
 		}
 	}
 
-	public void getAllConsoleGames() {
-		Log.info("Getting all console games");
-
-		// Calls are made sequentially to ensure model coherence
-		// getConsoleIds();
-		// SleepUtils.sleep(2000);
-		// for (final int consoleId : model.getConsoleDataMap().keySet()) {
-		// getConsoleGames(consoleId);
-		// SleepUtils.sleep(2000);
-		// }
-		// getUserCompletedGames();
-		// SleepUtils.sleep(2000);
-		// getUserAwards();
-		// SleepUtils.sleep(2000);
-		// Send data as one packet
-		// TODO : Send data in multiple packets
-		// final List<GameData> dataToSend = new ArrayList<>();
-		// model.getConsoleDataMap().values()
-		// .forEach(consoleData ->
-		// dataToSend.addAll(consoleData.getGameDataMap().values()));
-
-		String toSend = "";
-		try {
-			final BufferedReader reader = new BufferedReader(
-					new FileReader(new File("C:\\Users\\dbill\\Downloads\\dataToSend.txt")));
-			toSend = String.join("", reader.lines().toList());
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		gamesSocketEndpoint.sendStringDataBroadcast(toSend);
-	}
-
 	private void mapCompletionStatus(final GameData gameData) {
 		CompletionStatusEnum status = CompletionStatusEnum.NOT_PLAYED;
 		final boolean containsMastery = gameData.getUserAwards().stream()
@@ -265,5 +234,47 @@ public class RetroAchievementsRequestService {
 			status = CompletionStatusEnum.TRIED;
 		}
 		gameData.setCompletionStatus(status);
+		Log.debug(gameData.getTitle() + " (" + gameData.getId() + ") is now " + gameData.getCompletionStatus());
+	}
+
+	public void getAllConsoleGames() {
+		Log.info("Getting all console games");
+
+		// Calls are made sequentially to ensure model coherence
+		getConsoleIds();
+		SleepUtils.sleep(2000);
+		for (final int consoleId : model.getConsoleDataMap().keySet()) {
+			getConsoleGames(consoleId);
+			SleepUtils.sleep(2000);
+		}
+		getUserCompletedGames();
+		SleepUtils.sleep(2000);
+		getUserAwards();
+		SleepUtils.sleep(2000);
+		model.getConsoleDataMap().values()
+				.forEach(cons -> cons.getGameDataMap().values().forEach(this::mapCompletionStatus));
+		// Send data as one packet
+		// TODO : Send data in multiple packets
+		final List<GameData> dataToSend = new ArrayList<>();
+		model.getConsoleDataMap().values()
+				.forEach(consoleData -> dataToSend.addAll(consoleData.getGameDataMap().values()));
+
+//		String toSend = "";
+		try {
+			String toSend = mapper.writeValueAsString(dataToSend);
+			final BufferedWriter writer = new BufferedWriter(
+					new FileWriter(new File("C:\\Users\\dbill\\Downloads\\dataToSend.txt")));
+			writer.write(toSend);
+			gamesSocketEndpoint.sendStringDataBroadcast(toSend);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+//		try {
+//			final BufferedReader reader = new BufferedReader(
+//					new FileReader(new File("C:\\Users\\dbill\\Downloads\\dataToSend.txt")));
+//			toSend = String.join("", reader.lines().toList());
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
 	}
 }
