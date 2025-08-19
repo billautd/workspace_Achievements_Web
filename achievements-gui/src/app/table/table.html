@@ -56,11 +56,9 @@
             <ng-container matColumnDef="id">
                 <th mat-header-cell *matHeaderCellDef class="idColumn">Id</th>
                 <td mat-cell *matCellDef="let data">
-                    <a class="idURL" href="https://retroachievements.org/game/{{data.ID}}" target="_blank">
-                        <div>
-                            {{data.ID}}
-                        </div>
-                    </a>
+                    <button class="urlButton" (click)="openURL(data)">
+                        {{data.ID}}
+                    </button>
                 </td>
             </ng-container>
 
@@ -73,7 +71,7 @@
             </button>
         </div>
     </div>
-    <div>    
+    <div class="filters-parent">    
         <mat-form-field class="app-form-field" appearance="fill">
             <mat-label>Filter</mat-label>
             <input matInput type="text" [(ngModel)]="filterText" (keyup)="applyFilter()">

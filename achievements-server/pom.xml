@@ -4,13 +4,17 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>achievements-server</artifactId>
+	<groupId>perso.project</groupId>
+	<version>0.0.1-SNAPSHOT</version>
 
-	<parent>
-		<groupId>perso.project</groupId>
-		<artifactId>achievements</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
-	</parent>
-	
+	<properties>
+		<maven.compiler.target>21</maven.compiler.target>
+		<maven.compiler.source>21</maven.compiler.source>
+
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+	</properties>
+
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
@@ -47,17 +51,25 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>perso.project</groupId>
-			<artifactId>achievements-model</artifactId>
-		</dependency>
-		
-		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
+			<version>2.19.2</version>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.datatype</groupId>
 			<artifactId>jackson-datatype-jsr310</artifactId>
+			<version>2.19.2</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi</artifactId>
+			<version>5.3.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml</artifactId>
+			<version>5.3.0</version>
 		</dependency>
 	</dependencies>
 
@@ -75,6 +87,15 @@
 						</goals>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.14.0</version>
+				<configuration>
+					<source>21</source>
+					<target>21</target>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

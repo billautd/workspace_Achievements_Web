@@ -64,7 +64,7 @@ mat-table{
   width:5vw
 }
 .statusColumn{
-  width:8vw;
+  width:10vw;
 }
 .statusText{
   display:inline-block;
@@ -106,7 +106,20 @@ mat-table{
   color:white;
 }
 
-.idURL{
+.urlButton{
+  background:transparent;
+  border:0px;
+  color:white;
+  text-decoration: underline;
+  font-size: medium;
+}
+
+.urlButton:hover{
+  cursor: pointer;
+}
+
+mat-option{
+  background-color:black !important;
   color:white;
 }
 

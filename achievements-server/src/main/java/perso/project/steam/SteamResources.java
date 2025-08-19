@@ -1,4 +1,4 @@
-package perso.project.ra;
+package perso.project.steam;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
@@ -7,10 +7,10 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import perso.project.model.MainModel;
 
-@Path("/ra")
-public class RetroAchievementsResources {
+@Path("/steam")
+public class SteamResources {
 	@Inject
-	RetroAchievementsRequestService raRequestService;
+	SteamRequestService steamRequestService;
 
 	@Inject
 	MainModel model;
@@ -18,9 +18,8 @@ public class RetroAchievementsResources {
 	@GET
 	@Path("/all_data")
 	@Produces(MediaType.TEXT_PLAIN)
-	public String getAllConsoleGames() {
-		// Data is send in chunks through GamesSocketEndpoint
-		raRequestService.getAllConsoleGames();
+	public String getAllData() {
+		steamRequestService.getAllData();
 		return "{}";
 	}
 }

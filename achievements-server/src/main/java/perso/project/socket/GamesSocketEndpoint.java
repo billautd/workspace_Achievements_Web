@@ -1,4 +1,4 @@
-package perso.project.ra;
+package perso.project.socket;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +12,7 @@ import jakarta.websocket.OnOpen;
 import jakarta.websocket.Session;
 import jakarta.websocket.server.ServerEndpoint;
 
-@ServerEndpoint("/ra/games_socket")
+@ServerEndpoint("/games_socket")
 @ApplicationScoped
 public class GamesSocketEndpoint {
 	private final List<Session> sessions = new ArrayList<>();

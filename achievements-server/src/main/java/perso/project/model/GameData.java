@@ -10,14 +10,20 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import perso.project.model.enums.CompletionStatusEnum;
 import perso.project.model.enums.UserAwardData;
 
-@JsonIgnoreProperties({ "DateModified", "NumLeaderboards", "ImageIcon", "ForumTopicID", "MaxPossible", "PctWon",
-		"HardcoreMode" })
+@JsonIgnoreProperties({
+		// Retro achievements
+		"DateModified", "NumLeaderboards", "ImageIcon", "ForumTopicID", "MaxPossible", "PctWon", "HardcoreMode",
+		// Steam
+		"playtime_forever", "img_icon_url", "playtime_windows_forever", "playtime_mac_forever",
+		"playtime_linux_forever", "playtime_deck_forever", "rtime_last_played", "content_descriptorids",
+		"playtime_disconnected", "has_community_visible_stats", "has_leaderboards", "playtime_2weeks" })
 public class GameData {
 	@JsonProperty("ID")
-	@JsonAlias("GameID")
+	@JsonAlias({ "GameID", "appid" })
 	private int id = 0;
 
 	@JsonProperty("Title")
+	@JsonAlias("name")
 	private String title = "";
 
 	@JsonProperty("ConsoleID")
@@ -41,6 +47,9 @@ public class GameData {
 	@JsonProperty("UserAwards")
 	private List<UserAwardData> userAwards = new ArrayList<>();
 
+	@JsonProperty("AchievementData")
+	private List<SteamAchievementData> steamAchievementData = new ArrayList<>();
+
 	public void setGameData(final GameData data) {
 		setTitle(data.getTitle());
 		setConsoleName(data.getConsoleName());
@@ -49,6 +58,7 @@ public class GameData {
 		setTotalPoints(data.getTotalPoints());
 		setCompletionStatus(data.getCompletionStatus());
 		setUserAwards(data.getUserAwards());
+		setSteamAchievementData(data.getSteamAchievementData());
 	}
 
 	@Override
@@ -57,7 +67,7 @@ public class GameData {
 				+ "Console name : " + getConsoleName() + '\n' + "Total achievements : " + getTotalAchievements() + '\n'
 				+ "Awarded achievements : " + getAwardedAchievements() + '\n' + "Total points : " + getTotalPoints()
 				+ '\n' + "Completion status : " + getCompletionStatus() + '\n' + "User awards number : "
-				+ getUserAwards().size();
+				+ getUserAwards().size() + '\n' + "Steam achievements number : " + getSteamAchievementData().size();
 	}
 
 	public int getId() {
@@ -130,5 +140,13 @@ public class GameData {
 
 	public void setUserAwards(List<UserAwardData> userAwards) {
 		this.userAwards = userAwards;
+	}
+
+	public List<SteamAchievementData> getSteamAchievementData() {
+		return steamAchievementData;
+	}
+
+	public void setSteamAchievementData(List<SteamAchievementData> steamAchievementData) {
+		this.steamAchievementData = steamAchievementData;
 	}
 }

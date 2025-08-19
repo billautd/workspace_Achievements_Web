@@ -10,6 +10,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,7 +30,9 @@ import perso.project.model.GameData;
 import perso.project.model.MainModel;
 import perso.project.model.enums.CompletionStatusEnum;
 import perso.project.model.enums.UserAwardData;
+import perso.project.socket.GamesSocketEndpoint;
 import perso.project.utils.LoggingUtils;
+import perso.project.utils.SleepUtils;
 
 @ApplicationScoped
 public class RetroAchievementsRequestService {
@@ -117,7 +120,7 @@ public class RetroAchievementsRequestService {
 					model.getConsoleDataMap().put(data.getId(), data);
 				}
 			});
-			Log.info("Console data map is now size " + model.getConsoleDataMap().size());
+			Log.info("Console data map is size " + model.getConsoleDataMap().size());
 		} catch (IOException e) {
 			Log.error("Error reading response body as ConsoleData", e);
 		}
@@ -232,30 +235,33 @@ public class RetroAchievementsRequestService {
 			status = CompletionStatusEnum.TRIED;
 		}
 		gameData.setCompletionStatus(status);
-		Log.debug(gameData.getTitle() + " (" + gameData.getId() + ") is now " + gameData.getCompletionStatus());
+		Log.debug(gameData.getTitle() + " (" + gameData.getId() + ") is " + gameData.getCompletionStatus());
 	}
 
 	public void getAllConsoleGames() {
 		Log.info("Getting all console games");
 
-//		// Calls are made sequentially to ensure model coherence
-//		getConsoleIds();
-//		SleepUtils.sleep(2000);
-//		for (final int consoleId : model.getConsoleDataMap().keySet()) {
-//			getConsoleGames(consoleId);
-//			SleepUtils.sleep(2000);
-//		}
-//		getUserCompletedGames();
-//		SleepUtils.sleep(2000);
-//		getUserAwards();
-//		SleepUtils.sleep(2000);
-//		model.getConsoleDataMap().values()
-//				.forEach(cons -> cons.getGameDataMap().values().forEach(this::mapCompletionStatus));
-//		// Send data as one packet
-//		// TODO : Send data in multiple packets
-//		final List<GameData> dataToSend = new ArrayList<>();
-//		model.getConsoleDataMap().values()
-//				.forEach(consoleData -> dataToSend.addAll(consoleData.getGameDataMap().values()));
+		// Calls are made sequentially to ensure model coherence
+		getConsoleIds();
+		SleepUtils.sleep(2000);
+		final List<ConsoleData> consoleData = model.getConsoleDataMap().values().stream().toList();
+		for (int i = 0; i < consoleData.size(); i++) {
+			final ConsoleData data = consoleData.get(i);
+			Log.info("Processing " + data.getName() + " : " + (i + 1) + " / " + consoleData.size());
+
+			getConsoleGames(data.getId());
+			SleepUtils.sleep(2000);
+		}
+		getUserCompletedGames();
+		SleepUtils.sleep(2000);
+		getUserAwards();
+		SleepUtils.sleep(2000);
+		model.getConsoleDataMap().values()
+				.forEach(cons -> cons.getGameDataMap().values().forEach(this::mapCompletionStatus));
+		// Send data as one packet
+		// TODO : Send data in multiple packets
+		final List<GameData> dataToSend = new ArrayList<>();
+		model.getConsoleDataMap().values().forEach(d -> dataToSend.addAll(d.getGameDataMap().values()));
 //
 //		try {
 //			String toSend = mapper.writeValueAsString(dataToSend);
@@ -267,9 +273,8 @@ public class RetroAchievementsRequestService {
 //			e.printStackTrace();
 //		}
 		String toSend = "";
-		try {
-			final BufferedReader reader = new BufferedReader(
-					new FileReader(new File("C:\\Users\\dbill\\Downloads\\dataToSend.txt")));
+		try (final BufferedReader reader = new BufferedReader(
+				new FileReader(new File("C:\\Users\\dbill\\Downloads\\dataToSend.txt")))) {
 			toSend = String.join("", reader.lines().toList());
 			gamesSocketEndpoint.sendStringDataBroadcast(toSend);
 		} catch (IOException e) {
