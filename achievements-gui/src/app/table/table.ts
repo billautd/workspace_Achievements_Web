@@ -98,4 +98,8 @@ export class Table {
     const filter:string = this.filterText.trim().toLowerCase();
     this.data.filter = filter;
   }
+
+  getURL(data:GameData){
+    return "https://retroachievements.org/game/" + data.ID;
+  }
 }
