@@ -72,7 +72,7 @@ export class Table {
         this.isRequestBlocked = false;
       }
     })
-    this.http.get(environment.API_URL + "/ra/all_data").subscribe(res => {});
+    this.http.get(environment.API_URL + "/psvita/all_data").subscribe(res => {});
     this.isRequestBlocked = true;
   }
 
@@ -120,10 +120,19 @@ export class Table {
     let url:string;
     if(data.ConsoleName === "Steam"){
       url = "https://store.steampowered.com/app/" + data.ID;
-    }else {
+    }else if(data.ConsoleName === "PlayStation 3"){
+      url = "https://www.exophase.com/platform/psn/?q=" + this.parseGameName(data.Title) + "&sort=updated&platforms=7";
+    }else if(data.ConsoleName === "PlayStation Vita"){
+      url = "https://www.exophase.com/platform/psn/?q=" + this.parseGameName(data.Title) + "&sort=updated&platforms=6";
+    }
+    else {
       url = "https://retroachievements.org/game/" + data.ID;
     }
     window.open(url, "_blank");
+  }
+
+  parseGameName(name:string):string{
+    return name.replace(/[#&•]/g, "").replace(/ /g, "+").toLowerCase();
   }
 
   applyFilter(){

@@ -1,6 +1,7 @@
 package perso.project.steam;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -10,7 +11,6 @@ import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.util.List;
 
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -31,6 +31,7 @@ import perso.project.model.Model;
 import perso.project.model.SteamAchievementData;
 import perso.project.model.enums.CompletionStatusEnum;
 import perso.project.socket.GamesSocketEndpoint;
+import perso.project.utils.ExcelUtils;
 import perso.project.utils.LoggingUtils;
 import perso.project.utils.SleepUtils;
 
@@ -200,10 +201,10 @@ public class SteamRequestService {
 
 	public void getSteamGames_Beaten(final String path) {
 		Log.info("Reading " + path + "file");
-		try (final XSSFWorkbook beatenWorkbook = new XSSFWorkbook(new File(path))) {
+		try (final XSSFWorkbook beatenWorkbook = new XSSFWorkbook(new FileInputStream(new File(path)))) {
 			for (final Row row : beatenWorkbook.getSheetAt(0)) {
-				String gameName = row.getCell(0).getStringCellValue();
-				int gameId = (int) Double.parseDouble(row.getCell(1).toString());
+				final String gameName = ExcelUtils.getCellAsString(row.getCell(0));
+				final int gameId = ExcelUtils.getCellAsInt(row.getCell(1));
 				final GameData gameData = model.getConsoleDataMap().get(Model.STEAM_CONSOLE_ID).getGameDataMap()
 						.get(gameId);
 				if (gameData == null) {
@@ -213,17 +214,17 @@ public class SteamRequestService {
 				gameData.setCompletionStatus(CompletionStatusEnum.BEATEN);
 				Log.info(gameName + " (" + gameId + ") for Steam is Beaten");
 			}
-		} catch (InvalidFormatException | IOException e) {
+		} catch (IOException e) {
 			Log.error("Cannot read Steam beaten file at " + path);
 		}
 	}
 
 	public void getSteamGames_Mastered(final String path) {
 		Log.info("Reading " + path + "file");
-		try (final XSSFWorkbook masteredWorkbook = new XSSFWorkbook(new File(path))) {
+		try (final XSSFWorkbook masteredWorkbook = new XSSFWorkbook(new FileInputStream(new File(path)))) {
 			for (final Row row : masteredWorkbook.getSheetAt(0)) {
-				String gameName = row.getCell(0).getStringCellValue();
-				int gameId = (int) Double.parseDouble(row.getCell(1).toString());
+				final String gameName = ExcelUtils.getCellAsString(row.getCell(0));
+				final int gameId = ExcelUtils.getCellAsInt(row.getCell(1));
 				final GameData gameData = model.getConsoleDataMap().get(Model.STEAM_CONSOLE_ID).getGameDataMap()
 						.get(gameId);
 				if (gameData == null) {
@@ -233,7 +234,7 @@ public class SteamRequestService {
 				gameData.setCompletionStatus(CompletionStatusEnum.MASTERED);
 				Log.info(gameName + " (" + gameId + ") for Steam is Mastered");
 			}
-		} catch (InvalidFormatException | IOException e) {
+		} catch (IOException e) {
 			Log.error("Cannot read Steam beaten file at " + path);
 		}
 	}
