@@ -1,3 +1,16 @@
 
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+:root{
+    --purple1:rgb(25, 0, 117);
+    --purple2:rgba(58, 41, 110, 1);
+    --purple3:rgba(110, 38, 128, 1);
+}
+
+html, body { 
+    background: linear-gradient(180deg, var(--purple1) 0%, var(--purple2) 71%, var(--purple3) 100%);
+}
+body {
+    margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; 
+    width:100%;
+    height:100%;
+    position:fixed;
+}

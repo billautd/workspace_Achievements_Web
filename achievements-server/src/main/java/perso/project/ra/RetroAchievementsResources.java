@@ -8,7 +8,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
-import perso.project.model.back.MainModel;
+import perso.project.model.MainModel;
 
 @Path("/ra")
 public class RetroAchievementsResources {

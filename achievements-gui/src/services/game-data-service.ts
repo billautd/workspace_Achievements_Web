@@ -11,11 +11,7 @@ export class GameDataService {
    * @param data Data received from games_socket
    */
   readData(data:GameData[], modelSubject:BehaviorSubject<GameData[]>):Observable<GameData[]>{
-    const gameDataArray:GameData[] = [];
-    for(const game of data){
-      gameDataArray.push({ id:game["id"], name:game["name"]});
-    }
-    modelSubject.next(gameDataArray);
+    modelSubject.next(data);
     console.log("Read " + data.length + " data")
     return of(modelSubject.getValue());
   }

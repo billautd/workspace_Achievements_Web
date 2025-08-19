@@ -12,7 +12,7 @@ public class LoggingUtils {
 
 	public static void prettyPrint(final ObjectMapper mapper, final String resBody) {
 		try {
-			Log.debug("Body : " + mapper.writerWithDefaultPrettyPrinter()
+			Log.trace("Body : " + mapper.writerWithDefaultPrettyPrinter()
 					.writeValueAsString(mapper.readValue(resBody, Object.class)));
 		} catch (JsonProcessingException e) {
 			Log.error("Cannot pretty print " + resBody, e);

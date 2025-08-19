@@ -1,33 +1,40 @@
-import { ChangeDetectorRef, Component, inject } from '@angular/core';
+import { Component, inject, Input } from '@angular/core';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { Model } from '../../model/model';
-import { GameData } from '../../model/gameData';
+import { CompletionStatusType, GameData } from '../../model/gameData';
 import { GameDataService } from '../../services/game-data-service';
 import { WebsocketService } from '../../services/websocket-service';
 import { HttpClient } from '@angular/common/http';
 import { WebSocketSubject } from 'rxjs/webSocket';
 import { environment } from '../../environments/environment';
+import { MatInputModule } from '@angular/material/input';
+import { MatIconModule } from '@angular/material/icon';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-table',
-  imports: [MatTableModule],
+  imports: [MatTableModule, MatInputModule, MatIconModule, MatFormFieldModule, FormsModule],
   templateUrl: './table.html',
   styleUrl: './table.css',
   providers:[Model, GameDataService, WebsocketService]
 })
 export class Table {
   data:MatTableDataSource<GameData> = new MatTableDataSource<GameData>();
-  columnsToDisplay = ["id", "name"];
+  columnsToDisplay = ["consoleName", "name", "completionStatus", "achievements", "percentage", "id"];
   
   http:HttpClient = inject(HttpClient);
   webSocketService:WebsocketService;
   model:Model;
   gameDataService:GameDataService;
   gamesWebsocket:WebSocketSubject<any> | undefined;
+  isRequestBlocked:boolean = false;
+  filterText:string = "";
+
 
   constructor(model:Model,
     gameDataService:GameDataService,
-    webSocketService:WebsocketService,
+    webSocketService:WebsocketService
   ){
     this.model = model;
     this.gameDataService = gameDataService;
@@ -36,16 +43,6 @@ export class Table {
     
   ngOnInit(){
     this.gamesWebsocket = this.webSocketService.connect("/ra/games_socket");
-    this.gamesWebsocket?.subscribe({
-      next : (data) => {
-        this.gameDataService.readData(data, this.model.getGameListSubject()).subscribe((newData) => {
-          //Refresh table
-          this.data.data = newData;
-        })
-      },
-      error: (err) => console.log(err),
-      complete: () => console.log("Completed")
-    })
   }
   
   /**
@@ -53,6 +50,51 @@ export class Table {
    * Data will come from websocket games_socket
    */
   requestGamesData():void{
+    this.gamesWebsocket?.subscribe({
+      next : (data) => {
+        this.gameDataService.readData(data, this.model.getGameListSubject()).subscribe((newData) => {
+          //Refresh table
+          this.data.data = newData;
+          this.isRequestBlocked = false;
+        })
+      },
+      error: (err) => console.log(err),
+      complete: () => console.log("Completed")
+    })
     this.http.get(environment.API_URL + "/ra/all_console_games").subscribe(res => {});
+    this.isRequestBlocked = true;
+  }
+
+  achievementsText(data:GameData){
+    return data.NumAwarded + " / " + data.NumAchievements;
+  }
+
+  percentageText(data:GameData){
+    const num:number = data.NumAwarded / data.NumAchievements;
+    return Number(num).toLocaleString(undefined,{style: 'percent', minimumFractionDigits:0});;
+  }
+
+  completionStatusText(data:GameData){
+    switch(data.CompletionStatus){
+      case CompletionStatusType.MASTERED:
+        return "Mastered";
+      case CompletionStatusType.BEATEN:
+        return "Beaten";
+      case CompletionStatusType.CANNOT_PLAY:
+        return "Cannot play";
+      case CompletionStatusType.NOT_PLAYED:
+        return "Not played";
+      case CompletionStatusType.NO_ACHIEVEMENTS:
+        return "No achievements";
+      case CompletionStatusType.TRIED:
+        return "Tried";
+      default:
+        return "No status";
+    }
+  }
+
+  applyFilter(){
+    const filter:string = this.filterText.trim().toLowerCase();
+    this.data.filter = filter;
   }
 }

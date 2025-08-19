@@ -40,7 +40,7 @@ public class GamesSocketEndpoint {
 	}
 
 	public void sendStringDataBroadcast(final String message) {
-		Log.info("Sending messaage to " + sessions.size() + " sessions");
+		Log.info("Sending message to " + sessions.size() + " sessions");
 		sessions.forEach(session -> {
 			session.getAsyncRemote().sendText(message);
 		});

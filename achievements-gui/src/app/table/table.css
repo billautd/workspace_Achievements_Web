@@ -1,0 +1,125 @@
+.table-with-filters{
+  display:flex;
+}
+
+.app-form-field{
+  color:white;
+  width:20vw;
+  margin-top:10px;
+  margin-left:10px;
+}
+
+.closeButton{
+  background-color:transparent ;
+  border: 0;
+}
+
+.closeIcon{
+  color:white;
+}
+
+.mat-mdc-header-cell, .mat-mdc-cell {
+  color: white;
+}
+.mat-mdc-header-cell{
+  font-weight: bold;
+}
+
+.mat-mdc-table .mat-mdc-cell,
+.mat-mdc-table .mat-mdc-header-cell {
+  border-bottom: 1px solid white;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.mat-mdc-table{
+  border:1px solid white;
+}
+
+mat-table{
+  overflow-y:auto;
+  display:block;
+  height:80vh;
+  background-color:var(--purple1);
+}
+
+.mat-mdc-header-row, .mat-mdc-header-cell {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background-color:var(--purple1);
+}
+
+.table-parent{
+  width:70vw;
+}
+
+.consoleNameColumn{
+  width:15vw;
+}
+.nameColumn{
+  width:20vw;
+}
+.idColumn{
+  width:5vw
+}
+.statusColumn{
+  width:10vw;
+}
+.achievementsColumn{
+  width:10vw
+}
+.percentageColumn{
+  width:10vw
+}
+
+.request-data-button{
+  float:left;
+  margin-top:20px;
+
+  align-items: center;
+  appearance: none;
+  background-image: radial-gradient(100% 100% at 100% 0, #5adaff 0, #5468ff 100%);
+  border: 0;
+  border-radius: 6px;
+  box-shadow: rgba(45, 35, 66, .4) 0 2px 4px,rgba(45, 35, 66, .3) 0 7px 13px -3px,rgba(58, 65, 111, .5) 0 -3px 0 inset;
+  box-sizing: border-box;
+  color: #fff;
+  cursor: pointer;
+  display: inline-flex;
+  height: 48px;
+  justify-content: center;
+  line-height: 1;
+  list-style: none;
+  padding-left: 16px;
+  padding-right: 16px;
+  position: relative;
+  text-align: left;
+  text-decoration: none;
+  transition: box-shadow .15s,transform .15s;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  white-space: nowrap;
+  will-change: box-shadow,transform;
+  font-size: 18px;
+}
+
+.request-data-button:focus {
+  box-shadow: #3c4fe0 0 0 0 1.5px inset, rgba(45, 35, 66, .4) 0 2px 4px, rgba(45, 35, 66, .3) 0 7px 13px -3px, #3c4fe0 0 -3px 0 inset;
+}
+
+.request-data-button:hover:enabled {
+  box-shadow: rgba(45, 35, 66, .4) 0 4px 8px, rgba(45, 35, 66, .3) 0 7px 13px -3px, #3c4fe0 0 -3px 0 inset;
+  transform: translateY(-2px);
+}
+
+.request-data-button:active:enabled {
+  box-shadow: #3c4fe0 0 3px 7px inset;
+  transform: translateY(2px);
+}
+
+.request-data-button:disabled{
+  background-image: radial-gradient(100% 100% at 100% 0, #555555 0, #5468ff 100%);
+  color:#AAAAAA;
+}

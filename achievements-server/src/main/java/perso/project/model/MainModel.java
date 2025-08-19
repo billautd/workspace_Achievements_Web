@@ -1,4 +1,4 @@
-package perso.project.model.back;
+package perso.project.model;
 
 import jakarta.enterprise.context.ApplicationScoped;
 
