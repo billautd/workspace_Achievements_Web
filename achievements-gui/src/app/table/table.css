@@ -64,13 +64,46 @@ mat-table{
   width:5vw
 }
 .statusColumn{
-  width:10vw;
+  width:8vw;
+}
+.statusText{
+  display:inline-block;
+  border-radius: 5px;
+  padding-top:5px;
+  padding-bottom: 5px;
+  padding-left: 10px;
+  padding-right: 10px;
 }
 .achievementsColumn{
   width:10vw
 }
 .percentageColumn{
   width:10vw
+}
+
+.status-not-played{
+  background-color: #a0a0a0;
+  color:black;
+}
+.status-mastered{
+  background-color: gold;
+  color:black;
+}
+.status-beaten{
+  background-color: green;
+  color:white;
+}
+.status-tried{
+  background-color: aquamarine; 
+  color:black;
+}
+.status-no-achievements{
+  background-color: #555555;
+  color:white;
+}
+.status-cannot-play{
+  background-color: black;
+  color:white;
 }
 
 .request-data-button{

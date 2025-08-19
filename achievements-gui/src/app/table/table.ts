@@ -11,10 +11,11 @@ import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-table',
-  imports: [MatTableModule, MatInputModule, MatIconModule, MatFormFieldModule, FormsModule],
+  imports: [MatTableModule, MatInputModule, MatIconModule, MatFormFieldModule, FormsModule, CommonModule],
   templateUrl: './table.html',
   styleUrl: './table.css',
   providers:[Model, GameDataService, WebsocketService]
