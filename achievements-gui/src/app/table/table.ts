@@ -22,17 +22,17 @@ import { ConsoleData } from '../../model/consoleData';
   providers:[Model, GameDataService]
 })
 export class Table {
+  //Table data
   data:MatTableDataSource<GameData> = new MatTableDataSource<GameData>();
   columnsToDisplay:string[] = ["consoleName", "name", "completionStatus", "achievements", "percentage", "id"];
-  consoles:string[] = [];
+  filterText:string = "";
+  isRequestRunning:boolean = false;
+
   
-  http:HttpClient = inject(HttpClient);
   model:Model;
   gameDataService:GameDataService;
-  filterText:string = "";
-  filterConsole:string[] = [];
 
-  @ViewChild(MatTable) table!: MatTable<GameData>;
+  http:HttpClient = inject(HttpClient);
 
   constructor(model:Model,
     gameDataService:GameDataService){
@@ -43,11 +43,11 @@ export class Table {
   ngOnInit(){
     //No data is passed through this behavior subject, it's only a trigger to refresh table data
     this.model.getUpdateBehaviorSubject().subscribe((gameData) => {
-      if(!gameData){
-        console.log("No data given for table refresh. Returning...")
-        return;
-      }
-      console.log("Refreshing table with " + gameData.length + " data");
+      // if(!gameData){
+      //   console.log("No data given for table refresh. Returning...")
+      //   return;
+      // }
+      // console.log("Refreshing table with " + gameData.length + " data");
       this.data.data = this.model.flattenMap();
     })
   }
@@ -57,10 +57,12 @@ export class Table {
    * Data will come from websocket games_socket
    */
   requestAllData():void{
+    this.isRequestRunning = true;
     this.gameDataService.requestConsoleData(this.model).then((res1) => {
       console.log("Console data OK")
       this.gameDataService.requestGameData(this.model).then((res2) => {
         console.log("Game data OK")
+        this.isRequestRunning = false;
       })
     });
   }

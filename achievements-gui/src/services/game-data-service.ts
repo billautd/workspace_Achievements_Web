@@ -63,10 +63,10 @@ export class GameDataService {
     const psVitaObs: Promise<ConsoleData[]> = this.psVitaDataService.requestPSVitaConsoleData(this.http);
 
     return Promise.all([
-      // raObs,
-      steamObs,
-      //ps3Obs,
-      //psVitaObs
+      raObs,
+      //steamObs,
+      ps3Obs,
+      psVitaObs
       ]).then((allRes) => {
       allRes.forEach(processing);
     })
@@ -74,10 +74,10 @@ export class GameDataService {
 
   async requestGameData(model: Model): Promise<any> {
     return Promise.all([
-      //this.raDataService.requestRAGameData(model, this.http),
-      this.steamDataService.requestSteamGameData(model, this.http),
-      //this.ps3DataService.requestPS3GameData(model, this.http),
-      //this.psVitaDataService.requestPSVitaGameData(model, this.http)
-    ]).then(() => { });
+      this.raDataService.requestRAGameData(model, this.http),
+      //this.steamDataService.requestSteamGameData(model, this.http),
+      this.ps3DataService.requestPS3GameData(model, this.http),
+      this.psVitaDataService.requestPSVitaGameData(model, this.http)
+    ]).then((dummy) => {});
   }
 }

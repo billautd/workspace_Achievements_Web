@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
-import { firstValueFrom, delay } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { environment } from '../environments/environment';
 import { ConsoleData, ConsoleSource } from '../model/consoleData';
 import { GameData } from '../model/gameData';
 import { Model } from '../model/model';
 import { HttpClient } from '@angular/common/http';
+import { delay } from './utils-service';
 
 @Injectable({
   providedIn: 'root'
@@ -70,7 +71,7 @@ export class RAGameDataService {
       processing(consoleGames);
       console.log("Processed " + consoleGames.length + " games for " + consoleData.Name + " (" + consoleId + ")");
       //Wait to not send too many requests
-      await delay(3000);
+      await delay(5000);
     }
 
     return null;
