@@ -4,14 +4,32 @@ import { BehaviorSubject, firstValueFrom, forkJoin, Observable, of } from 'rxjs'
 import { ConsoleData, ConsoleSource } from '../model/consoleData';
 import { environment } from '../environments/environment';
 import { HttpClient } from '@angular/common/http';
-import { Model, PS3_CONSOLE_ID, PSVITA_CONSOLE_ID } from '../model/model';
-import { delay } from './utils-service';
+import { Model, PS3_CONSOLE_ID, PSVITA_CONSOLE_ID, STEAM_CONSOLE_ID } from '../model/model';
+import { RAGameDataService } from './ra-game-data-service';
+import { SteamGameDataService } from './steam-game-data-service';
+import { PSVitaGameDataService } from './psvita-game-data-service';
+import { PS3GameDataService } from './ps3-game-data-service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class GameDataService {
   http: HttpClient = inject(HttpClient);
+  raDataService:RAGameDataService;
+  steamDataService:SteamGameDataService;
+  ps3DataService:PS3GameDataService;
+  psVitaDataService:PSVitaGameDataService;
+
+  constructor(raDataService:RAGameDataService,
+    steamDataService:SteamGameDataService,
+    ps3DataService:PS3GameDataService,
+    psVitaDataService:PSVitaGameDataService
+  ){
+    this.raDataService = raDataService;
+    this.steamDataService = steamDataService;
+    this.ps3DataService = ps3DataService;
+    this.psVitaDataService = psVitaDataService;
+  }
 
   /**
  * Add data to model
@@ -36,103 +54,30 @@ export class GameDataService {
     //All requests are executed simultaneously but method returns when all 4 are done
 
     //RA console data
-    const raObs:Promise<ConsoleData[]>  = firstValueFrom(this.http.get<ConsoleData[]>(environment.API_URL + "/ra/console_data"));
+    const raObs: Promise<ConsoleData[]> = this.raDataService.requestRAConsoleData(this.http);
     //Steam console data
-    const steamObs: Promise<ConsoleData[]> = firstValueFrom(this.http.get<ConsoleData[]>(environment.API_URL + "/steam/console_data"));
+    const steamObs: Promise<ConsoleData[]> = this.steamDataService.requestSteamConsoleData(this.http);
     //PS3 console data
-    const ps3Obs: Promise<ConsoleData[]> = firstValueFrom(this.http.get<ConsoleData[]>(environment.API_URL + "/ps3/console_data"));
+    const ps3Obs: Promise<ConsoleData[]> = this.ps3DataService.requestPS3ConsoleData(this.http);
     //PS vita console data
-    const psVitaObs: Promise<ConsoleData[]> = firstValueFrom(this.http.get<ConsoleData[]>(environment.API_URL + "/psvita/console_data"));
+    const psVitaObs: Promise<ConsoleData[]> = this.psVitaDataService.requestPSVitaConsoleData(this.http);
 
-    return Promise.all([raObs, steamObs, ps3Obs, psVitaObs]).then((allRes) => {
+    return Promise.all([
+      // raObs,
+      steamObs,
+      //ps3Obs,
+      //psVitaObs
+      ]).then((allRes) => {
       allRes.forEach(processing);
     })
   }
 
   async requestGameData(model: Model): Promise<any> {
     return Promise.all([
-      this.requestRAGameData(model),
-      this.requestSteamGameData(model),
-      this.requestPS3GameData(model),
-      this.requestPSVitaGameData(model)
+      //this.raDataService.requestRAGameData(model, this.http),
+      this.steamDataService.requestSteamGameData(model, this.http),
+      //this.ps3DataService.requestPS3GameData(model, this.http),
+      //this.psVitaDataService.requestPSVitaGameData(model, this.http)
     ]).then(() => { });
-  }
-
-   async requestRAGameData(model: Model): Promise<any> {
-     const processing = (gameData: GameData[]) => {
-       for (const game of gameData) {
-         const consoleData: ConsoleData | undefined = model.getConsoleData().get(game.ConsoleID);
-         if (!consoleData) {
-           console.log("No console " + game.ConsoleName + " (" + game.ConsoleID + ") found");
-           return;
-          }
-          //Add data to console data
-          consoleData.Games.set(game.ID, game);
-        }
-        //Force refresh data
-        model.getUpdateBehaviorSubject().next(null);
-      }
-      
-    //Get completion progress beforehand
-    const completionProgressObs:GameData[] = await firstValueFrom(this.http.get<GameData[]>(environment.API_URL + "/ra/completion_progress"));
-    processing(completionProgressObs);
-    console.log("Processed " + completionProgressObs.length + " games from completion progress");
-
-    //Get console games for each RA console
-    for (const consoleEntry of model.getConsoleData().entries()) {
-      const consoleId:number = consoleEntry[0];
-      const consoleData:ConsoleData = consoleEntry[1];
-      //Do not parse non RA consoles
-      if (consoleData.Source !== ConsoleSource.RETRO_ACHIEVEMENTS) {
-        continue;
-      }
-      const consoleGames:GameData[] = await firstValueFrom(this.http.get<GameData[]>(environment.API_URL + "/ra/game_data/" + consoleId));
-      processing(consoleGames);
-      console.log("Processed "+ consoleGames.length + " games for " + consoleData.Name + " (" + consoleId + ")");
-      await delay(3000);
-    }
-
-    return null;
-  }
-
-  async requestSteamGameData(model: Model): Promise<any> {
-    return null;
-  }
-
-  async requestPS3GameData(model: Model): Promise<any> {
-    const processing = (gameData: GameData[]) => {
-      const consoleData: ConsoleData | undefined = model.getConsoleData().get(PS3_CONSOLE_ID);
-      if (!consoleData) {
-        console.log("PS3 console data not yet set")
-        return;
-      }
-      //Add game to console game map
-      gameData.forEach((game) => {
-        consoleData.Games.set(game.ID, game);
-      })
-
-      //Force refresh data
-      model.getUpdateBehaviorSubject().next(null);
-    }
-
-    return firstValueFrom(this.http.get<GameData[]>(environment.API_URL + "/ps3/game_data")).then(processing);
-  }
-
-  async requestPSVitaGameData(model: Model): Promise<any> {
-    const processing = (gameData: GameData[]) => {
-      const consoleData: ConsoleData | undefined = model.getConsoleData().get(PSVITA_CONSOLE_ID);
-      if (!consoleData) {
-        console.log("PSVita console data not yet set")
-        return;
-      }
-      //Add game to console game map
-      gameData.forEach((game) => {
-        consoleData.Games.set(game.ID, game);
-      })
-
-      //Force refresh data
-      model.getUpdateBehaviorSubject().next(null);
-    }
-    return firstValueFrom(this.http.get<GameData[]>(environment.API_URL + "/psvita/game_data")).then(processing);
   }
 }

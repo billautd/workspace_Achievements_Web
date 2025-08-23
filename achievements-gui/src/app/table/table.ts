@@ -1,5 +1,5 @@
-import { Component, inject, Input } from '@angular/core';
-import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { Component, inject, Input, ViewChild } from '@angular/core';
+import { MatTable, MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { Model } from '../../model/model';
 import { CompletionStatusType, GameData } from '../../model/gameData';
 import { GameDataService } from '../../services/game-data-service';
@@ -32,6 +32,8 @@ export class Table {
   filterText:string = "";
   filterConsole:string[] = [];
 
+  @ViewChild(MatTable) table!: MatTable<GameData>;
+
   constructor(model:Model,
     gameDataService:GameDataService){
     this.model = model;
@@ -40,7 +42,12 @@ export class Table {
 
   ngOnInit(){
     //No data is passed through this behavior subject, it's only a trigger to refresh table data
-    this.model.getUpdateBehaviorSubject().subscribe((dummy) => {
+    this.model.getUpdateBehaviorSubject().subscribe((gameData) => {
+      if(!gameData){
+        console.log("No data given for table refresh. Returning...")
+        return;
+      }
+      console.log("Refreshing table with " + gameData.length + " data");
       this.data.data = this.model.flattenMap();
     })
   }

@@ -9,6 +9,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.poi.ss.usermodel.Row;
@@ -120,7 +121,7 @@ public class SteamRequestService {
 		return List.of(steamConsoleData);
 	}
 
-	public void getOwnedGames() {
+	public List<GameData> getOwnedGames() {
 		Log.info("Getting all Steam owned games");
 		final String resBody = requestData(PLAYER_SERVICE, OWNED_GAMES_METHOD, V001, "format=json", "include_appinfo=1",
 				"include_played_free_games=1", "skip_unvetted_apps=0").body();
@@ -137,15 +138,24 @@ public class SteamRequestService {
 				model.getConsoleDataMap().get(Model.STEAM_CONSOLE_ID).getGameDataMap().put(data.getId(), data);
 			});
 			Log.info("Found " + gameData.size() + " games for Steam");
+			return gameData;
 		} catch (JsonProcessingException e) {
 			Log.error("Error reading response body as GameData", e);
+			return null;
 		}
 	}
 
-	public void getAchievements(final GameData gameData) {
-		Log.info("Getting achievements for " + gameData.getTitle() + " (" + gameData.getId() + ")");
-		final String resBody = requestData(STEAM_USER_STATS, PLAYER_ACHIEVEMENTS_METHOD, V001,
-				"appid=" + gameData.getId()).body();
+	public GameData getAchievements(final int gameId) {
+		Log.info("Getting achievements for Steam game " + gameId);
+		final GameData existingGameData = model.getConsoleDataMap().get(Model.STEAM_CONSOLE_ID).getGameDataMap()
+				.get(gameId);
+		if (existingGameData == null) {
+			Log.error("No Steam game found for id " + gameId);
+			return null;
+		}
+
+		final String resBody = requestData(STEAM_USER_STATS, PLAYER_ACHIEVEMENTS_METHOD, V001, "appid=" + gameId)
+				.body();
 		LoggingUtils.prettyPrint(mapper, resBody);
 
 		try {
@@ -153,30 +163,79 @@ public class SteamRequestService {
 			final JsonNode achievementsNode = node.get("playerstats").get("achievements");
 			if (achievementsNode == null) {
 				// No achievements
-				Log.info("Found no achievements for Steam game " + gameData.getTitle() + " (" + gameData.getId() + ")");
+				Log.info("Found no achievements for Steam game " + existingGameData.getTitle() + " (" + gameId + ")");
 			} else {
 				final String dataBody = achievementsNode.toString();
 				final List<SteamAchievementData> achievementData = mapper.readValue(dataBody,
 						new TypeReference<List<SteamAchievementData>>() {
 						});
-				achievementData.forEach(gameData.getSteamAchievementData()::add);
+				achievementData.forEach(existingGameData.getSteamAchievementData()::add);
 			}
-			parseAchievementData(gameData);
-
+			parseAchievementData(existingGameData);
 			retryIndex = 1;
+			return existingGameData;
 		} catch (JsonProcessingException e) {
 			Log.error("Error reading response body as GameData", e);
 			if (retryIndex > RETRY_MAX) {
-				Log.error("Out of retries for " + gameData.getId());
+				Log.error("Out of retries for " + existingGameData.getId());
+				return null;
 			} else {
-				Log.error("Retrying for " + gameData.getId() + " => " + retryIndex + " / " + RETRY_MAX + "...");
+				Log.error("Retrying for " + existingGameData.getId() + " => " + retryIndex + " / " + RETRY_MAX + "...");
 				retryIndex++;
+				return getAchievements(gameId);
 			}
-			getAchievements(gameData);
 		}
 	}
 
-	private void parseAchievementData(final GameData gameData) {
+	public List<GameData> getSteamGames_Beaten(final String path) {
+		Log.info("Reading " + path + "file");
+		final List<GameData> beatenList = new ArrayList<>();
+		try (final XSSFWorkbook beatenWorkbook = new XSSFWorkbook(new FileInputStream(new File(path)))) {
+			for (final Row row : beatenWorkbook.getSheetAt(0)) {
+				final String gameName = ExcelUtils.getCellAsString(row.getCell(0));
+				final int gameId = ExcelUtils.getCellAsInt(row.getCell(1));
+				final GameData gameData = model.getConsoleDataMap().get(Model.STEAM_CONSOLE_ID).getGameDataMap()
+						.get(gameId);
+				if (gameData == null) {
+					Log.error(gameName + " (" + gameId + ") does not exist for Steam");
+				} else {
+					beatenList.add(gameData);
+					gameData.setCompletionStatus(CompletionStatusEnum.BEATEN);
+					Log.info(gameName + " (" + gameId + ") for Steam is Beaten");
+				}
+			}
+			return beatenList;
+		} catch (IOException e) {
+			Log.error("Cannot read Steam beaten file at " + path);
+			return null;
+		}
+	}
+
+	public List<GameData> getSteamGames_Mastered(final String path) {
+		Log.info("Reading " + path + "file");
+		final List<GameData> masteredList = new ArrayList<>();
+		try (final XSSFWorkbook masteredWorkbook = new XSSFWorkbook(new FileInputStream(new File(path)))) {
+			for (final Row row : masteredWorkbook.getSheetAt(0)) {
+				final String gameName = ExcelUtils.getCellAsString(row.getCell(0));
+				final int gameId = ExcelUtils.getCellAsInt(row.getCell(1));
+				final GameData gameData = model.getConsoleDataMap().get(Model.STEAM_CONSOLE_ID).getGameDataMap()
+						.get(gameId);
+				if (gameData == null) {
+					Log.error(gameName + " (" + gameId + ") does not exist for Steam");
+				} else {
+					masteredList.add(gameData);
+					gameData.setCompletionStatus(CompletionStatusEnum.MASTERED);
+					Log.info(gameName + " (" + gameId + ") for Steam is Mastered");
+				}
+			}
+			return masteredList;
+		} catch (IOException e) {
+			Log.error("Cannot read Steam beaten file at " + path);
+			return null;
+		}
+	}
+
+	private GameData parseAchievementData(final GameData gameData) {
 		// Check if already set by Steambeaten and SteamMastered files
 		if (gameData.getSteamAchievementData().isEmpty()) {
 			gameData.setAwardedAchievements(0);
@@ -200,66 +259,7 @@ public class SteamRequestService {
 		Log.info(gameData.getTitle() + " (" + gameData.getId() + ") for Steam is " + gameData.getCompletionStatus()
 				+ " with " + gameData.getAwardedAchievements() + " / " + gameData.getTotalAchievements()
 				+ " achievements");
-	}
-
-	public void getSteamGames_Beaten(final String path) {
-		Log.info("Reading " + path + "file");
-		try (final XSSFWorkbook beatenWorkbook = new XSSFWorkbook(new FileInputStream(new File(path)))) {
-			for (final Row row : beatenWorkbook.getSheetAt(0)) {
-				final String gameName = ExcelUtils.getCellAsString(row.getCell(0));
-				final int gameId = ExcelUtils.getCellAsInt(row.getCell(1));
-				final GameData gameData = model.getConsoleDataMap().get(Model.STEAM_CONSOLE_ID).getGameDataMap()
-						.get(gameId);
-				if (gameData == null) {
-					Log.error(gameName + " (" + gameId + ") does not exist for Steam");
-					continue;
-				}
-				gameData.setCompletionStatus(CompletionStatusEnum.BEATEN);
-				Log.info(gameName + " (" + gameId + ") for Steam is Beaten");
-			}
-		} catch (IOException e) {
-			Log.error("Cannot read Steam beaten file at " + path);
-		}
-	}
-
-	public void getSteamGames_Mastered(final String path) {
-		Log.info("Reading " + path + "file");
-		try (final XSSFWorkbook masteredWorkbook = new XSSFWorkbook(new FileInputStream(new File(path)))) {
-			for (final Row row : masteredWorkbook.getSheetAt(0)) {
-				final String gameName = ExcelUtils.getCellAsString(row.getCell(0));
-				final int gameId = ExcelUtils.getCellAsInt(row.getCell(1));
-				final GameData gameData = model.getConsoleDataMap().get(Model.STEAM_CONSOLE_ID).getGameDataMap()
-						.get(gameId);
-				if (gameData == null) {
-					Log.error(gameName + " (" + gameId + ") does not exist for Steam");
-					continue;
-				}
-				gameData.setCompletionStatus(CompletionStatusEnum.MASTERED);
-				Log.info(gameName + " (" + gameId + ") for Steam is Mastered");
-			}
-		} catch (IOException e) {
-			Log.error("Cannot read Steam beaten file at " + path);
-		}
-	}
-
-	public void getAllData() {
-		Log.info("Getting all Steam games");
-//		getOwnedGames();
-//		SleepUtils.sleep(2000);
-//		getSteamGames_Beaten("C:\\Users\\dbill\\Downloads\\SteamBeaten.xlsx");
-//		getSteamGames_Mastered("C:\\Users\\dbill\\Downloads\\SteamMastered.xlsx");
-//		final List<GameData> gameData = model.getConsoleDataMap().get(Model.STEAM_CONSOLE_ID).getGameDataMap().values()
-//				.stream().toList();
-//		for (int i = 0; i < gameData.size(); i++) {
-//			Log.info("Processing Steam : " + (i + 1) + " / " + gameData.size());
-//			getAchievements(gameData.get(i));
-//		}
-//		try {
-//			gamesSocketEndpoint.sendStringDataBroadcast(mapper.writeValueAsString(
-//					model.getConsoleDataMap().get(Model.STEAM_CONSOLE_ID).getGameDataMap().values()));
-//		} catch (JsonProcessingException e) {
-//			e.printStackTrace();
-//		}
+		return gameData;
 	}
 
 	public ObjectMapper getMapper() {

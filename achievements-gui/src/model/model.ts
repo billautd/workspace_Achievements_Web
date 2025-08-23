@@ -19,7 +19,7 @@ export class Model{
         return this.consoleData;
     }
 
-    getUpdateBehaviorSubject():BehaviorSubject<any>{
+    getUpdateBehaviorSubject():BehaviorSubject<GameData[]>{
       return this.updateBehaviorSubject;
     }
 
@@ -29,5 +29,13 @@ export class Model{
         c.Games.forEach(g => list.push(g))
       })
       return list;
+    }
+
+    /**
+     * Refresh table data source, while avoiding refreshing the whole table every time
+     * @param gameData Data to refresh in table.
+     */
+    refreshTableData(gameData:GameData[]):void{
+      this.getUpdateBehaviorSubject().next(gameData);
     }
 }
