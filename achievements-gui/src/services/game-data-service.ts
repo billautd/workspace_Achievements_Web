@@ -9,6 +9,7 @@ import { RAGameDataService } from './ra-game-data-service';
 import { SteamGameDataService } from './steam-game-data-service';
 import { PSVitaGameDataService } from './psvita-game-data-service';
 import { PS3GameDataService } from './ps3-game-data-service';
+import { C } from '@angular/cdk/keycodes';
 
 @Injectable({
   providedIn: 'root',
@@ -41,7 +42,7 @@ export class GameDataService {
     return of(modelSubject.getValue());
   }
 
-  async requestConsoleData(model: Model): Promise<any> {
+  async requestConsoleData(model: Model, sourcesToRequest:ConsoleSource[]): Promise<any> {
     const processing = (consoleData: ConsoleData[]) => {
       for (const cons of consoleData) {
         //Init map
@@ -62,22 +63,26 @@ export class GameDataService {
     //PS vita console data
     const psVitaObs: Promise<ConsoleData[]> = this.psVitaDataService.requestPSVitaConsoleData(this.http);
 
+    console.log("Requesting console data for sources : " + sourcesToRequest);
+
     return Promise.all([
-      //raObs,
-      //steamObs,
-      ps3Obs,
-      psVitaObs
+      sourcesToRequest.includes(ConsoleSource.RETRO_ACHIEVEMENTS) ? raObs : Promise.resolve<ConsoleData[]>([]),
+      sourcesToRequest.includes(ConsoleSource.STEAM) ? steamObs :  Promise.resolve<ConsoleData[]>([]),
+      sourcesToRequest.includes(ConsoleSource.STANDALONE) ? ps3Obs :  Promise.resolve<ConsoleData[]>([]),
+      sourcesToRequest.includes(ConsoleSource.STANDALONE) ? psVitaObs :  Promise.resolve<ConsoleData[]>([]),
     ]).then((allRes) => {
       allRes.forEach(processing);
     })
   }
 
-  async requestGameData(model: Model): Promise<any> {
+  async requestGameData(model: Model, sourcesToRequest:ConsoleSource[]): Promise<any> {
+    console.log("Requesting game data for sources : " + sourcesToRequest);
+
     return Promise.all([
-      //this.raDataService.requestRAGameData(model, this.http),
-      //this.steamDataService.requestSteamGameData(model, this.http),
-      this.ps3DataService.requestPS3GameData(model, this.http),
-      this.psVitaDataService.requestPSVitaGameData(model, this.http)
+      sourcesToRequest.includes(ConsoleSource.RETRO_ACHIEVEMENTS) ? this.raDataService.requestRAGameData(model, this.http) : Promise.resolve<ConsoleData[]>([]),
+      sourcesToRequest.includes(ConsoleSource.STEAM) ? this.steamDataService.requestSteamGameData(model, this.http) : Promise.resolve<ConsoleData[]>([]),
+      sourcesToRequest.includes(ConsoleSource.STANDALONE) ? this.ps3DataService.requestPS3GameData(model, this.http) : Promise.resolve<ConsoleData[]>([]),
+      sourcesToRequest.includes(ConsoleSource.STANDALONE) ? this.psVitaDataService.requestPSVitaGameData(model, this.http) : Promise.resolve<ConsoleData[]>([]),
     ]).then((dummy) => { });
   }
 
@@ -97,6 +102,19 @@ export class GameDataService {
         return "Tried";
       default:
         return "No status";
+    }
+  }
+
+  consoleSourceText(consoleSource: ConsoleSource) {
+    switch (consoleSource) {
+      case ConsoleSource.STANDALONE:
+        return "Standalone";
+      case ConsoleSource.STEAM:
+        return "Steam";
+      case ConsoleSource.RETRO_ACHIEVEMENTS:
+        return "Retro Achievements";
+      default:
+        return "No source";
     }
   }
 }

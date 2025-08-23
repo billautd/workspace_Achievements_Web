@@ -47,6 +47,7 @@ public class RetroAchievementsResources {
 	public String getConsoleIds(@PathParam("console_id") final int consoleId) throws JsonProcessingException {
 		final List<GameData> data = raRequestService.getConsoleGames(consoleId);
 		Log.info("Returning RetroAchievements " + data.size() + " games for console " + consoleId);
-		return raRequestService.getMapper().writeValueAsString(data);
+		return raRequestService.getMapper()
+				.writeValueAsString(model.getConsoleDataMap().get(consoleId).getGameDataMap().values());
 	}
 }

@@ -1,6 +1,7 @@
 .table-with-filters{
   display:flex;
   flex-direction: row;
+  padding:10px;
 }
 
 mat-table{  
@@ -8,7 +9,7 @@ mat-table{
   display: flex;
   flex-direction: column;
   height:80vh;
-  width:75vw;
+  width:70vw;
   background-color:var(--purple1);
   border:1px solid white;
 }
@@ -41,6 +42,11 @@ mat-table{
 }
 .nameColumn{
   width:27vw;
+}
+.title-span{
+   text-overflow: ellipsis; 
+   overflow: hidden; 
+   white-space: nowrap;
 }
 .idColumn{
   width:5vw

@@ -177,9 +177,9 @@ public class RetroAchievementsRequestService {
 					Log.error("Console data not found for " + data.getConsoleName() + " (" + data.getConsoleId() + ")");
 					return;
 				}
-				data.setCompletionStatus(CompletionStatusEnum.NOT_PLAYED);
 				if (!consoleData.getGameDataMap().containsKey(data.getId())) {
 					consoleData.getGameDataMap().put(data.getId(), data);
+					data.setCompletionStatus(CompletionStatusEnum.NOT_PLAYED);
 				}
 			});
 			return gameData;

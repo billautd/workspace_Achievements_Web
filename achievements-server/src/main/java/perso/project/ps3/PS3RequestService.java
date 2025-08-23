@@ -49,7 +49,7 @@ public class PS3RequestService {
 		ps3ConsoleData.setGameSystem(true);
 		ps3ConsoleData.setId(Model.PS3_CONSOLE_ID);
 		ps3ConsoleData.setName("PlayStation 3");
-		ps3ConsoleData.setSource(ConsoleSourceEnum.PS3);
+		ps3ConsoleData.setSource(ConsoleSourceEnum.STANDALONE);
 		model.getConsoleDataMap().put(ps3ConsoleData.getId(), ps3ConsoleData);
 
 		return List.of(ps3ConsoleData);

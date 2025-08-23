@@ -1,5 +1,5 @@
-import { Component, inject } from '@angular/core';
-import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { Component, inject, ViewChild } from '@angular/core';
+import { MatTable, MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { Model } from '../../model/model';
 import { CompletionStatusType, GameData } from '../../model/gameData';
 import { GameDataService } from '../../services/game-data-service';
@@ -10,25 +10,35 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { MatSelectChange, MatSelectModule } from '@angular/material/select';
+import { MatSort, MatSortModule, Sort } from '@angular/material/sort';
+import { C } from '@angular/cdk/keycodes';
+import { ConsoleData, ConsoleSource } from '../../model/consoleData';
 
 interface FilterData {
   text: string;
   consoles: string[];
   completionStatuses: string[];
+  sources:string[];
 }
 
 @Component({
   selector: 'app-table',
-  imports: [MatTableModule, MatIconModule, MatFormFieldModule, MatSelectModule, FormsModule, CommonModule, ReactiveFormsModule, MatInputModule],
+  imports: [MatTableModule, MatIconModule, MatFormFieldModule, MatSelectModule,
+    FormsModule, CommonModule, ReactiveFormsModule, MatInputModule,
+    MatSortModule],
   templateUrl: './table.html',
   styleUrl: './table.css',
   providers: [Model, GameDataService]
 })
 export class Table {
   //Table data
+  @ViewChild(MatTable) table!: MatTable<GameData>;
+  @ViewChild(MatSort) sort!: MatSort;
+
+  sourcesToRequest:ConsoleSource[] = [ConsoleSource.RETRO_ACHIEVEMENTS, ConsoleSource.STANDALONE];
 
   data: MatTableDataSource<GameData> = new MatTableDataSource<GameData>();
-  columnsToDisplay: string[] = ["consoleName", "name", "completionStatus", "achievements", "percentage", "id"];
+  columnsToDisplay: string[] = ["ConsoleName", "Title", "CompletionStatus", "Achievements", "Percentage", "ID"];
   filterText: string = "";
 
   selectedConsoles: string[] = [];
@@ -38,7 +48,11 @@ export class Table {
   selectedCompletionStatuses: string[] = [];
   completionStatuses = new FormControl();
   completionStatusesList: string[] = [];
-  
+
+  selectedSources: string[] = [];
+  sources = new FormControl();
+  sourcesList: string[] = [];
+
   model: Model;
   gameDataService: GameDataService;
 
@@ -62,8 +76,9 @@ export class Table {
       this.data.data = this.model.flattenMap();
     })
 
-    //Init completion status list
+    //Init filters list
     this.completionStatusesList = Object.values(CompletionStatusType).map(this.gameDataService.completionStatusText);
+    this.sourcesList = Object.values(ConsoleSource).map(this.gameDataService.consoleSourceText);
 
     //Setup custom filter predicate on filter string and console
     this.data.filterPredicate = (data: GameData, filter: string): boolean => {
@@ -71,7 +86,8 @@ export class Table {
 
       const text: string = searchTerms.text;
       const consoles: string[] = searchTerms.consoles;
-      const completionStatuses:string[] = searchTerms.completionStatuses;
+      const completionStatuses: string[] = searchTerms.completionStatuses;
+      const sources: string[] = searchTerms.sources;
 
       //Contains string text
       const strFilter: boolean = (data.ID.toString().trim().toLowerCase().includes(text) ||
@@ -80,9 +96,36 @@ export class Table {
       const consoleFilter: boolean = consoles.includes(data.ConsoleName) || consoles.length == 0;
       //Contains completion status
       const completionStatusesFilter: boolean = completionStatuses.includes(this.gameDataService.completionStatusText(data.CompletionStatus)) || completionStatuses.length == 0;
+      //Is from source
+      const consoleData:ConsoleData | undefined = this.model.getConsoleData().get(data.ConsoleID);
+      const sourcesFilter:boolean = consoleData ? sources.includes(consoleData.Source) : true || sources.length == 0;
 
-      return strFilter && consoleFilter && completionStatusesFilter;
+      return strFilter && consoleFilter && completionStatusesFilter && sourcesFilter;
     };
+  }
+
+  ngAfterViewInit() {
+    //Init sort
+    this.data.sort = this.sort;
+
+    //init sorting data accessors
+    this.data.sortingDataAccessor = (item, property) => {
+      switch (property) {
+        case "CompletionStatus":
+          return item.CompletionStatus;
+        case "ConsoleName":
+          return item.ConsoleName;
+        case "ID":
+          return item.ID;
+        case "Achievements":
+        case "Percentage":
+          return this.percentageValue(item);
+        case "Title":
+          return item.Title;
+        default:
+          return item.Title;
+      }
+    }
   }
 
   /**
@@ -91,16 +134,20 @@ export class Table {
    */
   requestAllData(): void {
     this.isRequestRunning = true;
-    this.gameDataService.requestConsoleData(this.model).then((dummy1) => {
+    this.gameDataService.requestConsoleData(this.model, this.sourcesToRequest).then((dummy1) => {
       console.log("Console data OK")
       this.updateConsolesList();
-      this.gameDataService.requestGameData(this.model).then((dummy2) => {
+      this.gameDataService.requestGameData(this.model, this.sourcesToRequest).then((dummy2) => {
         console.log("Game data OK")
         this.isRequestRunning = false;
       })
     });
   }
 
+
+  /******************************/
+  /* ROWS DISPLAY */
+  /******************************/
   totalText(): string {
     return this.data.filteredData.length + " games";
   }
@@ -109,7 +156,7 @@ export class Table {
     return data.NumAwardedHardcore + " / " + data.MaxPossible;
   }
 
-  percentageText(data: GameData) {
+  percentageValue(data:GameData):number{
     let num: number;
     if (data.NumAwardedHardcore == 0) {
       if (data.CompletionStatus === CompletionStatusType.MASTERED) {
@@ -122,7 +169,11 @@ export class Table {
     } else {
       num = data.NumAwardedHardcore / data.MaxPossible;
     }
-    return Number(num).toLocaleString(undefined, { style: 'percent', minimumFractionDigits: 0 });;
+    return num;
+  }
+
+  percentageText(data: GameData) {
+    return Number(this.percentageValue(data)).toLocaleString(undefined, { style: 'percent', minimumFractionDigits: 0 });;
   }
 
   openURL(data: GameData): void {
@@ -152,6 +203,14 @@ export class Table {
   }
 
   /******************************/
+  /* SORTING */
+  /******************************/
+  announceSortChange(event: Sort) {
+    console.log(event)
+    this.table.renderRows();
+  }
+
+  /******************************/
   /* FILTERING */
   /******************************/
 
@@ -165,13 +224,19 @@ export class Table {
     this.applyFilter();
   }
 
+  changeSelectedSources(event: MatSelectChange<any>) {
+    this.selectedSources = event.value;
+    this.applyFilter();
+  }
+
   applyFilter(): void {
     const filter: FilterData = {
       text: this.filterText,
       consoles: this.selectedConsoles,
-      completionStatuses:this.selectedCompletionStatuses,
+      completionStatuses: this.selectedCompletionStatuses,
+      sources:this.selectedSources
     }
-    console.log("Filter is " + filter)
+    console.log("Filter is [Text : " + filter.text + "], [Consoles : " + filter.consoles + "], [Statuses : " + filter.completionStatuses + "], [Sources : "+ filter.sources + "]")
     //Pass multiple parameters to filterPredicate
     this.data.filter = JSON.stringify(filter);
   }

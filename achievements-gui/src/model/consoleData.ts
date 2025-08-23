@@ -3,8 +3,7 @@ import { GameData } from "./gameData";
 export enum ConsoleSource{
     RETRO_ACHIEVEMENTS = "RETRO_ACHIEVEMENTS",
     STEAM = "STEAM",
-    PS3 = "PS3",
-    PSVITA = "PSVITA"
+    STANDALONE = "STANDALONE"
 }
 
 export type ConsoleData = {
