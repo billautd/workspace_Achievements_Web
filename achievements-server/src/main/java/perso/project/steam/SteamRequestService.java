@@ -30,10 +30,9 @@ import perso.project.model.MainModel;
 import perso.project.model.Model;
 import perso.project.model.SteamAchievementData;
 import perso.project.model.enums.CompletionStatusEnum;
-import perso.project.socket.GamesSocketEndpoint;
+import perso.project.model.enums.ConsoleSourceEnum;
 import perso.project.utils.ExcelUtils;
 import perso.project.utils.LoggingUtils;
-import perso.project.utils.SleepUtils;
 
 @ApplicationScoped
 public class SteamRequestService {
@@ -59,9 +58,6 @@ public class SteamRequestService {
 
 	@Inject
 	MainModel model;
-
-	@Inject
-	GamesSocketEndpoint gamesSocketEndpoint;
 
 	ObjectMapper mapper;
 
@@ -111,18 +107,25 @@ public class SteamRequestService {
 		}
 	}
 
+	public List<ConsoleData> getConsoleIds() {
+		Log.info("Getting Steam console data");
+		final ConsoleData steamConsoleData = new ConsoleData();
+		steamConsoleData.setActive(true);
+		steamConsoleData.setGameSystem(true);
+		steamConsoleData.setId(Model.STEAM_CONSOLE_ID);
+		steamConsoleData.setName("Steam");
+		steamConsoleData.setSource(ConsoleSourceEnum.STEAM);
+		model.getConsoleDataMap().put(steamConsoleData.getId(), steamConsoleData);
+
+		return List.of(steamConsoleData);
+	}
+
 	public void getOwnedGames() {
 		Log.info("Getting all Steam owned games");
 		final String resBody = requestData(PLAYER_SERVICE, OWNED_GAMES_METHOD, V001, "format=json", "include_appinfo=1",
 				"include_played_free_games=1", "skip_unvetted_apps=0").body();
 		LoggingUtils.prettyPrint(mapper, resBody);
 
-		final ConsoleData steamConsoleData = new ConsoleData();
-		steamConsoleData.setActive(true);
-		steamConsoleData.setGameSystem(true);
-		steamConsoleData.setId(Model.STEAM_CONSOLE_ID);
-		steamConsoleData.setName("Steam");
-		model.getConsoleDataMap().put(steamConsoleData.getId(), steamConsoleData);
 		try {
 			final JsonNode node = mapper.readTree(resBody);
 			final String gameDataBody = node.get("response").get("games").toString();
@@ -131,7 +134,7 @@ public class SteamRequestService {
 			gameData.forEach(data -> {
 				data.setConsoleId(Model.STEAM_CONSOLE_ID);
 				data.setConsoleName("Steam");
-				steamConsoleData.getGameDataMap().put(data.getId(), data);
+				model.getConsoleDataMap().get(Model.STEAM_CONSOLE_ID).getGameDataMap().put(data.getId(), data);
 			});
 			Log.info("Found " + gameData.size() + " games for Steam");
 		} catch (JsonProcessingException e) {
@@ -241,31 +244,25 @@ public class SteamRequestService {
 
 	public void getAllData() {
 		Log.info("Getting all Steam games");
-		getOwnedGames();
-		SleepUtils.sleep(2000);
-		getSteamGames_Beaten("C:\\Users\\dbill\\Downloads\\SteamBeaten.xlsx");
-		getSteamGames_Mastered("C:\\Users\\dbill\\Downloads\\SteamMastered.xlsx");
-		final List<GameData> gameData = model.getConsoleDataMap().get(Model.STEAM_CONSOLE_ID).getGameDataMap().values()
-				.stream().toList();
-		for (int i = 0; i < gameData.size(); i++) {
-			Log.info("Processing Steam : " + (i + 1) + " / " + gameData.size());
-			getAchievements(gameData.get(i));
-		}
-		try {
-			gamesSocketEndpoint.sendStringDataBroadcast(mapper.writeValueAsString(
-					model.getConsoleDataMap().get(Model.STEAM_CONSOLE_ID).getGameDataMap().values()));
-		} catch (JsonProcessingException e) {
-			e.printStackTrace();
-		}
-
-//		String toSend = "";
-//		try (final BufferedReader reader = new BufferedReader(
-//				new FileReader(new File("C:\\Users\\dbill\\Downloads\\dataToSend_Steam.txt")))) {
-//			toSend = String.join("", reader.lines().toList());
-//			gamesSocketEndpoint.sendStringDataBroadcast(toSend);
-//		} catch (IOException e) {
+//		getOwnedGames();
+//		SleepUtils.sleep(2000);
+//		getSteamGames_Beaten("C:\\Users\\dbill\\Downloads\\SteamBeaten.xlsx");
+//		getSteamGames_Mastered("C:\\Users\\dbill\\Downloads\\SteamMastered.xlsx");
+//		final List<GameData> gameData = model.getConsoleDataMap().get(Model.STEAM_CONSOLE_ID).getGameDataMap().values()
+//				.stream().toList();
+//		for (int i = 0; i < gameData.size(); i++) {
+//			Log.info("Processing Steam : " + (i + 1) + " / " + gameData.size());
+//			getAchievements(gameData.get(i));
+//		}
+//		try {
+//			gamesSocketEndpoint.sendStringDataBroadcast(mapper.writeValueAsString(
+//					model.getConsoleDataMap().get(Model.STEAM_CONSOLE_ID).getGameDataMap().values()));
+//		} catch (JsonProcessingException e) {
 //			e.printStackTrace();
 //		}
+	}
 
+	public ObjectMapper getMapper() {
+		return mapper;
 	}
 }

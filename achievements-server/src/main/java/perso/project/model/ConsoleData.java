@@ -6,7 +6,9 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-@JsonIgnoreProperties("IconURL")
+import perso.project.model.enums.ConsoleSourceEnum;
+
+@JsonIgnoreProperties({ "IconURL", "gameDataMap" })
 public class ConsoleData {
 	@JsonProperty("ID")
 	private int id = 0;
@@ -19,6 +21,9 @@ public class ConsoleData {
 
 	@JsonProperty("IsGameSystem")
 	private boolean isGameSystem = false;
+
+	@JsonProperty("Source")
+	private ConsoleSourceEnum source = null;
 
 	private Map<Integer, GameData> gameDataMap = new HashMap<>();
 
@@ -54,13 +59,22 @@ public class ConsoleData {
 		this.isGameSystem = isGameSystem;
 	}
 
+	public ConsoleSourceEnum getSource() {
+		return source;
+	}
+
+	public void setSource(ConsoleSourceEnum source) {
+		this.source = source;
+	}
+
 	public Map<Integer, GameData> getGameDataMap() {
 		return gameDataMap;
 	}
 
 	@Override
 	public String toString() {
-		return "Console data : \n" + "\tId : " + getId() + "\n\tName : " + getName() + "\n\tIs active : " + isActive()
-				+ "\n\tIs game system : " + isGameSystem();
+		return "Id : " + getId() + '\n' + "Name : " + getName() + '\n' + "Is active : " + isActive() + '\n'
+				+ "Is game system : " + isGameSystem() + '\n' + "Source : " + getSource() + '\n' + "Games number : "
+				+ getGameDataMap().values().size();
 	}
 }

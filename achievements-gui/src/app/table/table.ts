@@ -3,7 +3,6 @@ import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { Model } from '../../model/model';
 import { CompletionStatusType, GameData } from '../../model/gameData';
 import { GameDataService } from '../../services/game-data-service';
-import { WebsocketService } from '../../services/websocket-service';
 import { HttpClient } from '@angular/common/http';
 import { WebSocketSubject } from 'rxjs/webSocket';
 import { environment } from '../../environments/environment';
@@ -13,13 +12,14 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { MatSelectModule } from '@angular/material/select';
+import { ConsoleData } from '../../model/consoleData';
 
 @Component({
   selector: 'app-table',
   imports: [MatTableModule, MatInputModule, MatIconModule, MatFormFieldModule, MatSelectModule, FormsModule, CommonModule],
   templateUrl: './table.html',
   styleUrl: './table.css',
-  providers:[Model, GameDataService, WebsocketService]
+  providers:[Model, GameDataService]
 })
 export class Table {
   data:MatTableDataSource<GameData> = new MatTableDataSource<GameData>();
@@ -27,72 +27,54 @@ export class Table {
   consoles:string[] = [];
   
   http:HttpClient = inject(HttpClient);
-  webSocketService:WebsocketService;
   model:Model;
   gameDataService:GameDataService;
-  gamesWebsocket:WebSocketSubject<any> | undefined;
-  isRequestBlocked:boolean = false;
   filterText:string = "";
   filterConsole:string[] = [];
 
-
   constructor(model:Model,
-    gameDataService:GameDataService,
-    webSocketService:WebsocketService
-  ){
+    gameDataService:GameDataService){
     this.model = model;
     this.gameDataService = gameDataService;
-    this.webSocketService = webSocketService;
   }
-    
+
   ngOnInit(){
-    this.gamesWebsocket = this.webSocketService.connect("/games_socket");
+    //No data is passed through this behavior subject, it's only a trigger to refresh table data
+    this.model.getUpdateBehaviorSubject().subscribe((dummy) => {
+      this.data.data = this.model.flattenMap();
+    })
   }
   
   /**
    * Request games data to back
    * Data will come from websocket games_socket
    */
-  requestGamesData():void{
-    this.gamesWebsocket?.subscribe({
-      next : (data) => {
-        this.gameDataService.readData(data, this.model.getGameListSubject()).subscribe((newData) => {
-          //Refresh table
-          this.data.data = newData;
-          this.getConsoles(newData)
-          this.isRequestBlocked = false;
-        })
-      },
-      error: (err) => {
-        console.log(err)
-        this.isRequestBlocked = false;
-      },
-      complete: () => {
-        console.log("Completed")
-        this.isRequestBlocked = false;
-      }
-    })
-    this.http.get(environment.API_URL + "/psvita/all_data").subscribe(res => {});
-    this.isRequestBlocked = true;
+  requestAllData():void{
+    this.gameDataService.requestConsoleData(this.model).then((res1) => {
+      console.log("Console data OK")
+      this.gameDataService.requestGameData(this.model).then((res2) => {
+        console.log("Game data OK")
+      })
+    });
   }
 
+
   achievementsText(data:GameData){
-    return data.NumAwarded + " / " + data.NumAchievements;
+    return data.NumAwardedHardcore + " / " + data.MaxPossible;
   }
 
   percentageText(data:GameData){
     let num:number;
-    if(data.NumAchievements == 0){
+    if(data.NumAwardedHardcore== 0){
       if(data.CompletionStatus === CompletionStatusType.MASTERED){
         num = 1;
-      }
-      else if(data.CompletionStatus === CompletionStatusType.BEATEN){
+      }else if(data.CompletionStatus === CompletionStatusType.BEATEN){
         num = 0.5
       }else{
         num = 0;
       }
     }else{
-      num = data.NumAwarded / data.NumAchievements;
+      num = data.NumAwardedHardcore / data.MaxPossible;
     }
     return Number(num).toLocaleString(undefined,{style: 'percent', minimumFractionDigits:0});;
   }
@@ -124,8 +106,7 @@ export class Table {
       url = "https://www.exophase.com/platform/psn/?q=" + this.parseGameName(data.Title) + "&sort=updated&platforms=7";
     }else if(data.ConsoleName === "PlayStation Vita"){
       url = "https://www.exophase.com/platform/psn/?q=" + this.parseGameName(data.Title) + "&sort=updated&platforms=6";
-    }
-    else {
+    }else {
       url = "https://retroachievements.org/game/" + data.ID;
     }
     window.open(url, "_blank");
@@ -140,13 +121,11 @@ export class Table {
     this.data.filter = filter;
   }
 
-  getConsoles(data:GameData[]){
-    this.consoles = [];
-    for(const gameData of data){
-      if(!this.consoles.includes(gameData.ConsoleName)){
-        this.consoles.push(gameData.ConsoleName)
-      }
-    }
-    this.consoles.sort((a, b) => a.localeCompare(b));
+  isSocketDone(data:any):boolean{
+    return false;
+  }
+
+  getGamesNumberText():string{
+    return this.data.data.length + " games";
   }
 }

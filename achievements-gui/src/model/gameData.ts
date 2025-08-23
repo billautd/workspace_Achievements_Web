@@ -10,10 +10,10 @@ export enum CompletionStatusType{
 export type GameData = {
     Title:string;
     ID:number;
-    ConsoleId:number;
+    ConsoleID:number;
     ConsoleName:string;
     CompletionStatus:CompletionStatusType,
-    NumAchievements:number,
-    NumAwarded:number;
+    MaxPossible:number,
+    NumAwardedHardcore:number;
     Points:number;
 }

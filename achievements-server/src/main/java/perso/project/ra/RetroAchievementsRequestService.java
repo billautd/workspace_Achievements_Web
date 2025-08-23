@@ -1,8 +1,5 @@
 package perso.project.ra;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -12,7 +9,6 @@ import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
@@ -29,8 +25,7 @@ import perso.project.model.ConsoleData;
 import perso.project.model.GameData;
 import perso.project.model.MainModel;
 import perso.project.model.enums.CompletionStatusEnum;
-import perso.project.model.enums.UserAwardData;
-import perso.project.socket.GamesSocketEndpoint;
+import perso.project.model.enums.ConsoleSourceEnum;
 import perso.project.utils.LoggingUtils;
 import perso.project.utils.SleepUtils;
 
@@ -42,11 +37,10 @@ public class RetroAchievementsRequestService {
 
 	static final String CONSOLE_IDS_METHOD = "GetConsoleIDs";
 	static final String CONSOLE_GAMES_METHOD = "GetGameList";
-	static final String USER_AWARDS_METHOD = "GetUserAwards";
-	static final String USER_COMPLETED_GAMES_METHOD = "GetUserCompletedGames";
+	static final String USER_COMPLETION_PROGRESS_METHOD = "GetUserCompletionProgress";
 
-	static final String MASTERY_COMPLETION_STRING = "Mastery/Completion";
-	static final String GAME_BEATEN_STRING = "Game Beaten";
+	static final String MASTERY_COMPLETION_STRING = "mastered";
+	static final String GAME_BEATEN_STRING = "beaten-hardcore";
 
 	@Inject
 	@ConfigProperty(name = "ra.username")
@@ -54,9 +48,6 @@ public class RetroAchievementsRequestService {
 
 	@Inject
 	MainModel model;
-
-	@Inject
-	GamesSocketEndpoint gamesSocketEndpoint;
 
 	ObjectMapper mapper;
 
@@ -105,9 +96,9 @@ public class RetroAchievementsRequestService {
 		}
 	}
 
-	public void getConsoleIds() {
+	public List<ConsoleData> getConsoleIds() {
 		Log.info("Getting console ids");
-		final String resBody = requestData(CONSOLE_IDS_METHOD).body();
+		final String resBody = requestData(CONSOLE_IDS_METHOD, "a=1", "g=1").body();
 		LoggingUtils.prettyPrint(mapper, resBody);
 		try {
 			final List<ConsoleData> consoleData = mapper.readValue(resBody, new TypeReference<List<ConsoleData>>() {
@@ -115,88 +106,63 @@ public class RetroAchievementsRequestService {
 			Log.info("Found " + consoleData.size() + " consoles");
 			// Add console data to map only if it is a running game system
 			consoleData.forEach(data -> {
-				if (data.isGameSystem()) {
-					Log.debug("Adding console data for " + data.getName() + " (" + data.getId() + ")");
-					model.getConsoleDataMap().put(data.getId(), data);
-				}
+				Log.debug("Setting console data for " + data.getName() + " (" + data.getId() + ")");
+				data.setSource(ConsoleSourceEnum.RETRO_ACHIEVEMENTS);
+				model.getConsoleDataMap().put(data.getId(), data);
 			});
 			Log.info("Console data map is size " + model.getConsoleDataMap().size());
+			return consoleData;
 		} catch (IOException e) {
 			Log.error("Error reading response body as ConsoleData", e);
+			return null;
 		}
 	}
 
-	public void getUserAwards() {
-		Log.info("Getting user awards");
-		final String resBody = requestData(USER_AWARDS_METHOD).body();
-		LoggingUtils.prettyPrint(mapper, resBody);
+	public List<GameData> getUserCompletionProgress() {
+		Log.info("Getting user completion progress");
+		final List<GameData> gameData = new ArrayList<>();
+		// Request takes at most 500 games at once. We loop to get all of them
+		requestCompletionProgressLoop(0, gameData);
+
+		Log.info("Found " + gameData.size() + " played games");
+		gameData.forEach(data -> {
+			final ConsoleData consoleData = model.getConsoleDataMap().get(data.getConsoleId());
+			if (consoleData == null) {
+				Log.error("Console data not found for " + data.getConsoleName() + " (" + data.getConsoleId() + ")");
+				return;
+			}
+			mapCompletionStatus(data);
+			if (!consoleData.getGameDataMap().containsKey(data.getId())) {
+				consoleData.getGameDataMap().put(data.getId(), data);
+			}
+		});
+		return gameData;
+	}
+
+	private List<GameData> requestCompletionProgressLoop(final int currentCount, final List<GameData> data) {
+		final String resBody = requestData(USER_COMPLETION_PROGRESS_METHOD, "o=" + currentCount).body();
 		try {
 			final JsonNode node = mapper.readTree(resBody);
-			final String gameDataBody = node.get("VisibleUserAwards").toString();
-			final List<UserAwardData> userAwardData = mapper.readValue(gameDataBody,
-					new TypeReference<List<UserAwardData>>() {
-					});
-			Log.info("Found " + userAwardData.size() + " user awards");
-			userAwardData.forEach(data -> {
-				// Id not present, find by title
-				final ConsoleData consoleData = model.getConsoleDataMap().get(data.getConsoleId());
-				if (consoleData == null) {
-					Log.error("Console data not found for " + data.getConsoleName() + " (" + data.getConsoleId() + ")");
-					return;
-				}
-				final Optional<GameData> gameDataOpt = consoleData.getGameDataMap().values().stream()
-						.filter(val -> val.getTitle().equals(data.getTitle())).findFirst();
-				if (gameDataOpt.isEmpty()) {
-					Log.error("Game data not found for title " + data.getTitle() + " for " + data.getConsoleName());
-					return;
-				}
-				final GameData foundGameData = gameDataOpt.get();
-				final boolean alreadyHasAward = foundGameData.getUserAwards().stream()
-						.anyMatch(award -> award.getAwardType().equals(data.getAwardType()));
-				if (!alreadyHasAward) {
-					Log.debug("Adding user award with status " + data.getAwardType() + " for game " + data.getTitle()
-							+ " on " + data.getConsoleName());
-					foundGameData.getUserAwards().add(data);
-				}
-				mapCompletionStatus(foundGameData);
-
+			final int newCount = node.get("Count").asInt();
+			final int totalCount = node.get("Total").asInt();
+			final String gameDataBody = node.get("Results").toString();
+			final List<GameData> gameData = mapper.readValue(gameDataBody, new TypeReference<List<GameData>>() {
 			});
+			data.addAll(gameData);
+			if (currentCount < totalCount) {
+				// Sleep to avoid too many requests
+				SleepUtils.sleep(500);
+				Log.info("Reading " + (newCount + currentCount) + " / " + totalCount);
+				requestCompletionProgressLoop(newCount + currentCount, data);
+			}
 		} catch (JsonProcessingException e) {
 			Log.error("Error reading response body as GameData", e);
+			return null;
 		}
+		return data;
 	}
 
-	public void getUserCompletedGames() {
-		Log.info("Getting user completed games");
-		final String resBody = requestData(USER_COMPLETED_GAMES_METHOD).body();
-		LoggingUtils.prettyPrint(mapper, resBody);
-		try {
-			final List<GameData> gameData = mapper.readValue(resBody, new TypeReference<List<GameData>>() {
-			});
-			Log.info("Found " + gameData.size() + " completed games");
-			// Set num awarded for completion percentage
-			gameData.forEach(data -> {
-				final ConsoleData consoleData = model.getConsoleDataMap().get(data.getConsoleId());
-				if (consoleData == null) {
-					Log.error("Console data not found for " + data.getConsoleName() + " (" + data.getConsoleId() + ")");
-					return;
-				}
-				final GameData gameDataValue = consoleData.getGameDataMap().get(data.getId());
-				if (gameDataValue == null) {
-					Log.error("Game data for " + data.getTitle() + " (" + data.getId() + ") not found");
-					return;
-				}
-				Log.debug(data.getTitle() + " (" + data.getId() + ") has " + data.getAwardedAchievements()
-						+ " awarded achievements out of" + data.getTotalAchievements());
-				model.getConsoleDataMap().get(data.getConsoleId()).getGameDataMap().get(data.getId())
-						.setAwardedAchievements(data.getAwardedAchievements());
-			});
-		} catch (JsonProcessingException e) {
-			Log.error("Error reading response body as GameData", e);
-		}
-	}
-
-	public void getConsoleGames(final int consoleId) {
+	public List<GameData> getConsoleGames(final int consoleId) {
 		Log.info("Getting console games for console id " + consoleId);
 		final String resBody = requestData(CONSOLE_GAMES_METHOD, "i=" + Integer.toString(consoleId), "f=1").body();
 		LoggingUtils.prettyPrint(mapper, resBody);
@@ -205,80 +171,36 @@ public class RetroAchievementsRequestService {
 			});
 			Log.info("Found " + gameData.size() + " games for console " + consoleId);
 			// Add game data to console data
-			final ConsoleData consoleData = model.getConsoleDataMap().get(consoleId);
 			gameData.forEach(data -> {
-				Log.debug("Adding game data for " + data.getTitle() + " (" + data.getId() + ") on "
-						+ data.getConsoleName() + " (" + data.getConsoleId() + ")");
-				consoleData.getGameDataMap().put(data.getId(), data);
+				final ConsoleData consoleData = model.getConsoleDataMap().get(data.getConsoleId());
+				if (consoleData == null) {
+					Log.error("Console data not found for " + data.getConsoleName() + " (" + data.getConsoleId() + ")");
+					return;
+				}
+				data.setCompletionStatus(CompletionStatusEnum.NOT_PLAYED);
+				if (!consoleData.getGameDataMap().containsKey(data.getId())) {
+					consoleData.getGameDataMap().put(data.getId(), data);
+				}
 			});
+			return gameData;
 		} catch (JsonProcessingException e) {
 			Log.error("Error reading response body as GameData", e);
+			return null;
 		}
 	}
 
 	private void mapCompletionStatus(final GameData gameData) {
-		CompletionStatusEnum status = CompletionStatusEnum.NOT_PLAYED;
-		final boolean containsMastery = gameData.getUserAwards().stream()
-				.anyMatch(d -> MASTERY_COMPLETION_STRING.equals(d.getAwardType()));
-		final boolean containsBeaten = gameData.getUserAwards().stream()
-				.anyMatch(d -> GAME_BEATEN_STRING.equals(d.getAwardType()));
-
-		if (containsMastery) {
-			if (gameData.getTotalAchievements() == gameData.getAwardedAchievements()) {
-				status = CompletionStatusEnum.MASTERED;
-			} else {
-				status = CompletionStatusEnum.BEATEN;
-			}
-		} else if (containsBeaten) {
-			status = CompletionStatusEnum.BEATEN;
-		} else if (gameData.getAwardedAchievements() > 0) {
-			status = CompletionStatusEnum.TRIED;
+		if (MASTERY_COMPLETION_STRING.equals(gameData.getAwardKind())) {
+			gameData.setCompletionStatus(CompletionStatusEnum.MASTERED);
+		} else if (MASTERY_COMPLETION_STRING.equals(gameData.getAwardKind())) {
+			gameData.setCompletionStatus(CompletionStatusEnum.BEATEN);
+		} else {
+			gameData.setCompletionStatus(CompletionStatusEnum.TRIED);
 		}
-		gameData.setCompletionStatus(status);
 		Log.debug(gameData.getTitle() + " (" + gameData.getId() + ") is " + gameData.getCompletionStatus());
 	}
 
-	public void getAllConsoleGames() {
-		Log.info("Getting all console games");
-
-		// Calls are made sequentially to ensure model coherence
-		getConsoleIds();
-		SleepUtils.sleep(2000);
-		final List<ConsoleData> consoleData = model.getConsoleDataMap().values().stream().toList();
-		for (int i = 0; i < consoleData.size(); i++) {
-			final ConsoleData data = consoleData.get(i);
-			Log.info("Processing " + data.getName() + " : " + (i + 1) + " / " + consoleData.size());
-
-			getConsoleGames(data.getId());
-			SleepUtils.sleep(2000);
-		}
-		getUserCompletedGames();
-		SleepUtils.sleep(2000);
-		getUserAwards();
-		SleepUtils.sleep(2000);
-		model.getConsoleDataMap().values()
-				.forEach(cons -> cons.getGameDataMap().values().forEach(this::mapCompletionStatus));
-		// Send data as one packet
-		// TODO : Send data in multiple packets
-		final List<GameData> dataToSend = new ArrayList<>();
-		model.getConsoleDataMap().values().forEach(d -> dataToSend.addAll(d.getGameDataMap().values()));
-//
-//		try {
-//			String toSend = mapper.writeValueAsString(dataToSend);
-//			final BufferedWriter writer = new BufferedWriter(
-//					new FileWriter(new File("C:\\Users\\dbill\\Downloads\\dataToSend.txt")));
-//			writer.write(toSend);
-//			gamesSocketEndpoint.sendStringDataBroadcast(toSend);
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
-		String toSend = "";
-		try (final BufferedReader reader = new BufferedReader(
-				new FileReader(new File("C:\\Users\\dbill\\Downloads\\dataToSend.txt")))) {
-			toSend = String.join("", reader.lines().toList());
-			gamesSocketEndpoint.sendStringDataBroadcast(toSend);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+	public ObjectMapper getMapper() {
+		return mapper;
 	}
 }

@@ -8,7 +8,6 @@ import java.util.List;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
@@ -20,16 +19,13 @@ import perso.project.model.GameData;
 import perso.project.model.MainModel;
 import perso.project.model.Model;
 import perso.project.model.enums.CompletionStatusEnum;
-import perso.project.socket.GamesSocketEndpoint;
+import perso.project.model.enums.ConsoleSourceEnum;
 import perso.project.utils.ExcelUtils;
 
 @ApplicationScoped
 public class PS3RequestService {
 	@Inject
 	MainModel model;
-
-	@Inject
-	GamesSocketEndpoint gamesSocketEndpoint;
 
 	ObjectMapper mapper;
 
@@ -46,14 +42,22 @@ public class PS3RequestService {
 		return mapper;
 	}
 
-	public void getOwnedGames(final String path) {
-		Log.info("Getting all PS3 owned games");
+	public List<ConsoleData> getConsoleIds() {
+		Log.info("Getting PS3 console data");
 		final ConsoleData ps3ConsoleData = new ConsoleData();
 		ps3ConsoleData.setActive(true);
 		ps3ConsoleData.setGameSystem(true);
 		ps3ConsoleData.setId(Model.PS3_CONSOLE_ID);
 		ps3ConsoleData.setName("PlayStation 3");
+		ps3ConsoleData.setSource(ConsoleSourceEnum.PS3);
 		model.getConsoleDataMap().put(ps3ConsoleData.getId(), ps3ConsoleData);
+
+		return List.of(ps3ConsoleData);
+	}
+
+	public void getOwnedGames(final String path) {
+		Log.info("Getting all PS3 owned games");
+
 		try (final XSSFWorkbook gamesWorkbook = new XSSFWorkbook(new FileInputStream(new File(path)))) {
 			for (final Row row : gamesWorkbook.getSheetAt(0)) {
 				final String gameName = ExcelUtils.getCellAsString(row.getCell(0));
@@ -71,7 +75,7 @@ public class PS3RequestService {
 	}
 
 	public void getPS3Games_Beaten(final String path) {
-		Log.info("Reading " + path + "file");
+		Log.info("Reading " + path);
 		try (final XSSFWorkbook beatenWorkbook = new XSSFWorkbook(new FileInputStream(new File(path)))) {
 			for (final Row row : beatenWorkbook.getSheetAt(0)) {
 				final String gameName = ExcelUtils.getCellAsString(row.getCell(0));
@@ -91,7 +95,7 @@ public class PS3RequestService {
 	}
 
 	public void getPS3Games_Mastered(final String path) {
-		Log.info("Reading " + path + "file");
+		Log.info("Reading " + path);
 		try (final XSSFWorkbook masteredWorkbook = new XSSFWorkbook(new FileInputStream(new File(path)))) {
 			for (final Row row : masteredWorkbook.getSheetAt(0)) {
 				final String gameName = ExcelUtils.getCellAsString(row.getCell(0));
@@ -110,7 +114,7 @@ public class PS3RequestService {
 		}
 	}
 
-	public void getAllData() {
+	public List<GameData> getAllData() {
 		Log.info("Getting all PS3 games");
 		getOwnedGames("C:\\Users\\dbill\\Downloads\\PS3Games.xlsx");
 		getPS3Games_Beaten("C:\\Users\\dbill\\Downloads\\PS3GamesBeaten.xlsx");
@@ -118,11 +122,10 @@ public class PS3RequestService {
 		final List<GameData> gameData = model.getConsoleDataMap().get(Model.PS3_CONSOLE_ID).getGameDataMap().values()
 				.stream().toList();
 		Log.info("Processing " + gameData.size() + " PS3 games");
-		try {
-			gamesSocketEndpoint.sendStringDataBroadcast(mapper
-					.writeValueAsString(model.getConsoleDataMap().get(Model.PS3_CONSOLE_ID).getGameDataMap().values()));
-		} catch (JsonProcessingException e) {
-			e.printStackTrace();
-		}
+		return gameData;
+	}
+
+	public ObjectMapper getMapper() {
+		return mapper;
 	}
 }

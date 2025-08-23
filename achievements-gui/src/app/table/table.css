@@ -118,6 +118,17 @@ mat-table{
   cursor: pointer;
 }
 
+.bottom-bar{
+  display:flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.games-text{
+  padding-left:20px;
+  color:white;
+}
+
 mat-option{
   background-color:black !important;
   color:white;

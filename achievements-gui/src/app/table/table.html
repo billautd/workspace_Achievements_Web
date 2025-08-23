@@ -65,10 +65,12 @@
             <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
             <tr mat-row *matRowDef="let row columns:columnsToDisplay;"></tr>
         </mat-table>
-        <div>
-            <button class="request-data-button" (click)="requestGamesData()" [disabled]="isRequestBlocked">
+        <div class="bottom-bar">
+            <button class="request-data-button" (click)="requestAllData()" [disabled]="false">
                 Request games data
             </button>
+
+            <p class="games-text">{{getGamesNumberText()}}</p>
         </div>
     </div>
     <div class="filters-parent">    
