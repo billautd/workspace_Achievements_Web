@@ -1,64 +1,46 @@
 .table-with-filters{
   display:flex;
+  flex-direction: row;
 }
 
-.app-form-field{
-  color:white;
-  width:20vw;
-  margin-top:10px;
-  margin-left:10px;
-}
-
-.closeButton{
-  background-color:transparent ;
-  border: 0;
-}
-
-.closeIcon{
-  color:white;
-}
-
-.mat-mdc-header-cell, .mat-mdc-cell {
-  color: white;
-}
-.mat-mdc-header-cell{
-  font-weight: bold;
-}
-
-.mat-mdc-table .mat-mdc-cell,
-.mat-mdc-table .mat-mdc-header-cell {
-  border-bottom: 1px solid white;
-  text-align: left;
-  vertical-align: middle;
-}
-
-.mat-mdc-table{
+mat-table{  
+  overflow-y:scroll;
+  display: flex;
+  flex-direction: column;
+  height:80vh;
+  width:75vw;
+  background-color:var(--purple1);
   border:1px solid white;
 }
 
-mat-table{
-  overflow-y:auto;
-  display:block;
-  height:80vh;
-  background-color:var(--purple1);
+.mat-mdc-header-row,
+.mat-mdc-row,
+.mat-mdc-footer-row {
+  color: white;
+  border-bottom: 1px solid white;
+  text-align: left;
+  height:35px;
+  display:flex;
+  align-items: center;
+  flex:none;
 }
 
-.mat-mdc-header-row, .mat-mdc-header-cell {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  background-color:var(--purple1);
+.mat-mdc-header-row,
+.mat-mdc-footer-row{
+  font-weight: bold;
+  background-color:var(--purple0);
 }
 
-.table-parent{
-  width:70vw;
+.mat-mdc-footer-row{
+  margin-top:auto;
+  border-top: 1px solid white;
 }
 
 .consoleNameColumn{
   width:15vw;
 }
 .nameColumn{
-  width:20vw;
+  width:27vw;
 }
 .idColumn{
   width:5vw
@@ -69,16 +51,16 @@ mat-table{
 .statusText{
   display:inline-block;
   border-radius: 5px;
-  padding-top:5px;
-  padding-bottom: 5px;
+  padding-top:2px;
+  padding-bottom: 2px;
   padding-left: 10px;
   padding-right: 10px;
 }
 .achievementsColumn{
-  width:10vw
+  width:8vw
 }
 .percentageColumn{
-  width:10vw
+  width:8vw
 }
 
 .status-not-played{
@@ -124,13 +106,25 @@ mat-table{
   align-items: center;
 }
 
-.games-text{
-  padding-left:20px;
+mat-option{
+  background-color:black !important;
   color:white;
 }
 
-mat-option{
-  background-color:black !important;
+.app-form-field{
+  color:white;
+  width:20vw;
+  margin-top:10px;
+  margin-left:10px;
+}
+
+.closeButton{
+  background-color:transparent ;
+  border: 0;
+  cursor: pointer;
+}
+
+.closeIcon{
   color:white;
 }
 

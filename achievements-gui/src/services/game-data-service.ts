@@ -1,5 +1,5 @@
 import { inject, Injectable, model } from '@angular/core';
-import { GameData } from '../model/gameData';
+import { CompletionStatusType, GameData } from '../model/gameData';
 import { BehaviorSubject, firstValueFrom, forkJoin, Observable, of } from 'rxjs';
 import { ConsoleData, ConsoleSource } from '../model/consoleData';
 import { environment } from '../environments/environment';
@@ -15,16 +15,16 @@ import { PS3GameDataService } from './ps3-game-data-service';
 })
 export class GameDataService {
   http: HttpClient = inject(HttpClient);
-  raDataService:RAGameDataService;
-  steamDataService:SteamGameDataService;
-  ps3DataService:PS3GameDataService;
-  psVitaDataService:PSVitaGameDataService;
+  raDataService: RAGameDataService;
+  steamDataService: SteamGameDataService;
+  ps3DataService: PS3GameDataService;
+  psVitaDataService: PSVitaGameDataService;
 
-  constructor(raDataService:RAGameDataService,
-    steamDataService:SteamGameDataService,
-    ps3DataService:PS3GameDataService,
-    psVitaDataService:PSVitaGameDataService
-  ){
+  constructor(raDataService: RAGameDataService,
+    steamDataService: SteamGameDataService,
+    ps3DataService: PS3GameDataService,
+    psVitaDataService: PSVitaGameDataService
+  ) {
     this.raDataService = raDataService;
     this.steamDataService = steamDataService;
     this.ps3DataService = ps3DataService;
@@ -63,21 +63,40 @@ export class GameDataService {
     const psVitaObs: Promise<ConsoleData[]> = this.psVitaDataService.requestPSVitaConsoleData(this.http);
 
     return Promise.all([
-      raObs,
+      //raObs,
       //steamObs,
       ps3Obs,
       psVitaObs
-      ]).then((allRes) => {
+    ]).then((allRes) => {
       allRes.forEach(processing);
     })
   }
 
   async requestGameData(model: Model): Promise<any> {
     return Promise.all([
-      this.raDataService.requestRAGameData(model, this.http),
+      //this.raDataService.requestRAGameData(model, this.http),
       //this.steamDataService.requestSteamGameData(model, this.http),
       this.ps3DataService.requestPS3GameData(model, this.http),
       this.psVitaDataService.requestPSVitaGameData(model, this.http)
-    ]).then((dummy) => {});
+    ]).then((dummy) => { });
+  }
+
+  completionStatusText(completionStatus: CompletionStatusType) {
+    switch (completionStatus) {
+      case CompletionStatusType.MASTERED:
+        return "Mastered";
+      case CompletionStatusType.BEATEN:
+        return "Beaten";
+      case CompletionStatusType.CANNOT_PLAY:
+        return "Cannot play";
+      case CompletionStatusType.NOT_PLAYED:
+        return "Not played";
+      case CompletionStatusType.NO_ACHIEVEMENTS:
+        return "No achievements";
+      case CompletionStatusType.TRIED:
+        return "Tried";
+      default:
+        return "No status";
+    }
   }
 }

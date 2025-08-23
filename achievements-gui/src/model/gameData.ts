@@ -1,4 +1,4 @@
-export enum CompletionStatusType{
+export enum CompletionStatusType {
     NOT_PLAYED = "NOT_PLAYED",
     TRIED = "TRIED",
     BEATEN = "BEATEN",
@@ -8,12 +8,12 @@ export enum CompletionStatusType{
 }
 
 export type GameData = {
-    Title:string;
-    ID:number;
-    ConsoleID:number;
-    ConsoleName:string;
-    CompletionStatus:CompletionStatusType,
-    MaxPossible:number,
-    NumAwardedHardcore:number;
-    Points:number;
+    Title: string;
+    ID: number;
+    ConsoleID: number;
+    ConsoleName: string;
+    CompletionStatus: CompletionStatusType,
+    MaxPossible: number,
+    NumAwardedHardcore: number;
+    Points: number;
 }
