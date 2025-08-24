@@ -1,0 +1,8 @@
+.mat-mdc-tab-group{
+    color:white;
+}
+
+::ng-deep .mdc-tab.mdc-tab--active{
+  background-color: rgb(74, 3, 155) !important;
+  font-weight: bold;
+}

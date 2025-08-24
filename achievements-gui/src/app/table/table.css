@@ -4,7 +4,7 @@
   padding:10px;
 }
 
-mat-table{  
+.games-table{  
   overflow-y:scroll;
   display: flex;
   flex-direction: column;
@@ -35,6 +35,15 @@ mat-table{
 .mat-mdc-footer-row{
   margin-top:auto;
   border-top: 1px solid white;
+}
+
+::ng-deep .mat-mdc-paginator-page-size-select.mat-mdc-form-field-flex {
+  /* Apply styles to the dropdown trigger */
+  background-color: blue !important;
+  border : 5px solid red;
+  border-radius:10px;
+  padding-left:5px;
+  padding-right:5px;
 }
 
 .consoleNameColumn{
@@ -70,27 +79,23 @@ mat-table{
 }
 
 .status-not-played{
-  background-color: #a0a0a0;
+  background-color: var(--not-played);
   color:black;
 }
 .status-mastered{
-  background-color: gold;
+  background-color: var(--mastered);
   color:black;
 }
 .status-beaten{
-  background-color: green;
+  background-color: var(--beaten);
   color:white;
 }
 .status-tried{
-  background-color: aquamarine; 
+  background-color: var(--tried); 
   color:black;
 }
 .status-no-achievements{
-  background-color: #555555;
-  color:white;
-}
-.status-cannot-play{
-  background-color: black;
+  background-color: var(--no-achievements);
   color:white;
 }
 
@@ -110,14 +115,16 @@ mat-table{
   display:flex;
   flex-direction: row;
   align-items: center;
+  margin-top:10px;
+  justify-content: space-between;
 }
 
-mat-option{
+::ng-deep mat-option{
   background-color:black !important;
-  color:white;
+  color:white !important;
 }
 
-.app-form-field{
+::ng-deep mat-form-field{
   color:white;
   width:20vw;
   margin-top:10px;
@@ -136,7 +143,6 @@ mat-option{
 
 .request-data-button{
   float:left;
-  margin-top:20px;
 
   align-items: center;
   appearance: none;

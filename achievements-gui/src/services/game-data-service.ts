@@ -68,8 +68,8 @@ export class GameDataService {
     return Promise.all([
       sourcesToRequest.includes(ConsoleSource.RETRO_ACHIEVEMENTS) ? raObs : Promise.resolve<ConsoleData[]>([]),
       sourcesToRequest.includes(ConsoleSource.STEAM) ? steamObs :  Promise.resolve<ConsoleData[]>([]),
-      sourcesToRequest.includes(ConsoleSource.STANDALONE) ? ps3Obs :  Promise.resolve<ConsoleData[]>([]),
-      sourcesToRequest.includes(ConsoleSource.STANDALONE) ? psVitaObs :  Promise.resolve<ConsoleData[]>([]),
+      sourcesToRequest.includes(ConsoleSource.PS3) ? ps3Obs :  Promise.resolve<ConsoleData[]>([]),
+      sourcesToRequest.includes(ConsoleSource.PSVITA) ? psVitaObs :  Promise.resolve<ConsoleData[]>([]),
     ]).then((allRes) => {
       allRes.forEach(processing);
     })
@@ -81,8 +81,8 @@ export class GameDataService {
     return Promise.all([
       sourcesToRequest.includes(ConsoleSource.RETRO_ACHIEVEMENTS) ? this.raDataService.requestRAGameData(model, this.http) : Promise.resolve<ConsoleData[]>([]),
       sourcesToRequest.includes(ConsoleSource.STEAM) ? this.steamDataService.requestSteamGameData(model, this.http) : Promise.resolve<ConsoleData[]>([]),
-      sourcesToRequest.includes(ConsoleSource.STANDALONE) ? this.ps3DataService.requestPS3GameData(model, this.http) : Promise.resolve<ConsoleData[]>([]),
-      sourcesToRequest.includes(ConsoleSource.STANDALONE) ? this.psVitaDataService.requestPSVitaGameData(model, this.http) : Promise.resolve<ConsoleData[]>([]),
+      sourcesToRequest.includes(ConsoleSource.PS3) ? this.ps3DataService.requestPS3GameData(model, this.http) : Promise.resolve<ConsoleData[]>([]),
+      sourcesToRequest.includes(ConsoleSource.PSVITA) ? this.psVitaDataService.requestPSVitaGameData(model, this.http) : Promise.resolve<ConsoleData[]>([]),
     ]).then((dummy) => { });
   }
 
@@ -92,8 +92,6 @@ export class GameDataService {
         return "Mastered";
       case CompletionStatusType.BEATEN:
         return "Beaten";
-      case CompletionStatusType.CANNOT_PLAY:
-        return "Cannot play";
       case CompletionStatusType.NOT_PLAYED:
         return "Not played";
       case CompletionStatusType.NO_ACHIEVEMENTS:
@@ -107,8 +105,10 @@ export class GameDataService {
 
   consoleSourceText(consoleSource: ConsoleSource) {
     switch (consoleSource) {
-      case ConsoleSource.STANDALONE:
-        return "Standalone";
+      case ConsoleSource.PS3:
+        return "PS3";
+      case ConsoleSource.PSVITA:
+        return "PSVITA";
       case ConsoleSource.STEAM:
         return "Steam";
       case ConsoleSource.RETRO_ACHIEVEMENTS:

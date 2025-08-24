@@ -4,6 +4,12 @@
     --purple1:rgb(25, 0, 117);
     --purple2:rgba(58, 41, 110, 1);
     --purple3:rgba(110, 38, 128, 1);
+
+    --not-played:#a0a0a0;
+    --mastered:gold;
+    --beaten:green;
+    --tried:aquamarine;
+    --no-achievements:#555555;
 }
 
 html, body { 

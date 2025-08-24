@@ -50,7 +50,7 @@ export class RAGameDataService {
         consoleData.Games.set(game.ID, game);
       }
       //Force refresh data
-      model.refreshTableData(gameData);
+      model.refreshData(gameData);
     }
 
     //Get completion progress beforehand

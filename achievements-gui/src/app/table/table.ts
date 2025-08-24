@@ -11,8 +11,8 @@ import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { MatSelectChange, MatSelectModule } from '@angular/material/select';
 import { MatSort, MatSortModule, Sort } from '@angular/material/sort';
-import { C } from '@angular/cdk/keycodes';
 import { ConsoleData, ConsoleSource } from '../../model/consoleData';
+import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 
 interface FilterData {
   text: string;
@@ -25,17 +25,17 @@ interface FilterData {
   selector: 'app-table',
   imports: [MatTableModule, MatIconModule, MatFormFieldModule, MatSelectModule,
     FormsModule, CommonModule, ReactiveFormsModule, MatInputModule,
-    MatSortModule],
+    MatSortModule, MatPaginatorModule],
   templateUrl: './table.html',
-  styleUrl: './table.css',
-  providers: [Model, GameDataService]
+  styleUrl: './table.css'
 })
 export class Table {
   //Table data
   @ViewChild(MatTable) table!: MatTable<GameData>;
   @ViewChild(MatSort) sort!: MatSort;
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
 
-  sourcesToRequest:ConsoleSource[] = [ConsoleSource.RETRO_ACHIEVEMENTS, ConsoleSource.STANDALONE];
+  sourcesToRequest:ConsoleSource[] = [ConsoleSource.STEAM, ConsoleSource.PS3, ConsoleSource.PSVITA, ConsoleSource.RETRO_ACHIEVEMENTS];
 
   data: MatTableDataSource<GameData> = new MatTableDataSource<GameData>();
   columnsToDisplay: string[] = ["ConsoleName", "Title", "CompletionStatus", "Achievements", "Percentage", "ID"];
@@ -52,6 +52,7 @@ export class Table {
   selectedSources: string[] = [];
   sources = new FormControl();
   sourcesList: string[] = [];
+  standalone:string="Standlone"
 
   model: Model;
   gameDataService: GameDataService;
@@ -78,35 +79,44 @@ export class Table {
 
     //Init filters list
     this.completionStatusesList = Object.values(CompletionStatusType).map(this.gameDataService.completionStatusText);
-    this.sourcesList = Object.values(ConsoleSource).map(this.gameDataService.consoleSourceText);
+    this.sourcesList = [this.gameDataService.consoleSourceText(ConsoleSource.RETRO_ACHIEVEMENTS),
+      this.gameDataService.consoleSourceText(ConsoleSource.STEAM),
+      this.standalone
+    ]
 
     //Setup custom filter predicate on filter string and console
     this.data.filterPredicate = (data: GameData, filter: string): boolean => {
       const searchTerms: FilterData = JSON.parse(filter);
 
+      
       const text: string = searchTerms.text;
       const consoles: string[] = searchTerms.consoles;
       const completionStatuses: string[] = searchTerms.completionStatuses;
       const sources: string[] = searchTerms.sources;
-
+      
       //Contains string text
       const strFilter: boolean = (data.ID.toString().trim().toLowerCase().includes(text) ||
-        data.Title.trim().toLowerCase().includes(text));
+      data.Title.trim().toLowerCase().includes(text));
       //Contains filtered consoles
       const consoleFilter: boolean = consoles.includes(data.ConsoleName) || consoles.length == 0;
       //Contains completion status
       const completionStatusesFilter: boolean = completionStatuses.includes(this.gameDataService.completionStatusText(data.CompletionStatus)) || completionStatuses.length == 0;
       //Is from source
       const consoleData:ConsoleData | undefined = this.model.getConsoleData().get(data.ConsoleID);
-      const sourcesFilter:boolean = consoleData ? sources.includes(consoleData.Source) : true || sources.length == 0;
+      let sourcesFilter:boolean = true;
+      if(consoleData){
+        const isStandalone:boolean = (consoleData.Source == ConsoleSource.PS3 || consoleData.Source == ConsoleSource.PSVITA) ? sources.includes(this.standalone) : false; 
+        sourcesFilter = (isStandalone || sources.includes(this.gameDataService.consoleSourceText(consoleData.Source))) || sources.length == 0;
+      }
 
       return strFilter && consoleFilter && completionStatusesFilter && sourcesFilter;
     };
   }
 
   ngAfterViewInit() {
-    //Init sort
+    //Init sort and paginator
     this.data.sort = this.sort;
+    this.data.paginator = this.paginator;
 
     //init sorting data accessors
     this.data.sortingDataAccessor = (item, property) => {

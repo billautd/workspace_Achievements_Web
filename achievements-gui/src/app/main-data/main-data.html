@@ -1,0 +1,54 @@
+<div class="data-parent">
+    <div class="data-left">
+        <div class="data-steam">
+            <img src="steam.png" class="steam-icon">
+            <div class="steam-chart">
+                <app-chart-canvas class="steam-chart" #steamChartCanvas
+                    [consoleIds]="[steamConsoleId]"></app-chart-canvas>
+            </div>
+            <div class="data-steam-earned">
+                <h1>Earned</h1>
+                <h2>{{steamAchievementsText}}</h2>
+                <h2>{{steamAchievementsPercentageText}}</h2>
+            </div>
+        </div>
+        <div class="data-standalone">
+            <div class="data-ps3">
+                <img src="ps3.png" class="ps3-icon">
+                <div class="ps3-chart">
+                    <app-chart-canvas class="ps3-chart" #ps3ChartCanvas
+                        [consoleIds]="[ps3ConsoleId]"></app-chart-canvas>
+                </div>
+            </div>
+            <div class="data-psvita">
+                <img src="psvita.png" class="psvita-icon">
+                <div class="psvita-chart">
+                    <app-chart-canvas class="psvita-chart" #psVitaChartCanvas
+                        [consoleIds]="[psVitaConsoleId]"></app-chart-canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="data-right">
+        <div class="data-ra">
+            <img src="ra.png" class="ra-icon">
+            <div style="display:flex; flex-direction: column; flex-grow: 1;">
+
+                <div class="data-total-ra">
+                    <div class="ra-chart">
+                        <app-chart-canvas class="ra-chart" #raChartCanvas
+                            [consoleIds]="raConsoleIds"></app-chart-canvas>
+                    </div>
+                    <div class="data-ra-earned">
+                        <h1>Earned</h1>
+                        <h2>{{raAchievementsText}}</h2>
+                        <h2>{{raAchievementsPercentageText}}</h2>
+                    </div>
+                </div>
+
+                <div class="data-specific-ra">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

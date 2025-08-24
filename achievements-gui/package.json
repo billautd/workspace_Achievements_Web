@@ -28,6 +28,9 @@
     "@angular/material": "^20.1.6",
     "@angular/platform-browser": "^20.1.0",
     "@angular/router": "^20.1.0",
+    "@types/chart.js": "^2.9.41",
+    "@types/chartjs": "^0.0.31",
+    "chart.js": "^4.5.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.15.0"

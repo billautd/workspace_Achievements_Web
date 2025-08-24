@@ -35,7 +35,7 @@ export class Model{
      * Refresh table data source, while avoiding refreshing the whole table every time
      * @param gameData Data to refresh in table.
      */
-    refreshTableData(gameData:GameData[]):void{
+    refreshData(gameData:GameData[]):void{
       this.getUpdateBehaviorSubject().next(gameData);
     }
 }

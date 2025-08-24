@@ -48,7 +48,7 @@ export class PSVitaGameDataService {
       })
 
       //Force refresh data
-      model.refreshTableData(gameData);
+      model.refreshData(gameData);
     }
     return firstValueFrom(http.get<GameData[]>(environment.API_URL + "/psvita/game_data")).then(processing);
   }

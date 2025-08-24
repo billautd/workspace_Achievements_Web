@@ -47,7 +47,7 @@ export class PS3GameDataService {
       })
 
       //Force refresh data
-      model.refreshTableData(gameData);
+      model.refreshData(gameData);
     }
 
     return firstValueFrom(http.get<GameData[]>(environment.API_URL + "/ps3/game_data")).then(processing);

@@ -35,13 +35,14 @@ export class SteamGameDataService {
         consoleData.Games.set(game.ID, game);
       }
       //Force refresh data
-      model.refreshTableData(ownedGames);
+      model.refreshData(ownedGames);
   
 
       for(const gameIndex of consoleData.Games.keys()){
         const gameData:GameData = await firstValueFrom(http.get<GameData>(environment.API_URL + this.STEAM_PATH + this.GAME_DATA_METHOD + gameIndex));
+        console.log("Received data for game " + gameData.Title + " (" + gameData.ID + ")")
         consoleData.Games.set(gameIndex, gameData);
-        model.refreshTableData([gameData]);
+        model.refreshData([gameData]);
       }
 
       return null;

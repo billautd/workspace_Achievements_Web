@@ -49,7 +49,7 @@ public class PSVitaRequestService {
 		psvitaConsoleData.setGameSystem(true);
 		psvitaConsoleData.setId(Model.PSVITA_CONSOLE_ID);
 		psvitaConsoleData.setName("PlayStation Vita");
-		psvitaConsoleData.setSource(ConsoleSourceEnum.STANDALONE);
+		psvitaConsoleData.setSource(ConsoleSourceEnum.PSVITA);
 		model.getConsoleDataMap().put(psvitaConsoleData.getId(), psvitaConsoleData);
 
 		return List.of(psvitaConsoleData);
