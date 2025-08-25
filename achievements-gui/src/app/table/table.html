@@ -1,6 +1,7 @@
 <div class="table-with-filters">
     <div class="table-parent">
-        <mat-table class="games-table" [dataSource]="data" matSort (matSortChange)="announceSortChange($event)">
+        <mat-table class="games-table" [dataSource]="data" matSort (matSortChange)="announceSortChange($event)"
+            matSortActive="Title" matSortDirection="asc">
             <ng-container matColumnDef="ConsoleName">
                 <th mat-header-cell mat-sort-header *matHeaderCellDef class="consoleNameColumn">Console name</th>
                 <td mat-cell *matCellDef="let data" class="consoleNameColumn"> {{data.ConsoleName}} </td>
