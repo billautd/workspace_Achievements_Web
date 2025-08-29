@@ -19,7 +19,7 @@ export class GameDataService {
   ps3DataService: PS3GameDataService;
   psVitaDataService: PSVitaGameDataService;
 
-  sourcesToRequest: ConsoleSource[] = [ConsoleSource.PS3, ConsoleSource.PSVITA, ConsoleSource.RETRO_ACHIEVEMENTS];
+  sourcesToRequest: ConsoleSource[] = [ConsoleSource.PS3, ConsoleSource.PSVITA, ConsoleSource.RETRO_ACHIEVEMENTS, ConsoleSource.STEAM];
 
   constructor(raDataService: RAGameDataService,
     steamDataService: SteamGameDataService,

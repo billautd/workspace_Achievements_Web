@@ -110,15 +110,19 @@ public class SteamRequestService {
 	}
 
 	public List<ConsoleData> getConsoleIds() {
-		Log.info("Getting Steam console data");
-		final ConsoleData steamConsoleData = new ConsoleData();
-		steamConsoleData.setActive(true);
-		steamConsoleData.setGameSystem(true);
-		steamConsoleData.setId(Model.STEAM_CONSOLE_ID);
-		steamConsoleData.setName("Steam");
-		steamConsoleData.setSource(ConsoleSourceEnum.STEAM);
-		model.getConsoleDataMap().put(steamConsoleData.getId(), steamConsoleData);
-
+		ConsoleData steamConsoleData;
+		if (!model.getConsoleDataMap().containsKey(Model.STEAM_CONSOLE_ID)) {
+			Log.info("Getting Steam console data");
+			steamConsoleData = new ConsoleData();
+			steamConsoleData.setActive(true);
+			steamConsoleData.setGameSystem(true);
+			steamConsoleData.setId(Model.STEAM_CONSOLE_ID);
+			steamConsoleData.setName("Steam");
+			steamConsoleData.setSource(ConsoleSourceEnum.STEAM);
+			model.getConsoleDataMap().put(steamConsoleData.getId(), steamConsoleData);
+		} else {
+			steamConsoleData = model.getConsoleDataMap().get(Model.STEAM_CONSOLE_ID);
+		}
 		return List.of(steamConsoleData);
 	}
 
@@ -133,13 +137,11 @@ public class SteamRequestService {
 			final String gameDataBody = node.get("response").get("games").toString();
 			final List<GameData> gameData = mapper.readValue(gameDataBody, new TypeReference<List<GameData>>() {
 			});
-			if (!model.getConsoleDataMap().containsKey(Model.STEAM_CONSOLE_ID)) {
-				gameData.forEach(data -> {
-					data.setConsoleId(Model.STEAM_CONSOLE_ID);
-					data.setConsoleName("Steam");
-					model.getConsoleDataMap().get(Model.STEAM_CONSOLE_ID).getGameDataMap().put(data.getId(), data);
-				});
-			}
+			gameData.forEach(data -> {
+				data.setConsoleId(Model.STEAM_CONSOLE_ID);
+				data.setConsoleName("Steam");
+				model.getConsoleDataMap().get(Model.STEAM_CONSOLE_ID).getGameDataMap().put(data.getId(), data);
+			});
 			Log.info("Found " + gameData.size() + " games for Steam");
 			return gameData;
 		} catch (JsonProcessingException e) {
