@@ -1,0 +1,60 @@
+<div class="compare-parent">
+    <div class="box-with-compare-button">
+        <button class="request-data-button" (click)="compare()" [disabled]="isRequestRunning">
+            Refresh
+        </button>
+        <div class="compare-bottom">
+            <div class="compare-box compare-not-in-local-box">
+                <div class="compare-title">Not in local</div>
+                <div class="compare-not-in-local">
+                    @for(comp of notInLocal; track comp){
+                    <div class="data-line">
+                        <button class="copy-button" (click)="copyToClipboard(comp.name)">
+                            <img src="copy-icon.svg" class="copy-icon">
+                        </button>
+                        <div style="width:60%">{{comp.name}}</div>
+                        <div style="width:30%">{{comp.consoleName}}</div>
+                    </div>
+                    }
+                </div>
+            </div>
+            <div class="compare-box compare-not-in-database-box">
+                <div class="compare-title">Not in database</div>
+                <div class="compare-not-in-database">
+                    @for(comp of notInDatabase; track comp){
+                    <div class="data-line">
+                        <button class="copy-button" (click)="copyToClipboard(comp.name)">
+                            <img src="copy-icon.svg" class="copy-icon">
+                        </button>
+                        <div style="width:60%">{{comp.name}}</div>
+                        <div style="width:30%">{{comp.consoleName}}</div>
+                    </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="compare-box compare-completion-status-box">
+        <div class="compare-title">Completion status</div>
+        <div class="compare-completion-status">
+            @for(comp of completionStatusDifferent; track comp){
+            <div class="data-line">
+                <button class="copy-button" (click)="copyToClipboard(comp.name)">
+                    <img src="copy-icon.svg" class="copy-icon">
+                </button>
+                <div style="width:40%">{{comp.name}}</div>
+                <div style="width:20%">{{comp.consoleName}}</div>
+                <div class="status-text" [ngClass]="gameDataService.completionStatusClass(comp.playniteStatus)">
+                    {{gameDataService.completionStatusText(comp.playniteStatus)}}
+                </div>
+                <div style="width:10%; display:flex; justify-content:center">
+                    ========>
+                </div>
+                <div class="status-text" [ngClass]="gameDataService.completionStatusClass(comp.databaseStatus)">
+                    {{gameDataService.completionStatusText(comp.databaseStatus)}}
+                </div>
+            </div>
+            }
+        </div>
+    </div>
+</div>

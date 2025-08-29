@@ -1,12 +1,13 @@
 
 import { Component, ViewChild } from '@angular/core';
-import { Table } from './table/table';
 import { MatTab, MatTabChangeEvent, MatTabsModule } from '@angular/material/tabs';
+import { Compare } from "./compare/compare";
 import { MainData } from './main-data/main-data';
+import { Table } from './table/table';
 
 @Component({
   selector: 'app-root',
-  imports: [Table, MainData, MatTabsModule],
+  imports: [Table, MainData, MatTabsModule, Compare],
   templateUrl: './app.html',
   styleUrl: './app.css',
   providers:[]

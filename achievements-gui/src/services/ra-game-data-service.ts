@@ -1,10 +1,11 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../environments/environment';
+import { CompareData } from '../model/compareData';
 import { ConsoleData, ConsoleSource } from '../model/consoleData';
 import { GameData } from '../model/gameData';
 import { Model } from '../model/model';
-import { HttpClient } from '@angular/common/http';
 import { delay } from './utils-service';
 
 @Injectable({
@@ -15,6 +16,8 @@ export class RAGameDataService {
   COMPLETION_PROGRESS_METHOD: string = "completion_progress/";
   GAME_DATA_METHOD: string = "game_data/";
   CONSOLE_DATA_METHOD: string = "console_data/";
+  COMPARE_DATA_METHOD: string = "compare_data/";
+  EXISTING_DATA_METHOD: string = "existing_data/";
 
   /**
    * 
@@ -62,6 +65,8 @@ export class RAGameDataService {
     for (const consoleEntry of model.getConsoleData().entries()) {
       const consoleId: number = consoleEntry[0];
       const consoleData: ConsoleData = consoleEntry[1];
+      //Wait to not send too many requests
+      await delay(3000);
       //Do not parse non RA consoles
       if (consoleData.Source !== ConsoleSource.RETRO_ACHIEVEMENTS) {
         continue;
@@ -70,10 +75,32 @@ export class RAGameDataService {
       const consoleGames: GameData[] = await firstValueFrom(http.get<GameData[]>(environment.API_URL + this.RA_PATH + this.GAME_DATA_METHOD + consoleId));
       processing(consoleGames);
       console.log("Processed " + consoleGames.length + " games for " + consoleData.Name + " (" + consoleId + ")");
-      //Wait to not send too many requests
-      await delay(5000);
     }
 
+    //Send request for compare data
+    this.compareData(model, http);
+    return null;
+  }
+
+  async requestRAExistingGameData(model: Model, http: HttpClient): Promise<any> {
+    const gameData: GameData[] = await firstValueFrom(http.get<GameData[]>(environment.API_URL + this.RA_PATH + this.EXISTING_DATA_METHOD));
+    for (const game of gameData) {
+      const consoleData: ConsoleData | undefined = model.getConsoleData().get(game.ConsoleID);
+      if (!consoleData) {
+        console.log("No console " + game.ConsoleName + " (" + game.ConsoleID + ") found");
+        return;
+      }
+      //Add data to console data
+      consoleData.Games.set(game.ID, game);
+    }
+    //Force refresh data
+    model.refreshData(gameData);
+  }
+
+  async compareData(model:Model, http: HttpClient): Promise<any> {
+    const compareData: CompareData[] = await firstValueFrom(http.get<any>(environment.API_URL + this.RA_PATH + this.COMPARE_DATA_METHOD))
+    model.getCompareData().set(ConsoleSource.RETRO_ACHIEVEMENTS, compareData);
+    model.refreshCompareData(compareData);
     return null;
   }
 }

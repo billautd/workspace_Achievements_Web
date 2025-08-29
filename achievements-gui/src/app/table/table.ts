@@ -1,18 +1,18 @@
-import { Component, inject, ViewChild } from '@angular/core';
-import { MatTable, MatTableDataSource, MatTableModule } from '@angular/material/table';
-import { Model } from '../../model/model';
-import { CompletionStatusType, GameData } from '../../model/gameData';
-import { GameDataService } from '../../services/game-data-service';
-import { HttpClient } from '@angular/common/http';
-import { MatInputModule } from '@angular/material/input';
-import { MatIconModule } from '@angular/material/icon';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { MatSelectChange, MatSelectModule } from '@angular/material/select';
-import { MatSort, MatSortModule, Sort } from '@angular/material/sort';
-import { ConsoleData, ConsoleSource } from '../../model/consoleData';
+import { HttpClient } from '@angular/common/http';
+import { Component, inject, ViewChild } from '@angular/core';
+import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { MatSelectChange, MatSelectModule } from '@angular/material/select';
+import { MatSort, MatSortModule } from '@angular/material/sort';
+import { MatTable, MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { ConsoleData, ConsoleSource } from '../../model/consoleData';
+import { CompletionStatusType, GameData } from '../../model/gameData';
+import { Model } from '../../model/model';
+import { GameDataService } from '../../services/game-data-service';
 
 interface FilterData {
   text: string;
@@ -34,8 +34,6 @@ export class Table {
   @ViewChild(MatTable) table!: MatTable<GameData>;
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
-
-  sourcesToRequest:ConsoleSource[] = [ConsoleSource.STEAM, ConsoleSource.PS3, ConsoleSource.PSVITA, ConsoleSource.RETRO_ACHIEVEMENTS];
 
   data: MatTableDataSource<GameData> = new MatTableDataSource<GameData>();
   columnsToDisplay: string[] = ["ConsoleName", "Title", "CompletionStatus", "Achievements", "Percentage", "ID"];
@@ -68,12 +66,7 @@ export class Table {
 
   ngOnInit() {
     //No data is passed through this behavior subject, it's only a trigger to refresh table data
-    this.model.getUpdateBehaviorSubject().subscribe((gameData) => {
-      // if(!gameData){
-      //   console.log("No data given for table refresh. Returning...")
-      //   return;
-      // }
-      // console.log("Refreshing table with " + gameData.length + " data");
+    this.model.getUpdateBehaviorSubject().subscribe(() => {
       this.data.data = this.model.flattenMap();
     })
 
@@ -128,6 +121,7 @@ export class Table {
         case "ID":
           return item.ID;
         case "Achievements":
+          return item.MaxPossible;
         case "Percentage":
           return this.percentageValue(item);
         case "Title":
@@ -144,11 +138,23 @@ export class Table {
    */
   requestAllData(): void {
     this.isRequestRunning = true;
-    this.gameDataService.requestConsoleData(this.model, this.sourcesToRequest).then((dummy1) => {
+    this.gameDataService.requestConsoleData(this.model).then(() => {
       console.log("Console data OK")
       this.updateConsolesList();
-      this.gameDataService.requestGameData(this.model, this.sourcesToRequest).then((dummy2) => {
+      this.gameDataService.requestGameData(this.model).then(() => {
         console.log("Game data OK")
+        this.isRequestRunning = false;
+      })
+    });
+  }
+
+  requestAllExistingData():void{
+    this.isRequestRunning = true;
+    this.gameDataService.requestConsoleData(this.model).then(() => {
+      console.log("Console data OK")
+      this.updateConsolesList();
+      this.gameDataService.requestExistingData(this.model).then(() => {
+        console.log("Existing game data OK")
         this.isRequestRunning = false;
       })
     });
@@ -204,7 +210,7 @@ export class Table {
     return name.replace(/[#&•]/g, "").replace(/ /g, "+").toLowerCase();
   }
 
-  isSocketDone(data: any): boolean {
+  isSocketDone(): boolean {
     return false;
   }
 
@@ -215,8 +221,7 @@ export class Table {
   /******************************/
   /* SORTING */
   /******************************/
-  announceSortChange(event: Sort) {
-    console.log(event)
+  announceSortChange() {
     this.table.renderRows();
   }
 

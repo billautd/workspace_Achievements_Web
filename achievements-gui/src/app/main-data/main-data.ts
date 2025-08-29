@@ -1,6 +1,6 @@
-import { Component, ElementRef, ViewChild } from '@angular/core';
-import { Model, PS3_CONSOLE_ID, PSVITA_CONSOLE_ID, STEAM_CONSOLE_ID } from '../../model/model';
+import { Component, ViewChild } from '@angular/core';
 import { ConsoleData, ConsoleSource } from '../../model/consoleData';
+import { Model, PS3_CONSOLE_ID, PSVITA_CONSOLE_ID, STEAM_CONSOLE_ID } from '../../model/model';
 import { GameDataService } from '../../services/game-data-service';
 import { ChartCanvas } from '../chart-canvas/chart-canvas';
 
@@ -38,7 +38,7 @@ export class MainData {
 
   ngOnInit() {
     //No data is passed through this behavior subject, it's only a trigger to refresh data
-    this.model.getUpdateBehaviorSubject().subscribe((gameData) => {
+    this.model.getUpdateBehaviorSubject().subscribe(() => {
       this.updateSteamAchievementsText();
       this.updateRAAchievementsText();
       this.updateRAConsoleIds();

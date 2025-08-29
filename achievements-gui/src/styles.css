@@ -4,6 +4,7 @@
     --purple1:rgb(25, 0, 117);
     --purple2:rgba(58, 41, 110, 1);
     --purple3:rgba(110, 38, 128, 1);
+    --purple4:rgba(160, 50, 170, 1);
 
     --not-played:#a0a0a0;
     --mastered:gold;
@@ -20,4 +21,88 @@ body {
     width:100%;
     height:100%;
     position:fixed;
+}
+
+.status-text{
+  display:flex;
+  justify-content: center;
+  width:150px;
+  border-radius: 5px;
+  padding-top:2px;
+  padding-bottom: 2px;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.status-not-played{
+  background-color: var(--not-played);
+  color:black;
+}
+.status-mastered{
+  display:flex;
+  justify-content: center;
+  background-color: var(--mastered);
+  color:black;
+}
+.status-beaten{
+  background-color: var(--beaten);
+  color:white;
+}
+.status-tried{
+  background-color: var(--tried); 
+  color:black;
+}
+.status-no-achievements{
+  background-color: var(--no-achievements);
+  color:white;
+}
+
+.request-data-button{
+  float:left;
+
+  align-items: center;
+  appearance: none;
+  background-image: radial-gradient(100% 100% at 100% 0, #5adaff 0, #5468ff 100%);
+  border: 0;
+  border-radius: 6px;
+  box-shadow: rgba(45, 35, 66, .4) 0 2px 4px,rgba(45, 35, 66, .3) 0 7px 13px -3px,rgba(58, 65, 111, .5) 0 -3px 0 inset;
+  box-sizing: border-box;
+  color: #fff;
+  cursor: pointer;
+  display: inline-flex;
+  height: 48px;
+  justify-content: center;
+  line-height: 1;
+  list-style: none;
+  padding-left: 16px;
+  padding-right: 16px;
+  position: relative;
+  text-align: left;
+  text-decoration: none;
+  transition: box-shadow .15s,transform .15s;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  white-space: nowrap;
+  will-change: box-shadow,transform;
+  font-size: 18px;
+}
+
+.request-data-button:focus {
+  box-shadow: #3c4fe0 0 0 0 1.5px inset, rgba(45, 35, 66, .4) 0 2px 4px, rgba(45, 35, 66, .3) 0 7px 13px -3px, #3c4fe0 0 -3px 0 inset;
+}
+
+.request-data-button:hover:enabled {
+  box-shadow: rgba(45, 35, 66, .4) 0 4px 8px, rgba(45, 35, 66, .3) 0 7px 13px -3px, #3c4fe0 0 -3px 0 inset;
+  transform: translateY(-2px);
+}
+
+.request-data-button:active:enabled {
+  box-shadow: #3c4fe0 0 3px 7px inset;
+  transform: translateY(2px);
+}
+
+.request-data-button:disabled{
+  background-image: radial-gradient(100% 100% at 100% 0, #555555 0, #5468ff 100%);
+  color:#AAAAAA;
 }

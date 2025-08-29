@@ -28,6 +28,7 @@
     "@angular/material": "^20.1.6",
     "@angular/platform-browser": "^20.1.0",
     "@angular/router": "^20.1.0",
+    "@tsed/logger-file": "^8.0.4",
     "@types/chart.js": "^2.9.41",
     "@types/chartjs": "^0.0.31",
     "chart.js": "^4.5.0",

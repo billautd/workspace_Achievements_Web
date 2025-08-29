@@ -1,6 +1,6 @@
 <div class="table-with-filters">
     <div class="table-parent">
-        <mat-table class="games-table" [dataSource]="data" matSort (matSortChange)="announceSortChange($event)"
+        <mat-table class="games-table" [dataSource]="data" matSort (matSortChange)="announceSortChange()"
             matSortActive="Title" matSortDirection="asc">
             <ng-container matColumnDef="ConsoleName">
                 <th mat-header-cell mat-sort-header *matHeaderCellDef class="consoleNameColumn">Console name</th>
@@ -19,14 +19,7 @@
             <ng-container matColumnDef="CompletionStatus">
                 <th mat-header-cell mat-sort-header *matHeaderCellDef class="statusColumn">Status</th>
                 <td mat-cell *matCellDef="let data" class="statusColumn">
-                    <div class="statusText" [ngClass]="{
-                        'status-not-played':data.CompletionStatus === 'NOT_PLAYED',
-                        'status-mastered':data.CompletionStatus === 'MASTERED',
-                        'status-tried':data.CompletionStatus === 'TRIED',
-                        'status-beaten':data.CompletionStatus === 'BEATEN',
-                        'status-cannot-play':data.CompletionStatus === 'CANNOT_PLAY',
-                        'status-no-achievements':data.CompletionStatus === 'NO_ACHIEVEMENTS'
-                    }">
+                    <div class="status-text" [ngClass]="gameDataService.completionStatusClass(data.CompletionStatus)">
                         {{gameDataService.completionStatusText(data.CompletionStatus)}}
                     </div>
                 </td>
@@ -62,6 +55,9 @@
         <div class="bottom-bar">
             <button class="request-data-button" (click)="requestAllData()" [disabled]="isRequestRunning">
                 Request games data
+            </button>
+           <button class="request-data-button" (click)="requestAllExistingData()" [disabled]="isRequestRunning">
+                Get existing games data
             </button>
             <mat-paginator [pageSize]="200" hidePageSize showFirstLastButtons ></mat-paginator>
         </div>

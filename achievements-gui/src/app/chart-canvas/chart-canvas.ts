@@ -1,5 +1,5 @@
 import { Component, ElementRef, Input, ViewChild } from '@angular/core';
-import Chart from 'chart.js/auto';
+import { Chart } from 'chart.js/auto';
 import { CompletionStatusType } from '../../model/gameData';
 import { Model } from '../../model/model';
 import { GameDataService } from '../../services/game-data-service';

@@ -85,7 +85,7 @@ public class RetroAchievementsRequestService {
 				uriString.append("&").append(param);
 			}
 			final URI uri = new URI(uriString.toString());
-			Log.info("Creating request for URI : " + uri.toString());
+			Log.debug("Creating request for URI : " + uri.toString());
 
 			final HttpClient client = HttpClient.newBuilder().build();
 			final HttpRequest request = HttpRequest.newBuilder(uri).build();
@@ -106,8 +106,12 @@ public class RetroAchievementsRequestService {
 			Log.info("Found " + consoleData.size() + " consoles");
 			// Add console data to map only if it is a running game system
 			consoleData.forEach(data -> {
+				if (model.getConsoleDataMap().containsKey(data.getId())) {
+					return;
+				}
 				Log.debug("Setting console data for " + data.getName() + " (" + data.getId() + ")");
 				data.setSource(ConsoleSourceEnum.RETRO_ACHIEVEMENTS);
+				// Ignore if already present
 				model.getConsoleDataMap().put(data.getId(), data);
 			});
 			Log.info("Console data map is size " + model.getConsoleDataMap().size());
@@ -191,13 +195,18 @@ public class RetroAchievementsRequestService {
 
 	private void mapCompletionStatus(final GameData gameData) {
 		if (MASTERY_COMPLETION_STRING.equals(gameData.getAwardKind())) {
-			gameData.setCompletionStatus(CompletionStatusEnum.MASTERED);
-		} else if (MASTERY_COMPLETION_STRING.equals(gameData.getAwardKind())) {
+			// Check for previous mastery
+			if (gameData.getAwardedAchievements() < gameData.getTotalAchievements()) {
+				gameData.setCompletionStatus(CompletionStatusEnum.BEATEN);
+			} else {
+				gameData.setCompletionStatus(CompletionStatusEnum.MASTERED);
+			}
+		} else if (GAME_BEATEN_STRING.equals(gameData.getAwardKind())) {
 			gameData.setCompletionStatus(CompletionStatusEnum.BEATEN);
 		} else {
 			gameData.setCompletionStatus(CompletionStatusEnum.TRIED);
 		}
-		Log.debug(gameData.getTitle() + " (" + gameData.getId() + ") is " + gameData.getCompletionStatus());
+		Log.info(gameData.getTitle() + " (" + gameData.getId() + ") is " + gameData.getCompletionStatus());
 	}
 
 	public ObjectMapper getMapper() {
