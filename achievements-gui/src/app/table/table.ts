@@ -2,6 +2,11 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, ViewChild } from '@angular/core';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import {
+  MatDialog,
+  MatDialogConfig,
+  MatDialogRef
+} from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -13,12 +18,13 @@ import { ConsoleData, ConsoleSource } from '../../model/consoleData';
 import { CompletionStatusType, GameData } from '../../model/gameData';
 import { Model } from '../../model/model';
 import { GameDataService } from '../../services/game-data-service';
+import { LoadingDialog } from '../loading-dialog/loading-dialog';
 
 interface FilterData {
   text: string;
   consoles: string[];
   completionStatuses: string[];
-  sources:string[];
+  sources: string[];
 }
 
 @Component({
@@ -27,9 +33,11 @@ interface FilterData {
     FormsModule, CommonModule, ReactiveFormsModule, MatInputModule,
     MatSortModule, MatPaginatorModule],
   templateUrl: './table.html',
-  styleUrl: './table.css'
+  styleUrl: './table.scss'
 })
 export class Table {
+  dialog = inject(MatDialog);
+
   //Table data
   @ViewChild(MatTable) table!: MatTable<GameData>;
   @ViewChild(MatSort) sort!: MatSort;
@@ -50,7 +58,7 @@ export class Table {
   selectedSources: string[] = [];
   sources = new FormControl();
   sourcesList: string[] = [];
-  standalone:string="Standlone"
+  standalone: string = "Standlone"
 
   model: Model;
   gameDataService: GameDataService;
@@ -73,32 +81,32 @@ export class Table {
     //Init filters list
     this.completionStatusesList = Object.values(CompletionStatusType).map(this.gameDataService.completionStatusText);
     this.sourcesList = [this.gameDataService.consoleSourceText(ConsoleSource.RETRO_ACHIEVEMENTS),
-      this.gameDataService.consoleSourceText(ConsoleSource.STEAM),
-      this.standalone
+    this.gameDataService.consoleSourceText(ConsoleSource.STEAM),
+    this.standalone
     ]
 
     //Setup custom filter predicate on filter string and console
     this.data.filterPredicate = (data: GameData, filter: string): boolean => {
       const searchTerms: FilterData = JSON.parse(filter);
 
-      
+
       const text: string = searchTerms.text;
       const consoles: string[] = searchTerms.consoles;
       const completionStatuses: string[] = searchTerms.completionStatuses;
       const sources: string[] = searchTerms.sources;
-      
+
       //Contains string text
       const strFilter: boolean = (data.ID.toString().trim().toLowerCase().includes(text) ||
-      data.Title.trim().toLowerCase().includes(text));
+        data.Title.trim().toLowerCase().includes(text));
       //Contains filtered consoles
       const consoleFilter: boolean = consoles.includes(data.ConsoleName) || consoles.length == 0;
       //Contains completion status
       const completionStatusesFilter: boolean = completionStatuses.includes(this.gameDataService.completionStatusText(data.CompletionStatus)) || completionStatuses.length == 0;
       //Is from source
-      const consoleData:ConsoleData | undefined = this.model.getConsoleData().get(data.ConsoleID);
-      let sourcesFilter:boolean = true;
-      if(consoleData){
-        const isStandalone:boolean = (consoleData.Source == ConsoleSource.PS3 || consoleData.Source == ConsoleSource.PSVITA) ? sources.includes(this.standalone) : false; 
+      const consoleData: ConsoleData | undefined = this.model.getConsoleData().get(data.ConsoleID);
+      let sourcesFilter: boolean = true;
+      if (consoleData) {
+        const isStandalone: boolean = (consoleData.Source == ConsoleSource.PS3 || consoleData.Source == ConsoleSource.PSVITA) ? sources.includes(this.standalone) : false;
         sourcesFilter = (isStandalone || sources.includes(this.gameDataService.consoleSourceText(consoleData.Source))) || sources.length == 0;
       }
 
@@ -137,6 +145,8 @@ export class Table {
    * Data will come from websocket games_socket
    */
   requestAllData(): void {
+    const dialogRef: MatDialogRef<LoadingDialog> = this.openDialog();
+
     this.isRequestRunning = true;
     this.gameDataService.requestConsoleData(this.model).then(() => {
       console.log("Console data OK")
@@ -144,11 +154,12 @@ export class Table {
       this.gameDataService.requestGameData(this.model).then(() => {
         console.log("Game data OK")
         this.isRequestRunning = false;
+        dialogRef.close();
       })
     });
   }
 
-  requestAllExistingData():void{
+  requestAllExistingData(): void {
     this.isRequestRunning = true;
     this.gameDataService.requestConsoleData(this.model).then(() => {
       console.log("Console data OK")
@@ -158,6 +169,16 @@ export class Table {
         this.isRequestRunning = false;
       })
     });
+  }
+
+  openDialog(): MatDialogRef<LoadingDialog> {
+    const config: MatDialogConfig = new MatDialogConfig();
+    config.disableClose = true;
+    config.autoFocus = false;
+    config.restoreFocus = true;
+    config.minHeight = "40vh";
+    config.minWidth = "50vw";
+    return this.dialog.open(LoadingDialog, config);
   }
 
 
@@ -172,7 +193,7 @@ export class Table {
     return data.NumAwardedHardcore + " / " + data.MaxPossible;
   }
 
-  percentageValue(data:GameData):number{
+  percentageValue(data: GameData): number {
     let num: number;
     if (data.NumAwardedHardcore == 0) {
       if (data.CompletionStatus === CompletionStatusType.MASTERED) {
@@ -249,9 +270,9 @@ export class Table {
       text: this.filterText,
       consoles: this.selectedConsoles,
       completionStatuses: this.selectedCompletionStatuses,
-      sources:this.selectedSources
+      sources: this.selectedSources
     }
-    console.log("Filter is [Text : " + filter.text + "], [Consoles : " + filter.consoles + "], [Statuses : " + filter.completionStatuses + "], [Sources : "+ filter.sources + "]")
+    console.log("Filter is [Text : " + filter.text + "], [Consoles : " + filter.consoles + "], [Statuses : " + filter.completionStatuses + "], [Sources : " + filter.sources + "]")
     //Pass multiple parameters to filterPredicate
     this.data.filter = JSON.stringify(filter);
   }

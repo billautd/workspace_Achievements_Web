@@ -106,13 +106,12 @@ public class RetroAchievementsRequestService {
 			Log.info("Found " + consoleData.size() + " consoles");
 			// Add console data to map only if it is a running game system
 			consoleData.forEach(data -> {
-				if (model.getConsoleDataMap().containsKey(data.getId())) {
-					return;
-				}
-				Log.debug("Setting console data for " + data.getName() + " (" + data.getId() + ")");
 				data.setSource(ConsoleSourceEnum.RETRO_ACHIEVEMENTS);
-				// Ignore if already present
-				model.getConsoleDataMap().put(data.getId(), data);
+				Log.debug("Setting console data for " + data.getName() + " (" + data.getId() + ")");
+
+				if (!model.getConsoleDataMap().containsKey(data.getId())) {
+					model.getConsoleDataMap().put(data.getId(), data);
+				}
 			});
 			Log.info("Console data map is size " + model.getConsoleDataMap().size());
 			return consoleData;

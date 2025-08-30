@@ -8,7 +8,7 @@ import { GameDataService } from '../../services/game-data-service';
   selector: 'app-compare',
   imports: [CommonModule],
   templateUrl: './compare.html',
-  styleUrl: './compare.css',
+  styleUrl: './compare.scss',
 })
 export class Compare {
   completionStatusDifferent: CompareData[] = [];
@@ -45,8 +45,6 @@ export class Compare {
             this.notInLocal.push(compareData);
           } else if (status == CompareDataStatusEnum.OK) {
             okNbr++;
-          } else {
-            console.log("no status")
           }
         }
       }
@@ -54,11 +52,6 @@ export class Compare {
       this.completionStatusDifferent.sort((a, b) => a.name.localeCompare(b.name));
       this.notInLocal.sort((a, b) => a.name.localeCompare(b.name));
       this.notInDatabase.sort((a, b) => a.name.localeCompare(b.name));
-
-      console.log(this.completionStatusDifferent.length + " completion status different")
-      console.log(this.notInLocal.length + " not in local")
-      console.log(this.notInDatabase.length + " not in database")
-      console.log(okNbr + " OK")
     })
   }
 

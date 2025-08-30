@@ -40,9 +40,7 @@ public class PSVitaCompareService extends AbstractCompareService {
 			final List<GameData> psVitaGameData, final List<CompareData> compareData) {
 		psVitaPlayniteData.forEach(playniteGame -> {
 			final Optional<GameData> databaseGameFoundOpt = psVitaGameData.stream()
-					.filter(databaseGame -> databaseGame.getTitle().equals(playniteGame.getName())
-							&& databaseGame.getConsoleName().equals(playniteGame.getPlatform()))
-					.findFirst();
+					.filter(databaseGame -> databaseGame.getTitle().equals(playniteGame.getName())).findFirst();
 			// Check if game in Playnite is in database
 			if (databaseGameFoundOpt.isEmpty()) {
 				compareData.add(getNotInDatabaseCompareData(playniteGame, Model.PSVITA_CONSOLE_ID));

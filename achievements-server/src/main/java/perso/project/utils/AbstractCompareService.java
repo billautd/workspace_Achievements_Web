@@ -23,7 +23,7 @@ public abstract class AbstractCompareService {
 
 	protected CompareData getNotInLocalCompareData(final GameData databaseGame, final ConsoleSourceEnum source) {
 		Log.debug(databaseGame.getTitle() + " for " + databaseGame.getConsoleName() + " => In " + source
-				+ "but not in Playnite");
+				+ " but not in Playnite");
 		return new CompareData(databaseGame.getConsoleName(), databaseGame.getConsoleId(), databaseGame.getTitle(),
 				source, CompareDataStatusEnum.NOT_IN_LOCAL);
 	}

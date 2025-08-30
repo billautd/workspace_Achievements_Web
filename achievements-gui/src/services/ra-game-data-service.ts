@@ -19,6 +19,8 @@ export class RAGameDataService {
   COMPARE_DATA_METHOD: string = "compare_data/";
   EXISTING_DATA_METHOD: string = "existing_data/";
 
+  consoleReqCounter: number = 0;
+
   /**
    * 
    * @param http : HttpClient
@@ -42,6 +44,7 @@ export class RAGameDataService {
    * @returns Empty promise for getting all RA game data
    */
   async requestRAGameData(model: Model, http: HttpClient): Promise<any> {
+
     const processing = (gameData: GameData[]) => {
       for (const game of gameData) {
         const consoleData: ConsoleData | undefined = model.getConsoleData().get(game.ConsoleID);
@@ -62,6 +65,8 @@ export class RAGameDataService {
     console.log("Processed " + completionProgressObs.length + " games from completion progress");
 
     //Get console games for each RA console
+    //Reset counter
+    this.consoleReqCounter = 0;
     for (const consoleEntry of model.getConsoleData().entries()) {
       const consoleId: number = consoleEntry[0];
       const consoleData: ConsoleData = consoleEntry[1];
@@ -74,6 +79,7 @@ export class RAGameDataService {
       //Request games for given console data
       const consoleGames: GameData[] = await firstValueFrom(http.get<GameData[]>(environment.API_URL + this.RA_PATH + this.GAME_DATA_METHOD + consoleId));
       processing(consoleGames);
+      this.consoleReqCounter++;
       console.log("Processed " + consoleGames.length + " games for " + consoleData.Name + " (" + consoleId + ")");
     }
 
@@ -97,10 +103,11 @@ export class RAGameDataService {
     model.refreshData(gameData);
   }
 
-  async compareData(model:Model, http: HttpClient): Promise<any> {
+  async compareData(model: Model, http: HttpClient): Promise<any> {
     const compareData: CompareData[] = await firstValueFrom(http.get<any>(environment.API_URL + this.RA_PATH + this.COMPARE_DATA_METHOD))
     model.getCompareData().set(ConsoleSource.RETRO_ACHIEVEMENTS, compareData);
     model.refreshCompareData(compareData);
+    console.log("Process RA " + compareData.length + " compare data");
     return null;
   }
 }

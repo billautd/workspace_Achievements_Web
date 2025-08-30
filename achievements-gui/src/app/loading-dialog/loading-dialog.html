@@ -1,0 +1,35 @@
+<div class="dialog-parent">
+    <div class="loading-title">Loading...</div>
+    @if(hasRA()){
+    <div class="loading-progress-bar">
+        <div class="loading-icon">
+            <img src="ra.png" class="ra-icon">
+        </div>
+        <mat-progress-bar class="data-progress-bar" mode="determinate" [value]="progressRA"></mat-progress-bar>
+    </div>
+    }
+    @if(hasSteam()){
+    <div class="loading-progress-bar">
+        <div class="loading-icon">
+            <img src="steam.png" class="steam-icon">
+        </div>
+        <mat-progress-bar class="data-progress-bar" mode="determinate" [value]="progressSteam"></mat-progress-bar>
+    </div>
+    }
+    @if(hasPS3()){
+    <div class="loading-progress-bar">
+        <div class="loading-icon">
+            <img src="ps3.png" class="ps3-icon">
+        </div>
+        <mat-progress-bar class="data-progress-bar" mode="determinate" [value]="progressPS3"></mat-progress-bar>
+    </div>
+    }
+    @if(hasPSVita()){
+    <div class="loading-progress-bar">
+        <div class="loading-icon">
+            <img src="psvita.png" class="psvita-icon">
+        </div>
+        <mat-progress-bar class="data-progress-bar" mode="determinate" [value]="progressPSVita"></mat-progress-bar>
+    </div>
+    }
+</div>

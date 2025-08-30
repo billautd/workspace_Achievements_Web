@@ -55,6 +55,8 @@ export class PSVitaGameDataService {
       model.refreshData(gameData);
     }
 
+    console.log("PSVita game data OK");
+
     const consoleGames: GameData[] = await firstValueFrom(http.get<GameData[]>(environment.API_URL + this.PSVITA_PATH + this.GAME_DATA_METHOD));
     processing(consoleGames);
 
@@ -80,10 +82,11 @@ export class PSVitaGameDataService {
     model.refreshData(gameData);
   }
 
-  async compareData(model:Model, http: HttpClient): Promise<any> {
-    const compareData:CompareData[] = await firstValueFrom(http.get<any>(environment.API_URL + this.PSVITA_PATH + this.COMPARE_DATA_METHOD))
+  async compareData(model: Model, http: HttpClient): Promise<any> {
+    const compareData: CompareData[] = await firstValueFrom(http.get<any>(environment.API_URL + this.PSVITA_PATH + this.COMPARE_DATA_METHOD))
     model.getCompareData().set(ConsoleSource.PSVITA, compareData);
     model.refreshCompareData(compareData);
+    console.log("Process PSVita " + compareData.length + " compare data");
     return null;
   }
 }

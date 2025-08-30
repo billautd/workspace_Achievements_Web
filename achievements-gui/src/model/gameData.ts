@@ -3,7 +3,8 @@ export enum CompletionStatusType {
     TRIED = "TRIED",
     BEATEN = "BEATEN",
     MASTERED = "MASTERED",
-    NO_ACHIEVEMENTS = "NO_ACHIEVEMENTS"
+    NO_ACHIEVEMENTS = "NO_ACHIEVEMENTS",
+    CANNOT_PLAY = "CANNOT_PLAY"
 }
 
 export type GameData = {

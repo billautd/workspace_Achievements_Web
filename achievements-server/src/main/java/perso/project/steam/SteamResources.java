@@ -85,6 +85,9 @@ public class SteamResources {
 	@Produces(MediaType.TEXT_PLAIN)
 	public String getCompareData() throws JsonProcessingException {
 		playniteService.getPlayniteData(playniteDataPath);
+		steamRequestService.getSteamGames_Beaten(steamBeatenPath);
+		steamRequestService.getSteamGames_Mastered(steamMasteredPath);
+		steamRequestService.getSteamGames_Removed(steamRemovedPath);
 		final List<CompareData> data = steamCompareService.getCompareData();
 		Log.info("Returning Steam " + data.size() + " compare data");
 		return steamRequestService.getMapper().writeValueAsString(data);

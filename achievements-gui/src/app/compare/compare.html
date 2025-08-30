@@ -16,6 +16,9 @@
                         <div style="width:30%">{{comp.consoleName}}</div>
                     </div>
                     }
+                    @if(notInLocal.length == 0){
+                    <img src="ok.svg" class="ok-icon">
+                    }
                 </div>
             </div>
             <div class="compare-box compare-not-in-database-box">
@@ -29,6 +32,9 @@
                         <div style="width:60%">{{comp.name}}</div>
                         <div style="width:30%">{{comp.consoleName}}</div>
                     </div>
+                    }
+                    @if(notInLocal.length == 0){
+                    <img src="ok.svg" class="ok-icon">
                     }
                 </div>
             </div>
@@ -55,6 +61,10 @@
                 </div>
             </div>
             }
+            @if(notInLocal.length == 0){
+            <img src="ok.svg" class="ok-icon">
+            }
+
         </div>
     </div>
 </div>

@@ -55,9 +55,11 @@ public class SteamCompareService extends AbstractCompareService {
 				final boolean isPlaying = playniteGame.getCompletionStatus().equals(CompletionStatusEnum.PLAYING);
 				final boolean isNoAchievementsButInterested = CompletionStatusEnum.NO_ACHIEVEMENTS
 						.equals(databaseGameFound.getCompletionStatus())
-						&& CompletionStatusEnum.NOT_PLAYED.equals(playniteGame.getCompletionStatus());
+						&& !CompletionStatusEnum.NO_ACHIEVEMENTS.equals(playniteGame.getCompletionStatus());
+				final boolean isCannotPlay = CompletionStatusEnum.CANNOT_PLAY
+						.equals(databaseGameFound.getCompletionStatus());
 
-				if (!isPlaying && !isNoAchievementsButInterested) {
+				if (!isPlaying && !isNoAchievementsButInterested && !isCannotPlay) {
 					compareData.add(getCompletionStatusDifferentCompareData(playniteGame, databaseGameFound));
 					return;
 				}

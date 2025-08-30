@@ -8,7 +8,7 @@ import { ChartCanvas } from '../chart-canvas/chart-canvas';
   selector: 'app-main-data',
   imports: [ChartCanvas],
   templateUrl: './main-data.html',
-  styleUrl: './main-data.css'
+  styleUrl: './main-data.scss'
 })
 export class MainData {
   @ViewChild("steamChartCanvas") steamChartCanvas!: ChartCanvas;
@@ -61,7 +61,6 @@ export class MainData {
     let total: number = 0;
     const steamData: ConsoleData | undefined = this.model.getConsoleData().get(STEAM_CONSOLE_ID);
     if (!steamData) {
-      console.log("No steam data");
       this.steamAchievementsText = "- / -";
       this.steamAchievementsPercentageText = "- %";
       return;
@@ -87,10 +86,10 @@ export class MainData {
     let earned: number = 0;
     let total: number = 0;
     for (const console of this.model.getConsoleData()) {
-      if(console[1].Source != ConsoleSource.RETRO_ACHIEVEMENTS){
+      if (console[1].Source != ConsoleSource.RETRO_ACHIEVEMENTS) {
         continue;
       }
-      for(const game of console[1].Games){
+      for (const game of console[1].Games) {
         earned += game[1].NumAwardedHardcore;
         total += game[1].MaxPossible;
       }

@@ -193,21 +193,24 @@ public class SteamRequestService {
 	}
 
 	public List<GameData> getSteamGames_Beaten(final Path path) {
-		Log.info("Reading " + path + "file");
+		Log.info("Reading " + path);
 		final List<GameData> beatenList = new ArrayList<>();
 		try (final XSSFWorkbook beatenWorkbook = new XSSFWorkbook(new FileInputStream(new File(path.toString())))) {
 			for (final Row row : beatenWorkbook.getSheetAt(0)) {
 				final String gameName = ExcelUtils.getCellAsString(row.getCell(0));
 				final int gameId = ExcelUtils.getCellAsInt(row.getCell(1));
-				final GameData gameData = model.getConsoleDataMap().get(Model.STEAM_CONSOLE_ID).getGameDataMap()
-						.get(gameId);
+				GameData gameData = model.getConsoleDataMap().get(Model.STEAM_CONSOLE_ID).getGameDataMap().get(gameId);
 				if (gameData == null) {
-					Log.error(gameName + " (" + gameId + ") does not exist for Steam");
-				} else {
-					beatenList.add(gameData);
-					gameData.setCompletionStatus(CompletionStatusEnum.BEATEN);
-					Log.info(gameName + " (" + gameId + ") for Steam is Beaten");
+					gameData = new GameData();
+					gameData.setTitle(gameName);
+					gameData.setId(gameId);
+					gameData.setConsoleId(Model.STEAM_CONSOLE_ID);
+					gameData.setConsoleName("Steam");
 				}
+				gameData.setCompletionStatus(CompletionStatusEnum.BEATEN);
+				model.getConsoleDataMap().get(Model.STEAM_CONSOLE_ID).getGameDataMap().put(gameId, gameData);
+				beatenList.add(gameData);
+				Log.info(gameName + " (" + gameId + ") for Steam is Beaten");
 			}
 			return beatenList;
 		} catch (IOException e) {
@@ -217,21 +220,24 @@ public class SteamRequestService {
 	}
 
 	public List<GameData> getSteamGames_Mastered(final Path path) {
-		Log.info("Reading " + path + "file");
+		Log.info("Reading " + path);
 		final List<GameData> masteredList = new ArrayList<>();
 		try (final XSSFWorkbook masteredWorkbook = new XSSFWorkbook(new FileInputStream(new File(path.toString())))) {
 			for (final Row row : masteredWorkbook.getSheetAt(0)) {
 				final String gameName = ExcelUtils.getCellAsString(row.getCell(0));
 				final int gameId = ExcelUtils.getCellAsInt(row.getCell(1));
-				final GameData gameData = model.getConsoleDataMap().get(Model.STEAM_CONSOLE_ID).getGameDataMap()
-						.get(gameId);
+				GameData gameData = model.getConsoleDataMap().get(Model.STEAM_CONSOLE_ID).getGameDataMap().get(gameId);
 				if (gameData == null) {
-					Log.error(gameName + " (" + gameId + ") does not exist for Steam");
-				} else {
-					masteredList.add(gameData);
-					gameData.setCompletionStatus(CompletionStatusEnum.MASTERED);
-					Log.info(gameName + " (" + gameId + ") for Steam is Mastered");
+					gameData = new GameData();
+					gameData.setTitle(gameName);
+					gameData.setId(gameId);
+					gameData.setConsoleId(Model.STEAM_CONSOLE_ID);
+					gameData.setConsoleName("Steam");
 				}
+				gameData.setCompletionStatus(CompletionStatusEnum.MASTERED);
+				model.getConsoleDataMap().get(Model.STEAM_CONSOLE_ID).getGameDataMap().put(gameId, gameData);
+				masteredList.add(gameData);
+				Log.info(gameName + " (" + gameId + ") for Steam is Mastered");
 			}
 			return masteredList;
 		} catch (IOException e) {
@@ -241,21 +247,21 @@ public class SteamRequestService {
 	}
 
 	public List<GameData> getSteamGames_Removed(final Path path) {
-		Log.info("Reading " + path + "file");
+		Log.info("Reading " + path);
 		final List<GameData> removedList = new ArrayList<>();
 		try (final XSSFWorkbook removedWorkbook = new XSSFWorkbook(new FileInputStream(new File(path.toString())))) {
 			for (final Row row : removedWorkbook.getSheetAt(0)) {
 				final String gameName = ExcelUtils.getCellAsString(row.getCell(0));
 				final int gameId = ExcelUtils.getCellAsInt(row.getCell(1));
-				final GameData gameData = model.getConsoleDataMap().get(Model.STEAM_CONSOLE_ID).getGameDataMap()
-						.get(gameId);
-				if (gameData == null) {
-					Log.error(gameName + " (" + gameId + ") does not exist for Steam");
-				} else {
-					removedList.add(gameData);
-					gameData.setCompletionStatus(CompletionStatusEnum.CANNOT_PLAY);
-					Log.info(gameName + " (" + gameId + ") for Steam is Beaten");
-				}
+				final GameData gameData = new GameData();
+				gameData.setConsoleId(Model.STEAM_CONSOLE_ID);
+				gameData.setConsoleName("Steam");
+				gameData.setId(gameId);
+				gameData.setTitle(gameName);
+				gameData.setCompletionStatus(CompletionStatusEnum.CANNOT_PLAY);
+				model.getConsoleDataMap().get(Model.STEAM_CONSOLE_ID).getGameDataMap().put(gameId, gameData);
+				removedList.add(gameData);
+				Log.info(gameName + " (" + gameId + ") for Steam is Removed");
 			}
 			return removedList;
 		} catch (IOException e) {
@@ -271,12 +277,12 @@ public class SteamRequestService {
 		// Check if already set by Steambeaten and SteamMastered files
 		// If beaten or mastered, already set by other methods
 		if (CompletionStatusEnum.NOT_PLAYED.equals(gameData.getCompletionStatus())) {
-			if (gameData.getAwardedAchievements() == gameData.getTotalAchievements()) {
+			if (gameData.getTotalAchievements() == 0) {
+				gameData.setCompletionStatus(CompletionStatusEnum.NO_ACHIEVEMENTS);
+			} else if (gameData.getAwardedAchievements() == gameData.getTotalAchievements()) {
 				gameData.setCompletionStatus(CompletionStatusEnum.MASTERED);
 			} else if (gameData.getAwardedAchievements() > 0) {
 				gameData.setCompletionStatus(CompletionStatusEnum.TRIED);
-			} else {
-				gameData.setCompletionStatus(CompletionStatusEnum.NO_ACHIEVEMENTS);
 			}
 		}
 		Log.info(gameData.getTitle() + " (" + gameData.getId() + ") for Steam is " + gameData.getCompletionStatus()

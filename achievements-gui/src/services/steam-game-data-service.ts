@@ -18,6 +18,8 @@ export class SteamGameDataService {
   COMPARE_DATA_METHOD: string = "compare_data/";
   EXISTING_DATA_METHOD: string = "existing_data/";
 
+  gameReqCounter: number = 0;
+
   /**
    * 
    * @param http : HttpClient
@@ -40,15 +42,18 @@ export class SteamGameDataService {
     //Force refresh data
     model.refreshData(ownedGames);
 
+    //Reset counter
+    this.gameReqCounter = 0;
     for (const gameIndex of consoleData.Games.keys()) {
       const gameData: GameData = await firstValueFrom(http.get<GameData>(environment.API_URL + this.STEAM_PATH + this.GAME_DATA_METHOD + gameIndex));
       console.log("Received data for game " + gameData.Title + " (" + gameData.ID + ")")
       consoleData.Games.set(gameIndex, gameData);
+      this.gameReqCounter++;
       model.refreshData([gameData]);
     }
 
     //Send request for compare data
-    this.compareData(model,http);
+    this.compareData(model, http);
 
     return null;
   }
@@ -71,10 +76,11 @@ export class SteamGameDataService {
     model.refreshData(gameData);
   }
 
-  async compareData(model:Model, http: HttpClient): Promise<any> {
+  async compareData(model: Model, http: HttpClient): Promise<any> {
     const compareData: CompareData[] = await firstValueFrom(http.get<any>(environment.API_URL + this.STEAM_PATH + this.COMPARE_DATA_METHOD))
     model.getCompareData().set(ConsoleSource.STEAM, compareData);
     model.refreshCompareData(compareData);
+    console.log("Process Steam " + compareData.length + " compare data");
     return null;
   }
 }

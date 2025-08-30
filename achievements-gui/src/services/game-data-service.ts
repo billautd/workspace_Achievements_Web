@@ -19,7 +19,12 @@ export class GameDataService {
   ps3DataService: PS3GameDataService;
   psVitaDataService: PSVitaGameDataService;
 
-  sourcesToRequest: ConsoleSource[] = [ConsoleSource.PS3, ConsoleSource.PSVITA, ConsoleSource.RETRO_ACHIEVEMENTS, ConsoleSource.STEAM];
+  sourcesToRequest: ConsoleSource[] = [
+    ConsoleSource.PS3,
+    ConsoleSource.PSVITA,
+    ConsoleSource.RETRO_ACHIEVEMENTS,
+    ConsoleSource.STEAM
+  ];
 
   constructor(raDataService: RAGameDataService,
     steamDataService: SteamGameDataService,
@@ -97,8 +102,8 @@ export class GameDataService {
     ]).then(() => { });
   }
 
-  async requestCompareData(model:Model):Promise<any>{
-      console.log("Requesting compare game data for sources : " + this.sourcesToRequest);
+  async requestCompareData(model: Model): Promise<any> {
+    console.log("Requesting compare game data for sources : " + this.sourcesToRequest);
 
     return Promise.all([
       this.sourcesToRequest.includes(ConsoleSource.RETRO_ACHIEVEMENTS) ? this.raDataService.compareData(model, this.http) : Promise.resolve<ConsoleData[]>([]),

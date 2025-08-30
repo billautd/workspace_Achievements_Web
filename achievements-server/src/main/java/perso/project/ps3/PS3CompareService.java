@@ -40,9 +40,7 @@ public class PS3CompareService extends AbstractCompareService {
 			final List<CompareData> compareData) {
 		ps3PlayniteData.forEach(playniteGame -> {
 			final Optional<GameData> databaseGameFoundOpt = ps3GameData.stream()
-					.filter(databaseGame -> databaseGame.getTitle().equals(playniteGame.getName())
-							&& databaseGame.getConsoleName().equals(playniteGame.getPlatform()))
-					.findFirst();
+					.filter(databaseGame -> databaseGame.getTitle().equals(playniteGame.getName())).findFirst();
 			// Check if game in Playnite is in database
 			if (databaseGameFoundOpt.isEmpty()) {
 				compareData.add(getNotInDatabaseCompareData(playniteGame, Model.PS3_CONSOLE_ID));

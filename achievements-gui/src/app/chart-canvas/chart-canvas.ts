@@ -1,15 +1,15 @@
 import { Component, ElementRef, Input, ViewChild } from '@angular/core';
 import { Chart } from 'chart.js/auto';
+import { ConsoleData } from '../../model/consoleData';
 import { CompletionStatusType } from '../../model/gameData';
 import { Model } from '../../model/model';
 import { GameDataService } from '../../services/game-data-service';
-import { ConsoleData } from '../../model/consoleData';
 
 @Component({
   selector: 'app-chart-canvas',
   imports: [],
   templateUrl: './chart-canvas.html',
-  styleUrl: './chart-canvas.css'
+  styleUrl: './chart-canvas.scss'
 })
 export class ChartCanvas {
   @Input() consoleIds:number[] = [];
@@ -34,7 +34,7 @@ export class ChartCanvas {
 
   ngOnInit() {
     //No data is passed through this behavior subject, it's only a trigger to refresh data
-    this.model.getUpdateBehaviorSubject().subscribe((gameData) => {
+    this.model.getUpdateBehaviorSubject().subscribe(() => {
       const consoleDataList:ConsoleData[] = [];
       for(const id of this.consoleIds){
         const consoleData:ConsoleData | undefined = this.model.getConsoleData().get(id);

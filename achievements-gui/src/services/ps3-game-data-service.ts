@@ -82,10 +82,11 @@ export class PS3GameDataService {
     model.refreshData(gameData);
   }
 
-  async compareData(model:Model, http:HttpClient):Promise<any>{
+  async compareData(model: Model, http: HttpClient): Promise<any> {
     const compareData: CompareData[] = await firstValueFrom(http.get<any>(environment.API_URL + this.PS3_PATH + this.COMPARE_DATA_METHOD))
     model.getCompareData().set(ConsoleSource.PS3, compareData)
     model.refreshCompareData(compareData);
+    console.log("Process PS3 " + compareData.length + " compare data");
     return null;
   }
 }

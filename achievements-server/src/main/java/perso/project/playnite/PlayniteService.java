@@ -7,6 +7,9 @@ import java.nio.file.Path;
 import java.util.List;
 
 import com.opencsv.CSVReader;
+import com.opencsv.CSVReaderBuilder;
+import com.opencsv.RFC4180Parser;
+import com.opencsv.RFC4180ParserBuilder;
 import com.opencsv.exceptions.CsvException;
 
 import io.quarkus.logging.Log;
@@ -24,7 +27,9 @@ public class PlayniteService {
 
 	public void getPlayniteData(final Path path) {
 		model.getPlayniteData().clear();
-		try (final CSVReader reader = new CSVReader(new FileReader(path.toFile(), StandardCharsets.UTF_8))) {
+		final RFC4180Parser rfc4180Parser = new RFC4180ParserBuilder().build();
+		try (final FileReader fileReader = new FileReader(path.toFile(), StandardCharsets.UTF_8)) {
+			final CSVReader reader = new CSVReaderBuilder(fileReader).withCSVParser(rfc4180Parser).build();
 			// Read headers
 			reader.readNextSilently();
 			final List<String[]> stringList = reader.readAll();
