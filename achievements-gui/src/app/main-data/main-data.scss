@@ -1,55 +1,55 @@
-.data-parent{
-    display:flex;
+.data-parent {
+    display: flex;
     flex-direction: row;
-    height:90vh;
+    height: 90vh;
     padding: 10px;
-    gap:10px;
+    gap: 10px;
 }
 
-.data-left{
-    display:flex;
+.data-left {
+    display: flex;
     flex-direction: column;
-    max-width:50vw;
+    max-width: 50vw;
     flex-grow: 1;
-    gap:1vh;
+    gap: 1vh;
 }
 
-.data-right{
-    display:flex;
+.data-right {
+    display: flex;
     flex-direction: column;
     flex-grow: 1;
-    max-width:50vw;
+    max-width: 50vw;
 }
 
 .data-steam,
 .data-standalone,
-.data-ra{
-    display:flex;
+.data-ra {
+    display: flex;
     flex-grow: 1;
-    border:3px solid var(--purple1);
+    border: 3px solid var(--purple1);
     background-color: var(--purple0);
     border-radius: 10px;
-    padding:10px;
+    padding: 10px;
 }
 
 
 .data-steam,
-.data-standalone{
-    height:40vh;
+.data-standalone {
+    height: 40vh;
 }
 
-.data-ra{
-    height:85vh;
+.data-ra {
+    height: 85vh;
 }
 
 .data-ps3,
-.data-psvita{
-    flex-grow:1;
+.data-psvita {
+    flex-grow: 1;
 }
 
 .data-total-ra,
-.data-specific-ra{
-    display:flex;
+.data-specific-ra {
+    display: flex;
     flex-direction: row;
     align-items: center;
     align-self: center;
@@ -57,44 +57,47 @@
 }
 
 .data-steam-earned,
-.data-ra-earned{
+.data-ra-earned {
     display: flex;
     flex-direction: column;
-    flex-grow:1;
+    flex-grow: 1;
     align-self: center;
     align-items: center;
 }
 
-.steam-icon{
-    height:42px;
+.steam-icon {
+    height: 42px;
 }
-.ra-icon{
-    height:32px;
+
+.ra-icon {
+    height: 32px;
 }
-.ps3-icon{
-    height:26px;
+
+.ps3-icon {
+    height: 26px;
 }
-.psvita-icon{
-    height:24px;
+
+.psvita-icon {
+    height: 24px;
 }
 
 .steam-chart,
 .ps3-chart,
 .psvita-chart,
-.ra-chart{
-    display:flex;
+.ra-chart {
+    display: flex;
     align-self: center;
     align-items: center;
 }
 
 .steam-chart,
-.ra-chart{
-    height:400px;
-    width:400px;
+.ra-chart {
+    height: 300px;
+    width: 300px;
 }
 
 .ps3-chart,
-.psvita-chart{
-    height:300px;
-    width:300px;
+.psvita-chart {
+    height: 300px;
+    width: 300px;
 }

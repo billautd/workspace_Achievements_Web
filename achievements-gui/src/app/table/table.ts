@@ -145,7 +145,7 @@ export class Table {
    * Data will come from websocket games_socket
    */
   requestAllData(): void {
-    const dialogRef: MatDialogRef<LoadingDialog> = this.openDialog();
+    // const dialogRef: MatDialogRef<LoadingDialog> = this.openDialog();
 
     this.isRequestRunning = true;
     this.gameDataService.requestConsoleData(this.model).then(() => {
@@ -154,7 +154,7 @@ export class Table {
       this.gameDataService.requestGameData(this.model).then(() => {
         console.log("Game data OK")
         this.isRequestRunning = false;
-        dialogRef.close();
+        // dialogRef.close();
       })
     });
   }

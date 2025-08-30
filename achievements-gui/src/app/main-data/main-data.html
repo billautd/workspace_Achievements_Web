@@ -46,7 +46,24 @@
                     </div>
                 </div>
 
+                <mat-form-field style="align-self: center; ">
+                    <mat-label>Console</mat-label>
+                    <mat-select (selectionChange)="changeSelectedConsole($event)" [formControl]="consoles">
+                        @for (console of consolesList; track console){
+                        <mat-option [value]="console">{{console}}</mat-option>
+                        }
+                    </mat-select>
+                </mat-form-field>
                 <div class="data-specific-ra">
+                    <div class="ra-chart">
+                        <app-chart-canvas class="ra-chart" #raConsoleChartCanvas
+                            [consoleIds]="[selectedRAConsoleId]"></app-chart-canvas>
+                    </div>
+                    <div class="data-ra-earned">
+                        <h1>Earned</h1>
+                        <h2>{{raConsoleAchievementsText}}</h2>
+                        <h2>{{raConsoleAchievementsPercentageText}}</h2>
+                    </div>
                 </div>
             </div>
         </div>

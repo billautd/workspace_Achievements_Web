@@ -12,7 +12,7 @@ import { GameDataService } from '../../services/game-data-service';
   styleUrl: './chart-canvas.scss'
 })
 export class ChartCanvas {
-  @Input() consoleIds:number[] = [];
+  @Input() consoleIds: number[] = [];
   @ViewChild("chartCanvas") canvas!: ElementRef<HTMLCanvasElement>
 
   model: Model;
@@ -35,10 +35,10 @@ export class ChartCanvas {
   ngOnInit() {
     //No data is passed through this behavior subject, it's only a trigger to refresh data
     this.model.getUpdateBehaviorSubject().subscribe(() => {
-      const consoleDataList:ConsoleData[] = [];
-      for(const id of this.consoleIds){
-        const consoleData:ConsoleData | undefined = this.model.getConsoleData().get(id);
-        if(consoleData){
+      const consoleDataList: ConsoleData[] = [];
+      for (const id of this.consoleIds) {
+        const consoleData: ConsoleData | undefined = this.model.getConsoleData().get(id);
+        if (consoleData) {
           consoleDataList.push(consoleData);
         }
       }
@@ -90,7 +90,7 @@ export class ChartCanvas {
   }
 
   resetChartData(): void {
-    if(this.chart){
+    if (this.chart) {
       Object.values(CompletionStatusType).forEach(t => this.chartData.set(t, 0));
     }
   }
@@ -102,12 +102,14 @@ export class ChartCanvas {
   }
 
   updateChartData(consoleDataList: ConsoleData[]): void {
-    if(!this.chart){
+    if (!this.chart) {
       return;
     }
     this.resetChartData();
 
-    for(const console of consoleDataList){
+    console.log(consoleDataList)
+
+    for (const console of consoleDataList) {
       for (const game of console.Games) {
         const status: CompletionStatusType = game[1].CompletionStatus;
         const val: number | undefined = this.chartData.get(status);
@@ -116,8 +118,8 @@ export class ChartCanvas {
     }
     //Update data
     this.chart.data.datasets[0].data = Array.from(this.chartData.values());
-    const labels:string[] = []
-    for(const entry of this.chartData){
+    const labels: string[] = []
+    for (const entry of this.chartData) {
       labels.push(this.gameDataService.completionStatusText(entry[0]) + " (" + entry[1] + ")");
     }
     this.chart.data.labels = labels;

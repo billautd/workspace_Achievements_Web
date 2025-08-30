@@ -3,10 +3,13 @@ import { ConsoleData, ConsoleSource } from '../../model/consoleData';
 import { Model, PS3_CONSOLE_ID, PSVITA_CONSOLE_ID, STEAM_CONSOLE_ID } from '../../model/model';
 import { GameDataService } from '../../services/game-data-service';
 import { ChartCanvas } from '../chart-canvas/chart-canvas';
+import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectChange, MatSelectModule } from '@angular/material/select';
 
 @Component({
   selector: 'app-main-data',
-  imports: [ChartCanvas],
+  imports: [ChartCanvas, MatFormFieldModule, FormsModule, ReactiveFormsModule, MatSelectModule],
   templateUrl: './main-data.html',
   styleUrl: './main-data.scss'
 })
@@ -15,6 +18,8 @@ export class MainData {
   @ViewChild("raChartCanvas") raChartCanvas!: ChartCanvas;
   @ViewChild("ps3ChartCanvas") ps3ChartCanvas!: ChartCanvas;
   @ViewChild("psVitaChartCanvas") psVitaChartCanvas!: ChartCanvas;
+  @ViewChild("raConsoleChartCanvas") raConsoleChartCanvas!: ChartCanvas;
+
   raConsoleIds: number[] = [];
   steamConsoleId: number = STEAM_CONSOLE_ID;
   ps3ConsoleId: number = PS3_CONSOLE_ID;
@@ -29,6 +34,14 @@ export class MainData {
   raAchievementsText: string = "";
   raAchievementsPercentageText: string = "";
 
+  raConsoleAchievementsText: string = "";
+  raConsoleAchievementsPercentageText: string = "";
+
+  selectedConsole: string = "";
+  consoles = new FormControl();
+  consolesList: string[] = [];
+  selectedRAConsoleId: number = 0;
+
   constructor(model: Model,
     gameDataService: GameDataService
   ) {
@@ -39,9 +52,12 @@ export class MainData {
   ngOnInit() {
     //No data is passed through this behavior subject, it's only a trigger to refresh data
     this.model.getUpdateBehaviorSubject().subscribe(() => {
-      this.updateSteamAchievementsText();
-      this.updateRAAchievementsText();
       this.updateRAConsoleIds();
+      this.updateRAConsolesList();
+
+      this.updateSteamAchievementsText();
+      this.updateRAAchievementsText(this.raConsoleIds);
+      this.updateRAAchievementsText([this.selectedRAConsoleId]);
     })
   }
 
@@ -81,12 +97,15 @@ export class MainData {
     }
   }
 
-  updateRAAchievementsText(): void {
+  updateRAAchievementsText(ids: number[]): void {
     //Get total and earned
     let earned: number = 0;
     let total: number = 0;
     for (const console of this.model.getConsoleData()) {
       if (console[1].Source != ConsoleSource.RETRO_ACHIEVEMENTS) {
+        continue;
+      }
+      if (!ids.includes(console[1].ID)) {
         continue;
       }
       for (const game of console[1].Games) {
@@ -95,14 +114,44 @@ export class MainData {
       }
     }
     //Update achivements number text
-    this.raAchievementsText = earned + " / " + total;
+    const totalText: string = earned + " / " + total;
+    if (ids.length > 1) {
+      this.raAchievementsText = totalText;
+    } else if (ids.length == 1) {
+      this.raConsoleAchievementsText = totalText
+    }
 
     //Update achivements percentage text
+    let percentageText: string;
     if (total == 0) {
-      this.raAchievementsPercentageText = "- %";
+      percentageText = "- %";
     } else {
       const num: number = earned / total;
-      this.raAchievementsPercentageText = Number(num).toLocaleString(undefined, { style: 'percent', minimumFractionDigits: 0 });;
+      percentageText = Number(num).toLocaleString(undefined, { style: 'percent', minimumFractionDigits: 0 });;
+    }
+    if (ids.length > 1) {
+      this.raAchievementsPercentageText = percentageText;
+    } else if (ids.length == 1) {
+      this.raConsoleAchievementsPercentageText = percentageText;
+    }
+  }
+
+  updateRAConsolesList(): void {
+    this.consolesList = [];
+    this.model.getConsoleData().forEach(c => {
+      if (c.Source == ConsoleSource.RETRO_ACHIEVEMENTS) {
+        this.consolesList.push(c.Name);
+      }
+    })
+  }
+
+  changeSelectedConsole(event: MatSelectChange<any>) {
+    this.selectedConsole = event.value;
+    //Get console associated to name
+    for (const c of this.model.getConsoleData().values()) {
+      if (c.Source == ConsoleSource.RETRO_ACHIEVEMENTS && c.Name == this.selectedConsole) {
+        this.selectedRAConsoleId = c.ID;
+      }
     }
   }
 }
