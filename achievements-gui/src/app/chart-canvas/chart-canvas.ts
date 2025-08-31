@@ -107,8 +107,6 @@ export class ChartCanvas {
     }
     this.resetChartData();
 
-    console.log(consoleDataList)
-
     for (const console of consoleDataList) {
       for (const game of console.Games) {
         const status: CompletionStatusType = game[1].CompletionStatus;

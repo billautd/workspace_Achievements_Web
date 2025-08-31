@@ -1,12 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, ViewChild } from '@angular/core';
-import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {
   MatDialog,
   MatDialogConfig,
   MatDialogRef
 } from '@angular/material/dialog';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -31,12 +32,13 @@ interface FilterData {
   selector: 'app-table',
   imports: [MatTableModule, MatIconModule, MatFormFieldModule, MatSelectModule,
     FormsModule, CommonModule, ReactiveFormsModule, MatInputModule,
-    MatSortModule, MatPaginatorModule],
+    MatSortModule, MatPaginatorModule, MatCheckboxModule],
   templateUrl: './table.html',
   styleUrl: './table.scss'
 })
 export class Table {
   dialog = inject(MatDialog);
+  formBuilder = inject(FormBuilder);
 
   //Table data
   @ViewChild(MatTable) table!: MatTable<GameData>;
@@ -58,7 +60,14 @@ export class Table {
   selectedSources: string[] = [];
   sources = new FormControl();
   sourcesList: string[] = [];
-  standalone: string = "Standlone"
+  standalone: string = "Standalone"
+
+  sourcesToRequest = this.formBuilder.group({
+    ra: true,
+    steam: true,
+    ps3: true,
+    psvita: true
+  });
 
   model: Model;
   gameDataService: GameDataService;
@@ -140,12 +149,29 @@ export class Table {
     }
   }
 
+  updateSources(): void {
+    this.gameDataService.sourcesToRequest = [];
+    if (this.sourcesToRequest.controls.ra.value) {
+      this.gameDataService.sourcesToRequest.push(ConsoleSource.RETRO_ACHIEVEMENTS);
+    }
+    if (this.sourcesToRequest.controls.steam.value) {
+      this.gameDataService.sourcesToRequest.push(ConsoleSource.STEAM);
+    }
+    if (this.sourcesToRequest.controls.ps3.value) {
+      this.gameDataService.sourcesToRequest.push(ConsoleSource.PS3);
+    }
+    if (this.sourcesToRequest.controls.psvita.value) {
+      this.gameDataService.sourcesToRequest.push(ConsoleSource.PSVITA);
+    }
+    console.log("Sources to request : " + this.gameDataService.sourcesToRequest)
+  }
+
   /**
    * Request games data to back
    * Data will come from websocket games_socket
    */
   requestAllData(): void {
-    // const dialogRef: MatDialogRef<LoadingDialog> = this.openDialog();
+    const dialogRef: MatDialogRef<LoadingDialog> = this.openDialog();
 
     this.isRequestRunning = true;
     this.gameDataService.requestConsoleData(this.model).then(() => {
@@ -154,7 +180,7 @@ export class Table {
       this.gameDataService.requestGameData(this.model).then(() => {
         console.log("Game data OK")
         this.isRequestRunning = false;
-        // dialogRef.close();
+        dialogRef.close();
       })
     });
   }

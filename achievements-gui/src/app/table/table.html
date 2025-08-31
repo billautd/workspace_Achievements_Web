@@ -56,10 +56,24 @@
             <button class="request-data-button" (click)="requestAllData()" [disabled]="isRequestRunning">
                 Request games data
             </button>
-           <button class="request-data-button" (click)="requestAllExistingData()" [disabled]="isRequestRunning">
+            <section class="source-to-request" [formGroup]="sourcesToRequest">
+                <mat-checkbox class="source-to-request" formControlName="ra" (change)="updateSources()">
+                    RetroAchievements
+                </mat-checkbox>
+                <mat-checkbox class="source-to-request" formControlName="steam" (change)="updateSources()">
+                    Steam
+                </mat-checkbox>
+                <mat-checkbox class="source-to-request" formControlName="ps3" (change)="updateSources()">
+                    PS3
+                </mat-checkbox>
+                <mat-checkbox class="source-to-request" formControlName="psvita" (change)="updateSources()">
+                    PSVita
+                </mat-checkbox>
+            </section>
+            <button class="request-data-button" (click)="requestAllExistingData()" [disabled]="isRequestRunning">
                 Get existing games data
             </button>
-            <mat-paginator [pageSize]="200" hidePageSize showFirstLastButtons ></mat-paginator>
+            <mat-paginator [pageSize]="200" hidePageSize showFirstLastButtons></mat-paginator>
         </div>
     </div>
     <div class="filters-parent">
@@ -91,8 +105,7 @@
         </mat-form-field>
         <mat-form-field>
             <mat-label>Sources</mat-label>
-            <mat-select (selectionChange)="changeSelectedSources($event)" [formControl]="sources"
-                multiple>
+            <mat-select (selectionChange)="changeSelectedSources($event)" [formControl]="sources" multiple>
                 @for (source of sourcesList; track source){
                 <mat-option [value]="source">{{source}}</mat-option>
                 }
