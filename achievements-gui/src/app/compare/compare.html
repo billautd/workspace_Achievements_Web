@@ -50,14 +50,14 @@
                 </button>
                 <div style="width:40%">{{comp.name}}</div>
                 <div style="width:20%">{{comp.consoleName}}</div>
-                <div class="status-text" [ngClass]="gameDataService.completionStatusClass(comp.playniteStatus)">
-                    {{gameDataService.completionStatusText(comp.playniteStatus)}}
+                <div class="status-text" [ngClass]="completionStatusClass(comp.playniteStatus)">
+                    {{completionStatusText(comp.playniteStatus)}}
                 </div>
                 <div style="width:10%; display:flex; justify-content:center">
                     ========>
                 </div>
-                <div class="status-text" [ngClass]="gameDataService.completionStatusClass(comp.databaseStatus)">
-                    {{gameDataService.completionStatusText(comp.databaseStatus)}}
+                <div class="status-text" [ngClass]="completionStatusClass(comp.databaseStatus)">
+                    {{completionStatusText(comp.databaseStatus)}}
                 </div>
             </div>
             }

@@ -20,6 +20,7 @@ import { CompletionStatusType, GameData } from '../../model/gameData';
 import { Model } from '../../model/model';
 import { GameDataService } from '../../services/game-data-service';
 import { LoadingDialog } from '../loading-dialog/loading-dialog';
+import { UtilsService } from '../../services/utils-service';
 
 interface FilterData {
   text: string;
@@ -66,7 +67,8 @@ export class Table {
     ra: true,
     steam: true,
     ps3: true,
-    psvita: true
+    psvita: true,
+    xbox360: true
   });
 
   model: Model;
@@ -88,9 +90,9 @@ export class Table {
     })
 
     //Init filters list
-    this.completionStatusesList = Object.values(CompletionStatusType).map(this.gameDataService.completionStatusText);
-    this.sourcesList = [this.gameDataService.consoleSourceText(ConsoleSource.RETRO_ACHIEVEMENTS),
-    this.gameDataService.consoleSourceText(ConsoleSource.STEAM),
+    this.completionStatusesList = Object.values(CompletionStatusType).map(UtilsService.completionStatusText);
+    this.sourcesList = [UtilsService.consoleSourceText(ConsoleSource.RETRO_ACHIEVEMENTS),
+    UtilsService.consoleSourceText(ConsoleSource.STEAM),
     this.standalone
     ]
 
@@ -110,13 +112,15 @@ export class Table {
       //Contains filtered consoles
       const consoleFilter: boolean = consoles.includes(data.ConsoleName) || consoles.length == 0;
       //Contains completion status
-      const completionStatusesFilter: boolean = completionStatuses.includes(this.gameDataService.completionStatusText(data.CompletionStatus)) || completionStatuses.length == 0;
+      const completionStatusesFilter: boolean = completionStatuses.includes(UtilsService.completionStatusText(data.CompletionStatus)) || completionStatuses.length == 0;
       //Is from source
       const consoleData: ConsoleData | undefined = this.model.getConsoleData().get(data.ConsoleID);
       let sourcesFilter: boolean = true;
       if (consoleData) {
-        const isStandalone: boolean = (consoleData.Source == ConsoleSource.PS3 || consoleData.Source == ConsoleSource.PSVITA) ? sources.includes(this.standalone) : false;
-        sourcesFilter = (isStandalone || sources.includes(this.gameDataService.consoleSourceText(consoleData.Source))) || sources.length == 0;
+        const isStandalone: boolean = (consoleData.Source == ConsoleSource.PS3
+          || consoleData.Source == ConsoleSource.PSVITA
+          || consoleData.Source == ConsoleSource.XBOX_360) ? sources.includes(this.standalone) : false;
+        sourcesFilter = (isStandalone || sources.includes(UtilsService.consoleSourceText(consoleData.Source))) || sources.length == 0;
       }
 
       return strFilter && consoleFilter && completionStatusesFilter && sourcesFilter;
@@ -163,6 +167,9 @@ export class Table {
     if (this.sourcesToRequest.controls.psvita.value) {
       this.gameDataService.sourcesToRequest.push(ConsoleSource.PSVITA);
     }
+    if (this.sourcesToRequest.controls.xbox360.value) {
+      this.gameDataService.sourcesToRequest.push(ConsoleSource.XBOX_360);
+    }
     console.log("Sources to request : " + this.gameDataService.sourcesToRequest)
   }
 
@@ -171,7 +178,7 @@ export class Table {
    * Data will come from websocket games_socket
    */
   requestAllData(): void {
-    const dialogRef: MatDialogRef<LoadingDialog> = this.openDialog();
+    //const dialogRef: MatDialogRef<LoadingDialog> = this.openDialog();
 
     this.isRequestRunning = true;
     this.gameDataService.requestConsoleData(this.model).then(() => {
@@ -180,7 +187,7 @@ export class Table {
       this.gameDataService.requestGameData(this.model).then(() => {
         console.log("Game data OK")
         this.isRequestRunning = false;
-        dialogRef.close();
+        //dialogRef.close();
       })
     });
   }
@@ -247,6 +254,8 @@ export class Table {
       url = "https://www.exophase.com/platform/psn/?q=" + this.parseGameName(data.Title) + "&sort=updated&platforms=7";
     } else if (data.ConsoleName === "PlayStation Vita") {
       url = "https://www.exophase.com/platform/psn/?q=" + this.parseGameName(data.Title) + "&sort=updated&platforms=6";
+    } else if (data.ConsoleName === "Xbox 360") {
+      url = "https://www.exophase.com/platform/xbox/?q=" + this.parseGameName(data.Title) + "&sort=updated&platforms=41";
     } else {
       url = "https://retroachievements.org/game/" + data.ID;
     }
@@ -311,5 +320,13 @@ export class Table {
   updateConsolesList(): void {
     this.consolesList = [];
     this.model.getConsoleData().forEach(c => this.consolesList.push(c.Name));
+  }
+
+  completionStatusClass(status: CompletionStatusType): any {
+    return UtilsService.completionStatusClass(status);
+  }
+
+  completionStatusText(status: CompletionStatusType): string {
+    return UtilsService.completionStatusText(status);
   }
 }

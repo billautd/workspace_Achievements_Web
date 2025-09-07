@@ -32,4 +32,12 @@
         <mat-progress-bar class="data-progress-bar" mode="determinate" [value]="progressPSVita"></mat-progress-bar>
     </div>
     }
+    @if(hasXbox360()){
+    <div class="loading-progress-bar">
+        <div class="loading-icon">
+            <img src="xbox360.png" class="xbox360-icon">
+        </div>
+        <mat-progress-bar class="data-progress-bar" mode="determinate" [value]="progressXbox360"></mat-progress-bar>
+    </div>
+    }
 </div>

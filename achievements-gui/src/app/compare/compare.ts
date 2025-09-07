@@ -3,6 +3,8 @@ import { Component } from '@angular/core';
 import { CompareData, CompareDataStatusEnum } from '../../model/compareData';
 import { Model } from '../../model/model';
 import { GameDataService } from '../../services/game-data-service';
+import { UtilsService } from '../../services/utils-service';
+import { CompletionStatusType } from '../../model/gameData';
 
 @Component({
   selector: 'app-compare',
@@ -69,6 +71,14 @@ export class Compare {
       console.log("Compare data OK");
       this.isRequestRunning = false;
     })
+  }
+
+  completionStatusClass(status: CompletionStatusType): any {
+    return UtilsService.completionStatusClass(status);
+  }
+
+  completionStatusText(status: CompletionStatusType): string {
+    return UtilsService.completionStatusText(status);
   }
 
 }

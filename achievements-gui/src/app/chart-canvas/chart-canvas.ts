@@ -4,6 +4,7 @@ import { ConsoleData } from '../../model/consoleData';
 import { CompletionStatusType } from '../../model/gameData';
 import { Model } from '../../model/model';
 import { GameDataService } from '../../services/game-data-service';
+import { UtilsService } from '../../services/utils-service';
 
 @Component({
   selector: 'app-chart-canvas',
@@ -35,14 +36,7 @@ export class ChartCanvas {
   ngOnInit() {
     //No data is passed through this behavior subject, it's only a trigger to refresh data
     this.model.getUpdateBehaviorSubject().subscribe(() => {
-      const consoleDataList: ConsoleData[] = [];
-      for (const id of this.consoleIds) {
-        const consoleData: ConsoleData | undefined = this.model.getConsoleData().get(id);
-        if (consoleData) {
-          consoleDataList.push(consoleData);
-        }
-      }
-      this.updateChartData(consoleDataList);
+      this.updateChartData(this.consoleIds);
     })
 
     this.resetChartData();
@@ -62,7 +56,7 @@ export class ChartCanvas {
           maintainAspectRatio: false
         },
         data: {
-          labels: Array.from(this.chartLabels.keys()).map(this.gameDataService.completionStatusText),
+          labels: Array.from(this.chartLabels.keys()).map(UtilsService.completionStatusText),
           datasets: [
             {
               label: '',
@@ -77,7 +71,7 @@ export class ChartCanvas {
 
   initGlobalChartData(): void {
     //Labels
-    Object.values(CompletionStatusType).forEach(t => this.chartLabels.set(t, this.gameDataService.completionStatusText(t)));
+    Object.values(CompletionStatusType).forEach(t => this.chartLabels.set(t, UtilsService.completionStatusText(t)));
     //Background colors
     Object.values(CompletionStatusType).forEach(t => this.chartBackgroundColors.set(t, ""));
 
@@ -101,11 +95,19 @@ export class ChartCanvas {
     }
   }
 
-  updateChartData(consoleDataList: ConsoleData[]): void {
+  updateChartData(consoleIds: number[]): void {
     if (!this.chart) {
       return;
     }
     this.resetChartData();
+
+    const consoleDataList: ConsoleData[] = [];
+    for (const id of consoleIds) {
+      const consoleData: ConsoleData | undefined = this.model.getConsoleData().get(id);
+      if (consoleData) {
+        consoleDataList.push(consoleData);
+      }
+    }
 
     for (const console of consoleDataList) {
       for (const game of console.Games) {
@@ -118,7 +120,7 @@ export class ChartCanvas {
     this.chart.data.datasets[0].data = Array.from(this.chartData.values());
     const labels: string[] = []
     for (const entry of this.chartData) {
-      labels.push(this.gameDataService.completionStatusText(entry[0]) + " (" + entry[1] + ")");
+      labels.push(UtilsService.completionStatusText(entry[0]) + " (" + entry[1] + ")");
     }
     this.chart.data.labels = labels;
     this.updateChart();

@@ -19,8 +19,8 @@
             <ng-container matColumnDef="CompletionStatus">
                 <th mat-header-cell mat-sort-header *matHeaderCellDef class="statusColumn">Status</th>
                 <td mat-cell *matCellDef="let data" class="statusColumn">
-                    <div class="status-text" [ngClass]="gameDataService.completionStatusClass(data.CompletionStatus)">
-                        {{gameDataService.completionStatusText(data.CompletionStatus)}}
+                    <div class="status-text" [ngClass]="completionStatusClass(data.CompletionStatus)">
+                        {{completionStatusText(data.CompletionStatus)}}
                     </div>
                 </td>
                 <td mat-footer-cell *matFooterCellDef class="statusColumn"></td>
@@ -68,6 +68,9 @@
                 </mat-checkbox>
                 <mat-checkbox class="source-to-request" formControlName="psvita" (change)="updateSources()">
                     PSVita
+                </mat-checkbox>
+                <mat-checkbox class="source-to-request" formControlName="xbox360" (change)="updateSources()">
+                    Xbox 360
                 </mat-checkbox>
             </section>
             <button class="request-data-button" (click)="requestAllExistingData()" [disabled]="isRequestRunning">

@@ -81,9 +81,17 @@
     height: 24px;
 }
 
+.xbox360-icon {
+    height: 60px;
+}
+
+.standalone-icons {
+    display: flex;
+    gap: 30px;
+}
+
 .steam-chart,
-.ps3-chart,
-.psvita-chart,
+.standalone-chart,
 .ra-chart {
     display: flex;
     align-self: center;
@@ -96,8 +104,7 @@
     width: 300px;
 }
 
-.ps3-chart,
-.psvita-chart {
+.standalone-chart {
     height: 300px;
     width: 300px;
 }

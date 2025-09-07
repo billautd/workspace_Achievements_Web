@@ -1,4 +1,4 @@
-package perso.project.ps3;
+package perso.project.xbox360;
 
 import java.nio.file.Path;
 
@@ -11,41 +11,43 @@ import perso.project.model.enums.ConsoleSourceEnum;
 import perso.project.standalone.AbstractStandaloneRequestService;
 
 @ApplicationScoped
-public class PS3RequestService extends AbstractStandaloneRequestService {
-	@Inject
-	@ConfigProperty(name = "ps3.games.path")
-	private Path ps3GamesPath;
+public class Xbox360RequestService extends AbstractStandaloneRequestService {
 
 	@Inject
-	@ConfigProperty(name = "ps3.beaten.path")
-	private Path ps3BeatenPath;
+	@ConfigProperty(name = "xbox360.games.path")
+	private Path xbox360GamesPath;
 
 	@Inject
-	@ConfigProperty(name = "ps3.mastered.path")
-	private Path ps3MasteredPath;
+	@ConfigProperty(name = "xbox360.beaten.path")
+	private Path xbox360BeatenPath;
+
+	@Inject
+	@ConfigProperty(name = "xbox360.mastered.path")
+	private Path xbox360MasteredPath;
 
 	@Override
 	protected Path getGamesPath() {
-		return ps3GamesPath;
+		return xbox360GamesPath;
 	}
 
 	@Override
 	protected Path getGamesBeatenPath() {
-		return ps3BeatenPath;
+		return xbox360BeatenPath;
 	}
 
 	@Override
 	protected Path getGamesMasteredPath() {
-		return ps3MasteredPath;
+		return xbox360MasteredPath;
 	}
 
 	@Override
 	protected ConsoleSourceEnum getSource() {
-		return ConsoleSourceEnum.PS3;
+		return ConsoleSourceEnum.XBOX_360;
 	}
 
 	@Override
 	protected int getId() {
-		return Model.PS3_CONSOLE_ID;
+		return Model.XBOX360_CONSOLE_ID;
 	}
+
 }

@@ -86,10 +86,12 @@ public class PlayniteService {
 		} else if ("RetroAchievements".equals(playniteSource)) {
 			data.setSource(ConsoleSourceEnum.RETRO_ACHIEVEMENTS);
 		} else if ("Standalone".equals(playniteSource)) {
-			if ("PlayStation 3".equals(data.getPlatform())) {
+			if (ConsoleSourceEnum.PS3.getName().equals(data.getPlatform())) {
 				data.setSource(ConsoleSourceEnum.PS3);
-			} else if ("PlayStation Vita".equals(data.getPlatform())) {
+			} else if (ConsoleSourceEnum.PSVITA.getName().equals(data.getPlatform())) {
 				data.setSource(ConsoleSourceEnum.PSVITA);
+			} else if (ConsoleSourceEnum.XBOX_360.getName().equals(data.getPlatform())) {
+				data.setSource(ConsoleSourceEnum.XBOX_360);
 			}
 		} else {
 			Log.error("Playnite source " + playniteSource + " not managed");

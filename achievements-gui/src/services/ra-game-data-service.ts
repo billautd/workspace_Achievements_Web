@@ -6,7 +6,7 @@ import { CompareData } from '../model/compareData';
 import { ConsoleData, ConsoleSource } from '../model/consoleData';
 import { GameData } from '../model/gameData';
 import { Model } from '../model/model';
-import { delay } from './utils-service';
+import { UtilsService } from './utils-service';
 
 @Injectable({
   providedIn: 'root'
@@ -71,7 +71,7 @@ export class RAGameDataService {
       const consoleId: number = consoleEntry[0];
       const consoleData: ConsoleData = consoleEntry[1];
       //Wait to not send too many requests
-      await delay(3000);
+      await UtilsService.delay(3000);
       //Do not parse non RA consoles
       if (consoleData.Source !== ConsoleSource.RETRO_ACHIEVEMENTS) {
         continue;

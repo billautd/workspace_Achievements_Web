@@ -1,10 +1,11 @@
 import { Component } from '@angular/core';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { ConsoleData, ConsoleSource } from '../../model/consoleData';
-import { Model, PS3_CONSOLE_ID, PSVITA_CONSOLE_ID, STEAM_CONSOLE_ID } from '../../model/model';
+import { Model, PS3_CONSOLE_ID, PSVITA_CONSOLE_ID, STEAM_CONSOLE_ID, XBOX360_CONSOLE_ID } from '../../model/model';
 import { GameDataService } from '../../services/game-data-service';
 import { RAGameDataService } from '../../services/ra-game-data-service';
 import { SteamGameDataService } from '../../services/steam-game-data-service';
+import { Xbox360GameDataService } from '../../services/xbox360-game-data-service';
 
 @Component({
   selector: 'app-loading-dialog',
@@ -17,6 +18,7 @@ export class LoadingDialog {
   progressSteam: number = 0;
   progressPS3: number = 0;
   progressPSVita: number = 0;
+  progressXbox360: number = 0;
 
   model: Model;
   gameDataService: GameDataService;
@@ -36,6 +38,7 @@ export class LoadingDialog {
     this.model.getUpdateBehaviorSubject().subscribe(() => {
       this.updatePS3Progress();
       this.updatePSVitaProgress();
+      this.updateXbox360Progress();
       this.updateRAProgress();
       this.updateSteamProgress();
     });
@@ -78,6 +81,15 @@ export class LoadingDialog {
     this.progressPSVita = data.Games.size > 0 ? 100 : 0;
   }
 
+  updateXbox360Progress(): void {
+    const data: ConsoleData | undefined = this.model.getConsoleData().get(XBOX360_CONSOLE_ID);
+    if (!data) {
+      this.progressXbox360 = 0;
+      return;
+    }
+    this.progressXbox360 = data.Games.size > 0 ? 100 : 0;
+  }
+
   hasRA(): boolean {
     return this.gameDataService.sourcesToRequest.includes(ConsoleSource.RETRO_ACHIEVEMENTS);
   }
@@ -89,5 +101,8 @@ export class LoadingDialog {
   }
   hasPSVita(): boolean {
     return this.gameDataService.sourcesToRequest.includes(ConsoleSource.PSVITA);
+  }
+  hasXbox360(): boolean {
+    return this.gameDataService.sourcesToRequest.includes(ConsoleSource.XBOX_360);
   }
 }

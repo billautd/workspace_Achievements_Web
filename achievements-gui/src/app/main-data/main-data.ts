@@ -1,11 +1,12 @@
 import { Component, ViewChild } from '@angular/core';
 import { ConsoleData, ConsoleSource } from '../../model/consoleData';
-import { Model, PS3_CONSOLE_ID, PSVITA_CONSOLE_ID, STEAM_CONSOLE_ID } from '../../model/model';
+import { Model, PS3_CONSOLE_ID, PSVITA_CONSOLE_ID, STEAM_CONSOLE_ID, XBOX360_CONSOLE_ID } from '../../model/model';
 import { GameDataService } from '../../services/game-data-service';
 import { ChartCanvas } from '../chart-canvas/chart-canvas';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectChange, MatSelectModule } from '@angular/material/select';
+import { UtilsService } from '../../services/utils-service';
 
 @Component({
   selector: 'app-main-data',
@@ -16,14 +17,13 @@ import { MatSelectChange, MatSelectModule } from '@angular/material/select';
 export class MainData {
   @ViewChild("steamChartCanvas") steamChartCanvas!: ChartCanvas;
   @ViewChild("raChartCanvas") raChartCanvas!: ChartCanvas;
-  @ViewChild("ps3ChartCanvas") ps3ChartCanvas!: ChartCanvas;
-  @ViewChild("psVitaChartCanvas") psVitaChartCanvas!: ChartCanvas;
+  @ViewChild("standaloneChartCanvas") standaloneChartCanvas!: ChartCanvas;
   @ViewChild("raConsoleChartCanvas") raConsoleChartCanvas!: ChartCanvas;
 
   raConsoleIds: number[] = [];
+  standaloneConsoleIds: number[] = [];
   steamConsoleId: number = STEAM_CONSOLE_ID;
-  ps3ConsoleId: number = PS3_CONSOLE_ID;
-  psVitaConsoleId: number = PSVITA_CONSOLE_ID;
+
 
   model: Model;
   gameDataService: GameDataService;
@@ -37,10 +37,15 @@ export class MainData {
   raConsoleAchievementsText: string = "";
   raConsoleAchievementsPercentageText: string = "";
 
-  selectedConsole: string = "";
-  consoles = new FormControl();
-  consolesList: string[] = [];
+  selectedRAConsole: string = "";
+  raConsoles = new FormControl();
+  raConsolesList: string[] = [];
   selectedRAConsoleId: number = 0;
+
+  selectedStandaloneConsole: string = "";
+  standaloneConsoles = new FormControl();
+  standaloneConsolesList: string[] = [];
+  selectedStandaloneConsoleId: number = 0;
 
   constructor(model: Model,
     gameDataService: GameDataService
@@ -54,11 +59,14 @@ export class MainData {
     this.model.getUpdateBehaviorSubject().subscribe(() => {
       this.updateRAConsoleIds();
       this.updateRAConsolesList();
+      this.updateStandaloneConsoleIds();
+      this.updateStandaloneConsolesList();
 
       this.updateSteamAchievementsText();
       this.updateRAAchievementsText(this.raConsoleIds);
       this.updateRAAchievementsText([this.selectedRAConsoleId]);
     })
+
   }
 
   updateRAConsoleIds(): void {
@@ -69,6 +77,10 @@ export class MainData {
       }
     }
     this.raConsoleIds = ids;
+  }
+
+  updateStandaloneConsoleIds(): void {
+    this.standaloneConsoleIds = [PS3_CONSOLE_ID, PSVITA_CONSOLE_ID, XBOX360_CONSOLE_ID]
   }
 
   updateSteamAchievementsText(): void {
@@ -137,21 +149,41 @@ export class MainData {
   }
 
   updateRAConsolesList(): void {
-    this.consolesList = [];
+    this.raConsolesList = [];
     this.model.getConsoleData().forEach(c => {
       if (c.Source == ConsoleSource.RETRO_ACHIEVEMENTS) {
-        this.consolesList.push(c.Name);
+        this.raConsolesList.push(c.Name);
       }
     })
   }
 
-  changeSelectedConsole(event: MatSelectChange<any>) {
-    this.selectedConsole = event.value;
+  updateStandaloneConsolesList(): void {
+    this.standaloneConsolesList = [
+      UtilsService.consoleSourceText(ConsoleSource.PS3),
+      UtilsService.consoleSourceText(ConsoleSource.PSVITA),
+      UtilsService.consoleSourceText(ConsoleSource.XBOX_360)
+    ];
+  }
+
+  changeRASelectedConsole(event: MatSelectChange<any>) {
+    this.selectedRAConsole = event.value;
     //Get console associated to name
     for (const c of this.model.getConsoleData().values()) {
-      if (c.Source == ConsoleSource.RETRO_ACHIEVEMENTS && c.Name == this.selectedConsole) {
+      if (c.Source == ConsoleSource.RETRO_ACHIEVEMENTS && c.Name == this.selectedRAConsole) {
         this.selectedRAConsoleId = c.ID;
       }
     }
+    this.raChartCanvas.updateChartData([this.selectedRAConsoleId]);
+  }
+
+  changeStandaloneSelectedConsole(event: MatSelectChange<any>) {
+    this.selectedStandaloneConsole = event.value;
+    //Get console associated to name
+    for (const c of this.model.getConsoleData().values()) {
+      if (c.Name == this.selectedStandaloneConsole) {
+        this.selectedStandaloneConsoleId = c.ID;
+      }
+    }
+    this.standaloneChartCanvas.updateChartData([this.selectedStandaloneConsoleId]);
   }
 }
