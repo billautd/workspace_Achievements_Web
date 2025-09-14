@@ -250,20 +250,18 @@ export class Table {
     let url: string;
     if (data.ConsoleName === "Steam") {
       url = "https://store.steampowered.com/app/" + data.ID;
-    } else if (data.ConsoleName === "PlayStation 3") {
-      url = "https://www.exophase.com/platform/psn/?q=" + this.parseGameName(data.Title) + "&sort=updated&platforms=7";
-    } else if (data.ConsoleName === "PlayStation Vita") {
-      url = "https://www.exophase.com/platform/psn/?q=" + this.parseGameName(data.Title) + "&sort=updated&platforms=6";
+    } else if (data.ConsoleName === "PlayStation 3" || data.ConsoleName === "PlayStation Vita") {
+      url = "https://www.psnprofiles.com/trophies/" + data.ID;
     } else if (data.ConsoleName === "Xbox 360") {
-      url = "https://www.exophase.com/platform/xbox/?q=" + this.parseGameName(data.Title) + "&sort=updated&platforms=41";
+      url = "https://www.xboxachievements.com/game/" + this.parseXBOXGameName(data.Title) + "/achievements";
     } else {
       url = "https://retroachievements.org/game/" + data.ID;
     }
     window.open(url, "_blank");
   }
 
-  parseGameName(name: string): string {
-    return name.replace(/[#&•]/g, "").replace(/ /g, "+").toLowerCase();
+  parseXBOXGameName(name: string): string {
+    return name.replace(/[()™:]/g, "").replace(/ /g, "-").toLowerCase();
   }
 
   isSocketDone(): boolean {

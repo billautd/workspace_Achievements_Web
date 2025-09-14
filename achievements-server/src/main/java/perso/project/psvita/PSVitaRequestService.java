@@ -8,14 +8,14 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import perso.project.model.Model;
 import perso.project.model.enums.ConsoleSourceEnum;
-import perso.project.standalone.AbstractStandaloneRequestService;
+import perso.project.standalone.AbstractPSNRequestService;
 
 @ApplicationScoped
-public class PSVitaRequestService extends AbstractStandaloneRequestService {
+public class PSVitaRequestService extends AbstractPSNRequestService {
 
 	@Inject
-	@ConfigProperty(name = "psvita.games.path")
-	private Path psVitaGamesPath;
+	@ConfigProperty(name = "psvita.html.folder.path")
+	private Path psVitaHTMLPath;
 
 	@Inject
 	@ConfigProperty(name = "psvita.beaten.path")
@@ -26,8 +26,8 @@ public class PSVitaRequestService extends AbstractStandaloneRequestService {
 	private Path psVitaMasteredPath;
 
 	@Override
-	protected Path getGamesPath() {
-		return psVitaGamesPath;
+	protected Path getHTMLPath() {
+		return psVitaHTMLPath;
 	}
 
 	@Override

@@ -98,7 +98,7 @@ public class SteamRequestService extends AbstractRequestService {
 			steamConsoleData.setActive(true);
 			steamConsoleData.setGameSystem(true);
 			steamConsoleData.setId(Model.STEAM_CONSOLE_ID);
-			steamConsoleData.setName("Steam");
+			steamConsoleData.setName(ConsoleSourceEnum.STEAM.getName());
 			steamConsoleData.setSource(ConsoleSourceEnum.STEAM);
 			model.getConsoleDataMap().put(steamConsoleData.getId(), steamConsoleData);
 		} else {

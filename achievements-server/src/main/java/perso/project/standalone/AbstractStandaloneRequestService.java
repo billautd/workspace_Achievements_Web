@@ -1,14 +1,17 @@
 package perso.project.standalone;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 
 import io.quarkus.logging.Log;
 import perso.project.model.ConsoleData;
@@ -19,7 +22,10 @@ import perso.project.utils.AbstractRequestService;
 import perso.project.utils.ExcelUtils;
 
 public abstract class AbstractStandaloneRequestService extends AbstractRequestService {
-	protected abstract Path getGamesPath();
+	static final String HTM_EXTENSION = "htm";
+	protected int id = 1;
+
+	protected abstract Path getHTMLPath();
 
 	protected abstract Path getGamesBeatenPath();
 
@@ -28,6 +34,40 @@ public abstract class AbstractStandaloneRequestService extends AbstractRequestSe
 	protected abstract ConsoleSourceEnum getSource();
 
 	protected abstract int getId();
+
+	protected abstract void parseDocument(final List<GameData> gameData, final Document document);
+
+	public List<GameData> getAllData() {
+		Log.info("Getting all " + getSource() + " games");
+		getGameDataFromHTML(getHTMLPath());
+		getGames_Beaten(getGamesBeatenPath());
+		getGames_Mastered(getGamesMasteredPath());
+		System.out.println();
+		final List<GameData> gameData = model.getConsoleDataMap().get(getId()).getGameDataMap().values().stream()
+				.toList();
+		Log.info("Processing " + gameData.size() + " " + getSource() + " games");
+		return gameData;
+	}
+
+	public List<GameData> getGameDataFromHTML(final Path pathToFolder) {
+		id = 1;
+		final List<GameData> gameData = new ArrayList<>();
+		for (final File htmlFile : pathToFolder.toFile().listFiles()) {
+			if (!FilenameUtils.getExtension(htmlFile.getName()).contains(HTM_EXTENSION)) {
+				continue;
+			}
+			Document doc;
+			try {
+				Log.info("Reading " + htmlFile.getName());
+				doc = Jsoup.parse(htmlFile);
+				parseDocument(gameData, doc);
+			} catch (IOException e) {
+				Log.error("Cannot parse htmlFile " + htmlFile.getName());
+				continue;
+			}
+		}
+		return gameData;
+	}
 
 	public List<ConsoleData> getConsoleIds() {
 		ConsoleData saConsoleData;
@@ -46,76 +86,57 @@ public abstract class AbstractStandaloneRequestService extends AbstractRequestSe
 		return List.of(saConsoleData);
 	}
 
-	public void getOwnedGames(final Path path) {
-		Log.info("Getting all " + getSource() + " owned games");
-
-		try (final XSSFWorkbook gamesWorkbook = new XSSFWorkbook(new FileInputStream(path.toFile()))) {
-			for (final Row row : gamesWorkbook.getSheetAt(0)) {
-				final String gameName = ExcelUtils.getCellAsString(row.getCell(0));
-				final int gameId = ExcelUtils.getCellAsInt(row.getCell(1));
-				final GameData gameData = new GameData();
-				gameData.setTitle(gameName);
-				gameData.setId(gameId);
-				gameData.setConsoleId(getId());
-				gameData.setConsoleName(getSource().getName());
-				model.getConsoleDataMap().get(getId()).getGameDataMap().put(gameId, gameData);
-			}
-		} catch (IOException e) {
-			Log.error("Cannot read " + getSource() + " games file at " + path);
-		}
-	}
-
-	public void getGames_Beaten(final Path path) {
+	public List<GameData> getGames_Beaten(final Path path) {
 		Log.info("Reading " + path);
+		final List<GameData> beatenList = new ArrayList<>();
 		try (final XSSFWorkbook beatenWorkbook = new XSSFWorkbook(new FileInputStream(path.toFile()))) {
 			for (final Row row : beatenWorkbook.getSheetAt(0)) {
 				final String gameName = ExcelUtils.getCellAsString(row.getCell(0));
 				final int gameId = ExcelUtils.getCellAsInt(row.getCell(1));
-				final GameData gameData = model.getConsoleDataMap().get(getId()).getGameDataMap().get(gameId);
+				GameData gameData = model.getConsoleDataMap().get(getId()).getGameDataMap().get(gameId);
 				if (gameData == null) {
-					Log.error(gameName + " (" + gameId + ") does not exist for " + getSource());
-					continue;
+					gameData = new GameData();
+					gameData.setTitle(gameName);
+					gameData.setId(gameId);
+					gameData.setConsoleId(getId());
+					gameData.setConsoleName(getSource().getName());
 				}
 				gameData.setCompletionStatus(CompletionStatusEnum.BEATEN);
+				model.getConsoleDataMap().get(getId()).getGameDataMap().put(gameId, gameData);
+				beatenList.add(gameData);
 				Log.info(gameName + " (" + gameId + ") for " + getSource() + " is Beaten");
 			}
+			return beatenList;
 		} catch (IOException e) {
 			Log.error("Cannot read " + getSource() + " beaten file at " + path);
+			return null;
 		}
 	}
 
-	public void getGames_Mastered(final Path path) {
+	public List<GameData> getGames_Mastered(final Path path) {
 		Log.info("Reading " + path);
+		final List<GameData> masteredList = new ArrayList<>();
 		try (final XSSFWorkbook masteredWorkbook = new XSSFWorkbook(new FileInputStream(path.toFile()))) {
 			for (final Row row : masteredWorkbook.getSheetAt(0)) {
 				final String gameName = ExcelUtils.getCellAsString(row.getCell(0));
 				final int gameId = ExcelUtils.getCellAsInt(row.getCell(1));
-				final GameData gameData = model.getConsoleDataMap().get(getId()).getGameDataMap().get(gameId);
+				GameData gameData = model.getConsoleDataMap().get(getId()).getGameDataMap().get(gameId);
 				if (gameData == null) {
-					Log.error(gameName + " (" + gameId + ") does not exist for " + getSource());
-					continue;
+					gameData = new GameData();
+					gameData.setTitle(gameName);
+					gameData.setId(gameId);
+					gameData.setConsoleId(getId());
+					gameData.setConsoleName(getSource().getName());
 				}
 				gameData.setCompletionStatus(CompletionStatusEnum.MASTERED);
+				model.getConsoleDataMap().get(getId()).getGameDataMap().put(gameId, gameData);
+				masteredList.add(gameData);
 				Log.info(gameName + " (" + gameId + ") for " + getSource() + " is Mastered");
 			}
+			return masteredList;
 		} catch (IOException e) {
 			Log.error("Cannot read " + getSource() + " mastered file at " + path);
+			return null;
 		}
-	}
-
-	public List<GameData> getAllData() {
-		Log.info("Getting all " + getSource() + " games");
-		getOwnedGames(getGamesPath());
-		getGames_Beaten(getGamesBeatenPath());
-		getGames_Mastered(getGamesMasteredPath());
-		final List<GameData> gameData = model.getConsoleDataMap().get(getId()).getGameDataMap().values().stream()
-				.toList();
-		Log.info("Processing " + gameData.size() + " " + getSource() + " games");
-		return gameData;
-	}
-
-	@Override
-	public ObjectMapper getMapper() {
-		return mapper;
 	}
 }

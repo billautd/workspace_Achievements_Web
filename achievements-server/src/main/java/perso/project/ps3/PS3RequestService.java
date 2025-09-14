@@ -8,13 +8,14 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import perso.project.model.Model;
 import perso.project.model.enums.ConsoleSourceEnum;
-import perso.project.standalone.AbstractStandaloneRequestService;
+import perso.project.standalone.AbstractPSNRequestService;
 
 @ApplicationScoped
-public class PS3RequestService extends AbstractStandaloneRequestService {
+public class PS3RequestService extends AbstractPSNRequestService {
+
 	@Inject
-	@ConfigProperty(name = "ps3.games.path")
-	private Path ps3GamesPath;
+	@ConfigProperty(name = "ps3.html.folder.path")
+	private Path ps3HTMLPath;
 
 	@Inject
 	@ConfigProperty(name = "ps3.beaten.path")
@@ -25,8 +26,8 @@ public class PS3RequestService extends AbstractStandaloneRequestService {
 	private Path ps3MasteredPath;
 
 	@Override
-	protected Path getGamesPath() {
-		return ps3GamesPath;
+	protected Path getHTMLPath() {
+		return ps3HTMLPath;
 	}
 
 	@Override

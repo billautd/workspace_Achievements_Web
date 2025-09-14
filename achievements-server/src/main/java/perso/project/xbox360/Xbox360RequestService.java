@@ -8,14 +8,14 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import perso.project.model.Model;
 import perso.project.model.enums.ConsoleSourceEnum;
-import perso.project.standalone.AbstractStandaloneRequestService;
+import perso.project.standalone.AbstractXboxRequestService;
 
 @ApplicationScoped
-public class Xbox360RequestService extends AbstractStandaloneRequestService {
+public class Xbox360RequestService extends AbstractXboxRequestService {
 
 	@Inject
-	@ConfigProperty(name = "xbox360.games.path")
-	private Path xbox360GamesPath;
+	@ConfigProperty(name = "xbox360.html.folder.path")
+	private Path xbox360HTMLPath;
 
 	@Inject
 	@ConfigProperty(name = "xbox360.beaten.path")
@@ -26,8 +26,8 @@ public class Xbox360RequestService extends AbstractStandaloneRequestService {
 	private Path xbox360MasteredPath;
 
 	@Override
-	protected Path getGamesPath() {
-		return xbox360GamesPath;
+	protected Path getHTMLPath() {
+		return xbox360HTMLPath;
 	}
 
 	@Override
