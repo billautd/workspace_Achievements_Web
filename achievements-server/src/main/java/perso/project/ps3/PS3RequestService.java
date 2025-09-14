@@ -121,7 +121,9 @@ public class PS3RequestService extends AbstractPSNRequestService {
 			final Optional<GameData> gameDataOpt = gameData.stream()
 					.filter(g -> g.getTitle().toLowerCase().equals(gameText.toLowerCase())).findFirst();
 			if (gameDataOpt.isEmpty()) {
-				Log.error("Could not find game " + gameText);
+				Log.error("Could not find game " + gameText + ". TODO : Try to find by region");
+			} else {
+				Log.info("Found game " + gameText);
 			}
 			return gameDataOpt;
 		} catch (IOException e) {
