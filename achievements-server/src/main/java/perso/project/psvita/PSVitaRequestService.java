@@ -1,11 +1,13 @@
 package perso.project.psvita;
 
 import java.nio.file.Path;
+import java.util.List;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import perso.project.model.GameData;
 import perso.project.model.Model;
 import perso.project.model.enums.ConsoleSourceEnum;
 import perso.project.standalone.AbstractPSNRequestService;
@@ -48,6 +50,12 @@ public class PSVitaRequestService extends AbstractPSNRequestService {
 	@Override
 	protected int getId() {
 		return Model.PSVITA_CONSOLE_ID;
+	}
+
+	@Override
+	protected void parseAchievements(final List<GameData> gameData) {
+		// TODO Auto-generated method stub
+
 	}
 
 }

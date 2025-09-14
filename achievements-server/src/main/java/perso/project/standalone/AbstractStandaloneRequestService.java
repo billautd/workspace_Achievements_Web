@@ -37,15 +37,17 @@ public abstract class AbstractStandaloneRequestService extends AbstractRequestSe
 
 	protected abstract void parseDocument(final List<GameData> gameData, final Document document);
 
+	protected abstract void parseAchievements(final List<GameData> gameData);
+
 	public List<GameData> getAllData() {
 		Log.info("Getting all " + getSource() + " games");
 		getGameDataFromHTML(getHTMLPath());
 		getGames_Beaten(getGamesBeatenPath());
 		getGames_Mastered(getGamesMasteredPath());
-		System.out.println();
 		final List<GameData> gameData = model.getConsoleDataMap().get(getId()).getGameDataMap().values().stream()
 				.toList();
 		Log.info("Processing " + gameData.size() + " " + getSource() + " games");
+		parseAchievements(gameData);
 		return gameData;
 	}
 
