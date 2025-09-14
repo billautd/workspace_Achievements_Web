@@ -9,27 +9,16 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import io.quarkus.logging.Log;
-import jakarta.inject.Inject;
 import perso.project.model.ConsoleData;
 import perso.project.model.GameData;
-import perso.project.model.MainModel;
 import perso.project.model.enums.CompletionStatusEnum;
 import perso.project.model.enums.ConsoleSourceEnum;
+import perso.project.utils.AbstractRequestService;
 import perso.project.utils.ExcelUtils;
 
-public abstract class AbstractStandaloneRequestService {
-	@Inject
-	MainModel model;
-
-	ObjectMapper mapper;
-
-	protected AbstractStandaloneRequestService() {
-		setupMapper();
-	}
-
+public abstract class AbstractStandaloneRequestService extends AbstractRequestService {
 	protected abstract Path getGamesPath();
 
 	protected abstract Path getGamesBeatenPath();
@@ -39,15 +28,6 @@ public abstract class AbstractStandaloneRequestService {
 	protected abstract ConsoleSourceEnum getSource();
 
 	protected abstract int getId();
-
-	ObjectMapper setupMapper() {
-		mapper = new ObjectMapper();
-
-		final JavaTimeModule module = new JavaTimeModule();
-		mapper.registerModule(module);
-
-		return mapper;
-	}
 
 	public List<ConsoleData> getConsoleIds() {
 		ConsoleData saConsoleData;
@@ -134,6 +114,7 @@ public abstract class AbstractStandaloneRequestService {
 		return gameData;
 	}
 
+	@Override
 	public ObjectMapper getMapper() {
 		return mapper;
 	}

@@ -21,23 +21,22 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import perso.project.model.ConsoleData;
 import perso.project.model.GameData;
-import perso.project.model.MainModel;
 import perso.project.model.Model;
 import perso.project.model.SteamAchievementData;
 import perso.project.model.enums.CompletionStatusEnum;
 import perso.project.model.enums.ConsoleSourceEnum;
+import perso.project.utils.AbstractRequestService;
 import perso.project.utils.ExcelUtils;
 import perso.project.utils.LoggingUtils;
 
 @ApplicationScoped
-public class SteamRequestService {
+public class SteamRequestService extends AbstractRequestService {
 	static final int RETRY_MAX = 3;
 	private int retryIndex = 1;
 
@@ -57,24 +56,6 @@ public class SteamRequestService {
 	@Inject
 	@ConfigProperty(name = "steam.id")
 	String steamId;
-
-	@Inject
-	MainModel model;
-
-	ObjectMapper mapper;
-
-	public SteamRequestService() {
-		setupMapper();
-	}
-
-	ObjectMapper setupMapper() {
-		mapper = new ObjectMapper();
-
-		final JavaTimeModule module = new JavaTimeModule();
-		mapper.registerModule(module);
-
-		return mapper;
-	}
 
 	/**
 	 * Creates <b>blocking</b> HTTP request
@@ -291,6 +272,7 @@ public class SteamRequestService {
 		return gameData;
 	}
 
+	@Override
 	public ObjectMapper getMapper() {
 		return mapper;
 	}

@@ -16,21 +16,20 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import perso.project.model.ConsoleData;
 import perso.project.model.GameData;
-import perso.project.model.MainModel;
 import perso.project.model.enums.CompletionStatusEnum;
 import perso.project.model.enums.ConsoleSourceEnum;
+import perso.project.utils.AbstractRequestService;
 import perso.project.utils.LoggingUtils;
 import perso.project.utils.SleepUtils;
 
 @ApplicationScoped
-public class RetroAchievementsRequestService {
+public class RetroAchievementsRequestService extends AbstractRequestService {
 	static final String RA_API_KEY_KEY = "RA_API_KEY";
 
 	static final String MAIN_URI = "https://retroachievements.org/API";
@@ -45,24 +44,6 @@ public class RetroAchievementsRequestService {
 	@Inject
 	@ConfigProperty(name = "ra.username")
 	String raUsername;
-
-	@Inject
-	MainModel model;
-
-	ObjectMapper mapper;
-
-	RetroAchievementsRequestService() {
-		setupMapper();
-	}
-
-	ObjectMapper setupMapper() {
-		mapper = new ObjectMapper();
-
-		final JavaTimeModule module = new JavaTimeModule();
-		mapper.registerModule(module);
-
-		return mapper;
-	}
 
 	/**
 	 * Creates <b>blocking</b> HTTP request
@@ -208,6 +189,7 @@ public class RetroAchievementsRequestService {
 		Log.info(gameData.getTitle() + " (" + gameData.getId() + ") is " + gameData.getCompletionStatus());
 	}
 
+	@Override
 	public ObjectMapper getMapper() {
 		return mapper;
 	}
