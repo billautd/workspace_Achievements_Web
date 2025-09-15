@@ -15,7 +15,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import perso.project.model.GameData;
 import perso.project.model.Model;
-import perso.project.model.enums.CompletionStatusEnum;
 import perso.project.model.enums.ConsoleSourceEnum;
 import perso.project.standalone.AbstractPSNRequestService;
 
@@ -158,16 +157,7 @@ public class PSVitaRequestService extends AbstractPSNRequestService {
 			final String binaryTrophyProgressString = new BigInteger(trophyProgressString, 16).toString(2);
 			unlockedCount = (int) binaryTrophyProgressString.chars().filter(c -> c == '1').count();
 			gameData.setAwardedAchievements(unlockedCount);
-			// If beaten or mastered, already set by other methods
-			if (CompletionStatusEnum.NOT_PLAYED.equals(gameData.getCompletionStatus())) {
-				if (gameData.getTotalAchievements() == 0) {
-					gameData.setCompletionStatus(CompletionStatusEnum.NO_ACHIEVEMENTS);
-				} else if (gameData.getAwardedAchievements() == gameData.getTotalAchievements()) {
-					gameData.setCompletionStatus(CompletionStatusEnum.MASTERED);
-				} else if (gameData.getAwardedAchievements() > 0) {
-					gameData.setCompletionStatus(CompletionStatusEnum.TRIED);
-				}
-			}
+			parseCompletionStatus(gameData);
 			Log.info("Found " + unlockedCount + " / " + gameData.getTotalAchievements() + " achievements for "
 					+ gameData.getTitle() + " (" + gameData.getId() + ")");
 		} catch (final Exception e) {

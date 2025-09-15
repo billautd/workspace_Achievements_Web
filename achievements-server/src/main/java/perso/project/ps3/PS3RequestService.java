@@ -18,7 +18,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import perso.project.model.GameData;
 import perso.project.model.Model;
-import perso.project.model.enums.CompletionStatusEnum;
 import perso.project.model.enums.ConsoleSourceEnum;
 import perso.project.standalone.AbstractPSNRequestService;
 
@@ -139,7 +138,6 @@ public class PS3RequestService extends AbstractPSNRequestService {
 			for (final byte b : bytes) {
 				hexStr += String.format("%02x", b);
 			}
-			System.out.println();
 			List<String> allSplits = new ArrayList<>();
 
 			final String[] splits1 = hexStr.split(TROPHY_SPLIT_1);
@@ -161,16 +159,7 @@ public class PS3RequestService extends AbstractPSNRequestService {
 				}
 			}
 			gameData.setAwardedAchievements(unlockedCount);
-			// If beaten or mastered, already set by other methods
-			if (CompletionStatusEnum.NOT_PLAYED.equals(gameData.getCompletionStatus())) {
-				if (gameData.getTotalAchievements() == 0) {
-					gameData.setCompletionStatus(CompletionStatusEnum.NO_ACHIEVEMENTS);
-				} else if (gameData.getAwardedAchievements() == gameData.getTotalAchievements()) {
-					gameData.setCompletionStatus(CompletionStatusEnum.MASTERED);
-				} else if (gameData.getAwardedAchievements() > 0) {
-					gameData.setCompletionStatus(CompletionStatusEnum.TRIED);
-				}
-			}
+			parseCompletionStatus(gameData);
 			Log.info("Found " + unlockedCount + " / " + gameData.getTotalAchievements() + " achievements for "
 					+ gameData.getTitle() + " (" + gameData.getId() + ")");
 		} catch (final Exception e) {

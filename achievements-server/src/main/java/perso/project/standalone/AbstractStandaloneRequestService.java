@@ -141,4 +141,21 @@ public abstract class AbstractStandaloneRequestService extends AbstractRequestSe
 			return null;
 		}
 	}
+
+	public GameData parseCompletionStatus(final GameData gameData) {
+		if (gameData.getCompletionStatus() == null) {
+			Log.error("Game " + gameData.getTitle() + " has null completion status");
+		}
+		// If beaten or mastered, already set by other methods
+		if (CompletionStatusEnum.NOT_PLAYED.equals(gameData.getCompletionStatus())) {
+			if (gameData.getTotalAchievements() == 0) {
+				gameData.setCompletionStatus(CompletionStatusEnum.NO_ACHIEVEMENTS);
+			} else if (gameData.getAwardedAchievements() == gameData.getTotalAchievements()) {
+				gameData.setCompletionStatus(CompletionStatusEnum.MASTERED);
+			} else if (gameData.getAwardedAchievements() > 0) {
+				gameData.setCompletionStatus(CompletionStatusEnum.TRIED);
+			}
+		}
+		return gameData;
+	}
 }
