@@ -35,7 +35,7 @@ public abstract class AbstractStandaloneRequestService extends AbstractRequestSe
 
 	protected abstract int getId();
 
-	protected abstract void parseDocument(final List<GameData> gameData, final Document document);
+	protected abstract void parseDocument(final File htmlFile, final List<GameData> gameData, final Document document);
 
 	protected abstract void parseAchievements(final List<GameData> gameData);
 
@@ -55,14 +55,14 @@ public abstract class AbstractStandaloneRequestService extends AbstractRequestSe
 		id = 1;
 		final List<GameData> gameData = new ArrayList<>();
 		for (final File htmlFile : pathToFolder.toFile().listFiles()) {
-			if (!FilenameUtils.getExtension(htmlFile.getName()).contains(HTM_EXTENSION)) {
+			if (!FilenameUtils.getExtension(htmlFile.getName()).equals(HTM_EXTENSION)) {
 				continue;
 			}
 			Document doc;
 			try {
 				Log.info("Reading " + htmlFile.getName());
 				doc = Jsoup.parse(htmlFile);
-				parseDocument(gameData, doc);
+				parseDocument(htmlFile, gameData, doc);
 			} catch (IOException e) {
 				Log.error("Cannot parse htmlFile " + htmlFile.getName());
 				continue;

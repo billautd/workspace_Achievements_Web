@@ -18,11 +18,11 @@
     flex-grow: 1;
 }
 
-.compare-bottom {
+.compare-top {
     display: flex;
     flex-direction: row;
     flex-grow: 1;
-    max-height: 40vh;
+    max-height: 60vh;
     gap: 1vw;
 }
 
@@ -58,7 +58,7 @@
 
 .compare-completion-status-box {
     margin-bottom: 1vh;
-    max-height: 40vh;
+    max-height: 30vh;
     border-radius: 10px;
     border: 2px solid var(--purple4);
     background-color: #100009;

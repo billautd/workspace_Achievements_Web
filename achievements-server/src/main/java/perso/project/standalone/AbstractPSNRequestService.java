@@ -1,5 +1,6 @@
 package perso.project.standalone;
 
+import java.io.File;
 import java.util.List;
 
 import org.jsoup.nodes.Document;
@@ -13,7 +14,7 @@ public abstract class AbstractPSNRequestService extends AbstractStandaloneReques
 	static final String BULLET_CHARACTER = " • ";
 
 	@Override
-	protected void parseDocument(List<GameData> gameData, Document document) {
+	protected void parseDocument(final File htmlFile, final List<GameData> gameData, final Document document) {
 		final Element gameList = document.selectFirst("table#game_list");
 		final Elements gameTrs = gameList.select("tr");
 		for (final Element gameTr : gameTrs) {
@@ -21,6 +22,13 @@ public abstract class AbstractPSNRequestService extends AbstractStandaloneReques
 			data.setConsoleId(getId());
 			data.setConsoleName(getSource().getName());
 			parseGameDataFromTR(data, gameTr);
+			// Ignore duplicates for PSN, no way to differentiate
+			if (gameData.stream()
+					.anyMatch(existing -> existing.getTitle().toLowerCase().equals(data.getTitle().toLowerCase()))) {
+				Log.warn("Game " + data.getTitle() + " (" + data.getId() + ") is duplicate for " + getSource().getName()
+						+ ". Ignoring.");
+				continue;
+			}
 			model.getConsoleDataMap().get(getId()).getGameDataMap().put(data.getId(), data);
 			gameData.add(data);
 		}

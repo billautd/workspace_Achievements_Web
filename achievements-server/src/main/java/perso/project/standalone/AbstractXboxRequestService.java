@@ -1,5 +1,6 @@
 package perso.project.standalone;
 
+import java.io.File;
 import java.util.List;
 
 import org.jsoup.nodes.Document;
@@ -11,12 +12,11 @@ import perso.project.model.GameData;
 
 public abstract class AbstractXboxRequestService extends AbstractStandaloneRequestService {
 
-	static final String BULLET_CHARACTER = " • ";
-
 	@Override
-	protected void parseDocument(final List<GameData> gameData, Document document) {
+	protected void parseDocument(final File htmlFile, final List<GameData> gameData, Document document) {
 		final Element gameList = document.select("section.section").selectFirst("ul.list");
 		final Elements gameLis = gameList.select("li");
+
 		for (final Element gameLi : gameLis) {
 			final GameData data = new GameData();
 			data.setConsoleId(getId());
@@ -24,6 +24,17 @@ public abstract class AbstractXboxRequestService extends AbstractStandaloneReque
 			parseGameDataFromLI(data, gameLi);
 			gameData.add(data);
 			model.getConsoleDataMap().get(getId()).getGameDataMap().put(data.getId(), data);
+			// Add region to JP games
+			if (htmlFile.getName().startsWith("JP")) {
+				data.setTitle(data.getTitle() + " (JP)");
+			}
+			// Ignore duplicates for Xbox, no way to differentiate
+			if (gameData.stream()
+					.anyMatch(existing -> existing.getTitle().toLowerCase().equals(data.getTitle().toLowerCase()))) {
+				Log.warn("Game " + data.getTitle() + " (" + data.getId() + ") is duplicate for " + getSource().getName()
+						+ ". Ignoring.");
+				continue;
+			}
 		}
 	}
 
