@@ -6,14 +6,10 @@ import perso.project.model.enums.ConsoleSourceEnum;
 
 public class CompareData {
 	private ConsoleSourceEnum source = null;
-
 	private String consoleName = "";
 	private int consoleId = 0;
-
 	private String name = "";
-
 	private CompareDataStatusEnum status = null;
-
 	private CompletionStatusEnum playniteStatus = null;
 	private CompletionStatusEnum databaseStatus = null;
 

@@ -6,7 +6,7 @@ import io.quarkus.logging.Log;
 
 public class ExcelUtils {
 	private ExcelUtils() {
-
+		// Static methods only
 	}
 
 	public static String getCellAsString(final Cell cell) {

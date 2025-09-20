@@ -234,12 +234,15 @@ public class SteamRequestService extends AbstractRequestService {
 			for (final Row row : removedWorkbook.getSheetAt(0)) {
 				final String gameName = ExcelUtils.getCellAsString(row.getCell(0));
 				final int gameId = ExcelUtils.getCellAsInt(row.getCell(1));
-				final GameData gameData = new GameData();
-				gameData.setConsoleId(Model.STEAM_CONSOLE_ID);
-				gameData.setConsoleName("Steam");
-				gameData.setId(gameId);
-				gameData.setTitle(gameName);
-				gameData.setCompletionStatus(CompletionStatusEnum.CANNOT_PLAY);
+				GameData gameData = model.getConsoleDataMap().get(Model.STEAM_CONSOLE_ID).getGameDataMap().get(gameId);
+				if (gameData == null) {
+					gameData = new GameData();
+					gameData.setConsoleId(Model.STEAM_CONSOLE_ID);
+					gameData.setConsoleName("Steam");
+					gameData.setId(gameId);
+					gameData.setTitle(gameName);
+				}
+				// Completion status is parsed in standard way through parseAchievementData
 				model.getConsoleDataMap().get(Model.STEAM_CONSOLE_ID).getGameDataMap().put(gameId, gameData);
 				removedList.add(gameData);
 				Log.info(gameName + " (" + gameId + ") for Steam is Removed");

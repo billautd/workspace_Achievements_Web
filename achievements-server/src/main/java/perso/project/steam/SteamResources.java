@@ -1,5 +1,6 @@
 package perso.project.steam;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -17,6 +18,7 @@ import perso.project.model.CompareData;
 import perso.project.model.ConsoleData;
 import perso.project.model.GameData;
 import perso.project.model.MainModel;
+import perso.project.model.Model;
 import perso.project.model.enums.ConsoleSourceEnum;
 import perso.project.playnite.PlayniteService;
 
@@ -63,11 +65,14 @@ public class SteamResources {
 	@Path("/owned_games")
 	@Produces(MediaType.TEXT_PLAIN)
 	public String getOwnedGames() throws JsonProcessingException {
-		final List<GameData> data = steamRequestService.getOwnedGames();
-		Log.info("Returning " + data.size() + " Steam owned games");
+		steamRequestService.getOwnedGames();
 		steamRequestService.getSteamGames_Beaten(steamBeatenPath);
 		steamRequestService.getSteamGames_Mastered(steamMasteredPath);
 		steamRequestService.getSteamGames_Removed(steamRemovedPath);
+
+		final Collection<GameData> data = model.getConsoleDataMap().get(Model.STEAM_CONSOLE_ID).getGameDataMap()
+				.values();
+		Log.info("Returning " + data.size() + " Steam owned games");
 		return steamRequestService.getMapper().writeValueAsString(data);
 	}
 

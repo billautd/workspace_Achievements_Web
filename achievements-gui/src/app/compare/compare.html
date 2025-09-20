@@ -33,7 +33,7 @@
                         <div style="width:30%">{{comp.consoleName}}</div>
                     </div>
                     }
-                    @if(notInLocal.length == 0){
+                    @if(notInDatabase.length == 0){
                     <img src="ok.svg" class="ok-icon">
                     }
                 </div>
@@ -61,7 +61,7 @@
                 </div>
             </div>
             }
-            @if(notInLocal.length == 0){
+            @if(completionStatusDifferent.length == 0){
             <img src="ok.svg" class="ok-icon">
             }
 
