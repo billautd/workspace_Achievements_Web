@@ -318,6 +318,7 @@ export class Table {
   updateConsolesList(): void {
     this.consolesList = [];
     this.model.getConsoleData().forEach(c => this.consolesList.push(c.Name));
+    this.consolesList.sort((o1, o2) => o1.localeCompare(o2))
   }
 
   completionStatusClass(status: CompletionStatusType): any {

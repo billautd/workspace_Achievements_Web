@@ -64,7 +64,7 @@ export class MainData {
 
       this.updateSteamAchievementsText();
       this.updateRAAchievementsText(this.raConsoleIds);
-      this.updateRAAchievementsText([this.selectedRAConsoleId]);
+      this.updateRAConsoleAchievementsText(this.selectedRAConsoleId);
     })
 
   }
@@ -127,11 +127,7 @@ export class MainData {
     }
     //Update achivements number text
     const totalText: string = earned + " / " + total;
-    if (ids.length > 1) {
-      this.raAchievementsText = totalText;
-    } else if (ids.length == 1) {
-      this.raConsoleAchievementsText = totalText
-    }
+    this.raAchievementsText = totalText;
 
     //Update achivements percentage text
     let percentageText: string;
@@ -141,11 +137,39 @@ export class MainData {
       const num: number = earned / total;
       percentageText = Number(num).toLocaleString(undefined, { style: 'percent', minimumFractionDigits: 0 });;
     }
-    if (ids.length > 1) {
-      this.raAchievementsPercentageText = percentageText;
-    } else if (ids.length == 1) {
-      this.raConsoleAchievementsPercentageText = percentageText;
+    this.raAchievementsPercentageText = percentageText;
+  }
+
+  updateRAConsoleAchievementsText(id: number) {
+    //Get total and earned
+    let earned: number = 0;
+    let total: number = 0;
+    console.log(id);
+    for (const console of this.model.getConsoleData()) {
+      if (console[1].Source != ConsoleSource.RETRO_ACHIEVEMENTS) {
+        continue;
+      }
+      if (id == console[1].ID) {
+        for (const game of console[1].Games) {
+          earned += game[1].NumAwardedHardcore;
+          total += game[1].MaxPossible;
+        }
+        break;
+      }
     }
+    //Update achivements number text
+    const totalText: string = earned + " / " + total;
+    this.raConsoleAchievementsText = totalText
+
+    //Update achivements percentage text
+    let percentageText: string;
+    if (total == 0) {
+      percentageText = "- %";
+    } else {
+      const num: number = earned / total;
+      percentageText = Number(num).toLocaleString(undefined, { style: 'percent', minimumFractionDigits: 0 });;
+    }
+    this.raConsoleAchievementsPercentageText = percentageText;
   }
 
   updateRAConsolesList(): void {
@@ -155,6 +179,7 @@ export class MainData {
         this.raConsolesList.push(c.Name);
       }
     })
+    this.raConsolesList.sort((o1, o2) => o1.localeCompare(o2))
   }
 
   updateStandaloneConsolesList(): void {
@@ -173,7 +198,8 @@ export class MainData {
         this.selectedRAConsoleId = c.ID;
       }
     }
-    this.raChartCanvas.updateChartData([this.selectedRAConsoleId]);
+    this.raConsoleChartCanvas.updateChartData([this.selectedRAConsoleId]);
+    this.updateRAConsoleAchievementsText(this.selectedRAConsoleId);
   }
 
   changeStandaloneSelectedConsole(event: MatSelectChange<any>) {
