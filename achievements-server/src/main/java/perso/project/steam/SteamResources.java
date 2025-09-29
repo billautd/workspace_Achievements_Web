@@ -68,7 +68,7 @@ public class SteamResources {
 		steamRequestService.getOwnedGames();
 		steamRequestService.getSteamGames_Beaten(steamBeatenPath);
 		steamRequestService.getSteamGames_Mastered(steamMasteredPath);
-		steamRequestService.getSteamGames_Removed(steamRemovedPath);
+		steamRequestService.getSteamGames_NotInDatabase(steamRemovedPath);
 
 		final Collection<GameData> data = model.getConsoleDataMap().get(Model.STEAM_CONSOLE_ID).getGameDataMap()
 				.values();
@@ -92,7 +92,7 @@ public class SteamResources {
 		playniteService.getPlayniteData(playniteDataPath);
 		steamRequestService.getSteamGames_Beaten(steamBeatenPath);
 		steamRequestService.getSteamGames_Mastered(steamMasteredPath);
-		steamRequestService.getSteamGames_Removed(steamRemovedPath);
+		steamRequestService.getSteamGames_NotInDatabase(steamRemovedPath);
 		final List<CompareData> data = steamCompareService.getCompareData();
 		Log.info("Returning Steam " + data.size() + " compare data");
 		return steamRequestService.getMapper().writeValueAsString(data);

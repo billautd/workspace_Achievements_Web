@@ -1,7 +1,6 @@
 package perso.project.steam;
 
-import java.io.File;
-import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -9,18 +8,22 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.opencsv.CSVReader;
+import com.opencsv.CSVReaderBuilder;
+import com.opencsv.RFC4180Parser;
+import com.opencsv.RFC4180ParserBuilder;
+import com.opencsv.exceptions.CsvException;
 
 import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -32,7 +35,6 @@ import perso.project.model.SteamAchievementData;
 import perso.project.model.enums.CompletionStatusEnum;
 import perso.project.model.enums.ConsoleSourceEnum;
 import perso.project.utils.AbstractRequestService;
-import perso.project.utils.ExcelUtils;
 import perso.project.utils.LoggingUtils;
 
 @ApplicationScoped
@@ -176,10 +178,18 @@ public class SteamRequestService extends AbstractRequestService {
 	public List<GameData> getSteamGames_Beaten(final Path path) {
 		Log.info("Reading " + path);
 		final List<GameData> beatenList = new ArrayList<>();
-		try (final XSSFWorkbook beatenWorkbook = new XSSFWorkbook(new FileInputStream(new File(path.toString())))) {
-			for (final Row row : beatenWorkbook.getSheetAt(0)) {
-				final String gameName = ExcelUtils.getCellAsString(row.getCell(0));
-				final int gameId = ExcelUtils.getCellAsInt(row.getCell(1));
+		final RFC4180Parser rfc4180Parser = new RFC4180ParserBuilder().build();
+		try (final FileReader fileReader = new FileReader(path.toFile(), StandardCharsets.UTF_8)) {
+			final CSVReader reader = new CSVReaderBuilder(fileReader).withCSVParser(rfc4180Parser).build();
+			final List<String[]> stringList = reader.readAll();
+			for (final String[] str : stringList) {
+				final String gameName = str[0];
+				final String gameIdStr = str[1];
+				if (gameIdStr.isBlank()) {
+					Log.error("No game id for game " + gameName);
+					continue;
+				}
+				final int gameId = Integer.parseInt(gameIdStr);
 				GameData gameData = model.getConsoleDataMap().get(Model.STEAM_CONSOLE_ID).getGameDataMap().get(gameId);
 				if (gameData == null) {
 					gameData = new GameData();
@@ -194,7 +204,7 @@ public class SteamRequestService extends AbstractRequestService {
 				Log.info(gameName + " (" + gameId + ") for Steam is Beaten");
 			}
 			return beatenList;
-		} catch (IOException e) {
+		} catch (final IOException | CsvException e) {
 			Log.error("Cannot read Steam beaten file at " + path);
 			return null;
 		}
@@ -203,10 +213,18 @@ public class SteamRequestService extends AbstractRequestService {
 	public List<GameData> getSteamGames_Mastered(final Path path) {
 		Log.info("Reading " + path);
 		final List<GameData> masteredList = new ArrayList<>();
-		try (final XSSFWorkbook masteredWorkbook = new XSSFWorkbook(new FileInputStream(new File(path.toString())))) {
-			for (final Row row : masteredWorkbook.getSheetAt(0)) {
-				final String gameName = ExcelUtils.getCellAsString(row.getCell(0));
-				final int gameId = ExcelUtils.getCellAsInt(row.getCell(1));
+		final RFC4180Parser rfc4180Parser = new RFC4180ParserBuilder().build();
+		try (final FileReader fileReader = new FileReader(path.toFile(), StandardCharsets.UTF_8)) {
+			final CSVReader reader = new CSVReaderBuilder(fileReader).withCSVParser(rfc4180Parser).build();
+			final List<String[]> stringList = reader.readAll();
+			for (final String[] str : stringList) {
+				final String gameName = str[0];
+				final String gameIdStr = str[1];
+				if (gameIdStr.isBlank()) {
+					Log.error("No game id for game " + gameName);
+					continue;
+				}
+				final int gameId = Integer.parseInt(gameIdStr);
 				GameData gameData = model.getConsoleDataMap().get(Model.STEAM_CONSOLE_ID).getGameDataMap().get(gameId);
 				if (gameData == null) {
 					gameData = new GameData();
@@ -221,35 +239,50 @@ public class SteamRequestService extends AbstractRequestService {
 				Log.info(gameName + " (" + gameId + ") for Steam is Mastered");
 			}
 			return masteredList;
-		} catch (IOException e) {
-			Log.error("Cannot read Steam beaten file at " + path);
+		} catch (final IOException | CsvException e) {
+			Log.error("Cannot read Steam mastered file at " + path);
 			return null;
 		}
 	}
 
-	public List<GameData> getSteamGames_Removed(final Path path) {
+	public List<GameData> getSteamGames_NotInDatabase(final Path path) {
 		Log.info("Reading " + path);
 		final List<GameData> removedList = new ArrayList<>();
-		try (final XSSFWorkbook removedWorkbook = new XSSFWorkbook(new FileInputStream(new File(path.toString())))) {
-			for (final Row row : removedWorkbook.getSheetAt(0)) {
-				final String gameName = ExcelUtils.getCellAsString(row.getCell(0));
-				final int gameId = ExcelUtils.getCellAsInt(row.getCell(1));
+		final RFC4180Parser rfc4180Parser = new RFC4180ParserBuilder().build();
+		try (final FileReader fileReader = new FileReader(path.toFile(), StandardCharsets.UTF_8)) {
+			final CSVReader reader = new CSVReaderBuilder(fileReader).withCSVParser(rfc4180Parser).build();
+			final List<String[]> stringList = reader.readAll();
+			for (int i = 0; i < stringList.size(); i++) {
+				final String[] str = stringList.get(i);
+				final String gameName = str[0];
+				final String gameIdStr = str[1];
+				Integer gameId = null;
+				if (gameIdStr.isBlank()) {
+					Log.error("No game id for game " + gameName);
+					continue;
+				}
+				try {
+					gameId = Integer.parseInt(gameIdStr);
+				} catch (final NumberFormatException e) {
+					Log.error("Cannot parse int value for string " + gameIdStr + " at index " + i);
+					continue;
+				}
 				GameData gameData = model.getConsoleDataMap().get(Model.STEAM_CONSOLE_ID).getGameDataMap().get(gameId);
 				if (gameData == null) {
 					gameData = new GameData();
+					gameData.setTitle(gameName);
+					gameData.setId(gameId);
 					gameData.setConsoleId(Model.STEAM_CONSOLE_ID);
 					gameData.setConsoleName("Steam");
-					gameData.setId(gameId);
-					gameData.setTitle(gameName);
 				}
 				// Completion status is parsed in standard way through parseAchievementData
 				model.getConsoleDataMap().get(Model.STEAM_CONSOLE_ID).getGameDataMap().put(gameId, gameData);
 				removedList.add(gameData);
-				Log.info(gameName + " (" + gameId + ") for Steam is Removed");
+				Log.info(gameName + " (" + gameId + ") for Steam is not in database");
 			}
 			return removedList;
-		} catch (IOException e) {
-			Log.error("Cannot read Steam beaten file at " + path);
+		} catch (final IOException | CsvException e) {
+			Log.error("Cannot read Steam removed file at " + path);
 			return null;
 		}
 	}
