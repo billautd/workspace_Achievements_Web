@@ -274,6 +274,8 @@ public class SteamRequestService extends AbstractRequestService {
 					gameData.setId(gameId);
 					gameData.setConsoleId(Model.STEAM_CONSOLE_ID);
 					gameData.setConsoleName("Steam");
+				} else {
+					Log.error("Removed game " + gameName + " (" + gameId + ") exists in Steam database");
 				}
 				// Completion status is parsed in standard way through parseAchievementData
 				model.getConsoleDataMap().get(Model.STEAM_CONSOLE_ID).getGameDataMap().put(gameId, gameData);
