@@ -1,9 +1,9 @@
 package perso.project.model;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import perso.project.model.enums.ConsoleSourceEnum;
 
@@ -13,9 +13,9 @@ public class Model {
 	public static final int PSVITA_CONSOLE_ID = 300000;
 	public static final int XBOX360_CONSOLE_ID = 400000;
 
-	private final Map<Integer, ConsoleData> consoleDataMap = new ConcurrentHashMap<>();
+	private final Map<Integer, ConsoleData> consoleDataMap = new HashMap<>();
 
-	private final Map<String, PlayniteGameData> playniteData = new ConcurrentHashMap<>();
+	private final Map<String, PlayniteGameData> playniteData = new HashMap<>();
 
 	public Map<Integer, ConsoleData> getConsoleDataMap() {
 		return consoleDataMap;
