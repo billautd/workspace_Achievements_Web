@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import perso.project.model.enums.ConsoleSourceEnum;
 
@@ -26,13 +27,12 @@ public class Model {
 	}
 
 	public List<GameData> getGameDataForSources(final List<ConsoleSourceEnum> sources) {
-		final List<ConsoleData> values = List.copyOf(consoleDataMap.values());
-		return values.stream().filter(c -> sources.contains(c.getSource())).map(c -> c.getGameDataMap().values())
-				.flatMap(Collection::stream).toList();
+		return consoleDataMap.values().stream().filter(c -> sources.contains(c.getSource()))
+				.map(c -> c.getGameDataMap().values()).flatMap(Collection::stream).collect(Collectors.toList());
 	}
 
 	public List<PlayniteGameData> getPlayniteGameDataForSources(final List<ConsoleSourceEnum> sources) {
-		final List<PlayniteGameData> values = List.copyOf(getPlayniteData().values());
-		return values.stream().filter(g -> g.getSource() != null && sources.contains(g.getSource())).toList();
+		return getPlayniteData().values().stream().filter(g -> g.getSource() != null && sources.contains(g.getSource()))
+				.collect(Collectors.toList());
 	}
 }
