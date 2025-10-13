@@ -27,12 +27,16 @@ public class Model {
 	}
 
 	public List<GameData> getGameDataForSources(final List<ConsoleSourceEnum> sources) {
-		return consoleDataMap.values().stream().filter(c -> sources.contains(c.getSource()))
-				.map(c -> c.getGameDataMap().values()).flatMap(Collection::stream).collect(Collectors.toList());
+		synchronized (consoleDataMap) {
+			return consoleDataMap.values().stream().filter(c -> sources.contains(c.getSource()))
+					.map(c -> c.getGameDataMap().values()).flatMap(Collection::stream).collect(Collectors.toList());
+		}
 	}
 
 	public List<PlayniteGameData> getPlayniteGameDataForSources(final List<ConsoleSourceEnum> sources) {
-		return getPlayniteData().values().stream().filter(g -> g.getSource() != null && sources.contains(g.getSource()))
-				.collect(Collectors.toList());
+		synchronized (playniteData) {
+			return playniteData.values().stream().filter(g -> g.getSource() != null && sources.contains(g.getSource()))
+					.collect(Collectors.toList());
+		}
 	}
 }
