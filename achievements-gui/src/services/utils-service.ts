@@ -1,3 +1,4 @@
+import { AchievementType } from "../model/achievementData";
 import { ConsoleSource } from "../model/consoleData";
 import { CompletionStatusType } from "../model/gameData";
 
@@ -47,6 +48,19 @@ export class UtilsService {
         return "Xbox 360";
       default:
         return "No source";
+    }
+  }
+
+  static sortAchievementType(type: AchievementType) {
+    switch (type) {
+      case AchievementType.MISSABLE:
+        return 1;
+      case AchievementType.PROGRESSION:
+        return 2;
+      case AchievementType.WIN_CONDITION:
+        return 3;
+      default:
+        return 999;
     }
   }
 }
