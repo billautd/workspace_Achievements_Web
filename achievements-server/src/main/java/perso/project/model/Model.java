@@ -1,10 +1,10 @@
 package perso.project.model;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import perso.project.model.enums.ConsoleSourceEnum;
 
@@ -27,16 +27,14 @@ public class Model {
 	}
 
 	public List<GameData> getGameDataForSources(final List<ConsoleSourceEnum> sources) {
-		synchronized (consoleDataMap) {
-			return consoleDataMap.values().stream().filter(c -> sources.contains(c.getSource()))
-					.map(c -> c.getGameDataMap().values()).flatMap(Collection::stream).collect(Collectors.toList());
-		}
+		return consoleDataMap.values().stream().filter(c -> sources.contains(c.getSource()))
+				.map(c -> c.getGameDataMap().values()).flatMap(Collection::stream).toList();
 	}
 
 	public List<PlayniteGameData> getPlayniteGameDataForSources(final List<ConsoleSourceEnum> sources) {
 		synchronized (playniteData) {
-			return playniteData.values().stream().filter(g -> g.getSource() != null && sources.contains(g.getSource()))
-					.collect(Collectors.toList());
+			final List<PlayniteGameData> data = new ArrayList<>(playniteData.values());
+			return data.stream().filter(g -> g.getSource() != null && sources.contains(g.getSource())).toList();
 		}
 	}
 }

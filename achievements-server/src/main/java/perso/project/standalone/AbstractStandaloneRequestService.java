@@ -75,6 +75,7 @@ public abstract class AbstractStandaloneRequestService extends AbstractRequestSe
 		return gameData;
 	}
 
+	@Override
 	public List<ConsoleData> getConsoleIds() {
 		ConsoleData saConsoleData;
 		if (!model.getConsoleDataMap().containsKey(getId())) {
@@ -116,6 +117,8 @@ public abstract class AbstractStandaloneRequestService extends AbstractRequestSe
 					gameData.setConsoleName(getSource().getName());
 				}
 				gameData.setCompletionStatus(CompletionStatusEnum.BEATEN);
+				setAchievementPercent(gameData);
+
 				model.getConsoleDataMap().get(getId()).getGameDataMap().put(gameId, gameData);
 				beatenList.add(gameData);
 				Log.info(gameName + " (" + gameId + ") for " + getSource() + " is Beaten");
@@ -151,6 +154,8 @@ public abstract class AbstractStandaloneRequestService extends AbstractRequestSe
 					gameData.setConsoleName(getSource().getName());
 				}
 				gameData.setCompletionStatus(CompletionStatusEnum.MASTERED);
+				setAchievementPercent(gameData);
+
 				model.getConsoleDataMap().get(getId()).getGameDataMap().put(gameId, gameData);
 				masteredList.add(gameData);
 				Log.info(gameName + " (" + gameId + ") for " + getSource() + " is Mastered");
@@ -165,6 +170,7 @@ public abstract class AbstractStandaloneRequestService extends AbstractRequestSe
 	public GameData parseCompletionStatus(final GameData gameData) {
 		if (gameData.getCompletionStatus() == null) {
 			Log.error("Game " + gameData.getTitle() + " has null completion status");
+			return gameData;
 		}
 		// If beaten or mastered, already set by other methods
 		if (CompletionStatusEnum.NOT_PLAYED.equals(gameData.getCompletionStatus())) {
@@ -176,6 +182,7 @@ public abstract class AbstractStandaloneRequestService extends AbstractRequestSe
 				gameData.setCompletionStatus(CompletionStatusEnum.TRIED);
 			}
 		}
+		setAchievementPercent(gameData);
 		return gameData;
 	}
 }

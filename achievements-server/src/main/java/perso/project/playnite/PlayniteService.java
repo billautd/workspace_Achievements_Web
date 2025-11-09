@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
@@ -26,25 +27,32 @@ public class PlayniteService {
 	Model model;
 
 	public void getPlayniteData(final Path path) {
-		model.getPlayniteData().clear();
-		final RFC4180Parser rfc4180Parser = new RFC4180ParserBuilder().build();
-		try (final FileReader fileReader = new FileReader(path.toFile(), StandardCharsets.UTF_8)) {
-			final CSVReader reader = new CSVReaderBuilder(fileReader).withCSVParser(rfc4180Parser).build();
-			// Read headers
-			reader.readNextSilently();
-			final List<String[]> stringList = reader.readAll();
-			for (final String[] str : stringList) {
-				final PlayniteGameData playniteData = new PlayniteGameData();
-				playniteData.setName(str[0]);
-				playniteData.setGameId(str[1]);
-				playniteData.setPlatform(str[3]);
-				mapSource(playniteData, str[4]);
-				mapCompletionStatus(playniteData, str[2]);
-				model.getPlayniteData().put(playniteData.getGameId(), playniteData);
+		final Map<String, PlayniteGameData> playniteDataMap = model.getPlayniteData();
+		synchronized (playniteDataMap) {
+			playniteDataMap.clear();
+			final RFC4180Parser rfc4180Parser = new RFC4180ParserBuilder().build();
+			try (final FileReader fileReader = new FileReader(path.toFile(), StandardCharsets.UTF_8)) {
+				final CSVReader reader = new CSVReaderBuilder(fileReader).withCSVParser(rfc4180Parser).build();
+				// Read headers
+				reader.readNextSilently();
+				final List<String[]> stringList = reader.readAll();
+				for (final String[] str : stringList) {
+					final String id = str[1];
+					PlayniteGameData playniteData = playniteDataMap.get(id);
+					if (playniteData == null) {
+						playniteData = new PlayniteGameData();
+						playniteData.setGameId(id);
+						playniteDataMap.put(playniteData.getGameId(), playniteData);
+					}
+					playniteData.setName(str[0]);
+					playniteData.setPlatform(str[3]);
+					mapSource(playniteData, str[4]);
+					mapCompletionStatus(playniteData, str[2]);
+				}
+				Log.info("Found Playnite data with " + playniteDataMap.size() + " games");
+			} catch (final IOException | CsvException e) {
+				Log.error("Error reading file at " + path);
 			}
-			Log.info("Found Playnite data with " + model.getPlayniteData().size() + " games");
-		} catch (final IOException | CsvException e) {
-			Log.error("Error reading file at " + path);
 		}
 	}
 

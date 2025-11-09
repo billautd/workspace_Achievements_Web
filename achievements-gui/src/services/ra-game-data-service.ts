@@ -2,32 +2,26 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../environments/environment';
-import { CompareData } from '../model/compareData';
 import { ConsoleData, ConsoleSource } from '../model/consoleData';
 import { GameData } from '../model/gameData';
 import { Model } from '../model/model';
 import { UtilsService } from './utils-service';
+import { AbstractSpecificGameDataService } from './abstract-game-data-service';
 
 @Injectable({
   providedIn: 'root'
 })
-export class RAGameDataService {
+export class RAGameDataService extends AbstractSpecificGameDataService {
   RA_PATH: string = "ra/";
   COMPLETION_PROGRESS_METHOD: string = "completion_progress/";
-  GAME_DATA_METHOD: string = "game_data/";
-  CONSOLE_DATA_METHOD: string = "console_data/";
-  COMPARE_DATA_METHOD: string = "compare_data/";
-  EXISTING_DATA_METHOD: string = "existing_data/";
 
   consoleReqCounter: number = 0;
 
-  /**
-   * 
-   * @param http : HttpClient
-   * @returns Promise for getting all RA console data
-   */
-  requestRAConsoleData(http: HttpClient): Promise<ConsoleData[]> {
-    return firstValueFrom(http.get<ConsoleData[]>(environment.API_URL + this.RA_PATH + this.CONSOLE_DATA_METHOD));
+  override getSource(): ConsoleSource {
+    return ConsoleSource.RETRO_ACHIEVEMENTS;
+  }
+  override getMainPath(): string {
+    return this.RA_PATH;
   }
 
   /**
@@ -43,7 +37,7 @@ export class RAGameDataService {
    * @param http : HttpClient
    * @returns Empty promise for getting all RA game data
    */
-  async requestRAGameData(model: Model, http: HttpClient): Promise<any> {
+  override async requestAllGameData(model: Model, http: HttpClient): Promise<any> {
 
     const processing = (gameData: GameData[]) => {
       for (const game of gameData) {
@@ -85,29 +79,7 @@ export class RAGameDataService {
 
     //Send request for compare data
     this.compareData(model, http);
-    return null;
-  }
-
-  async requestRAExistingGameData(model: Model, http: HttpClient): Promise<any> {
-    const gameData: GameData[] = await firstValueFrom(http.get<GameData[]>(environment.API_URL + this.RA_PATH + this.EXISTING_DATA_METHOD));
-    for (const game of gameData) {
-      const consoleData: ConsoleData | undefined = model.getConsoleData().get(game.ConsoleID);
-      if (!consoleData) {
-        console.log("No console " + game.ConsoleName + " (" + game.ConsoleID + ") found");
-        return;
-      }
-      //Add data to console data
-      consoleData.Games.set(game.ID, game);
-    }
-    //Force refresh data
-    model.refreshData(gameData);
-  }
-
-  async compareData(model: Model, http: HttpClient): Promise<any> {
-    const compareData: CompareData[] = await firstValueFrom(http.get<any>(environment.API_URL + this.RA_PATH + this.COMPARE_DATA_METHOD))
-    model.getCompareData().set(ConsoleSource.RETRO_ACHIEVEMENTS, compareData);
-    model.refreshCompareData(compareData);
-    console.log("Process RA " + compareData.length + " compare data");
+    this.writeDatabase(http);
     return null;
   }
 }

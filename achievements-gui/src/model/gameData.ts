@@ -1,3 +1,5 @@
+import { AchievementData } from "./achievementData";
+
 export enum CompletionStatusType {
     NOT_PLAYED = "NOT_PLAYED",
     TRIED = "TRIED",
@@ -16,4 +18,7 @@ export type GameData = {
     MaxPossible: number,
     NumAwardedHardcore: number;
     Points: number;
+    AchievementData: AchievementData[];
+    Percent: number;
+    Image: string;
 }

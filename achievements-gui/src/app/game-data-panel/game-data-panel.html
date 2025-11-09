@@ -1,0 +1,122 @@
+<div class="game-data-parent">
+    <div class="game-info">
+        <img class="game-header" [src]="selectedGame.Image" />
+        <mat-divider vertical="true"></mat-divider>
+        <div class="game-console-data">
+            <img [src]="sourceIcon(selectedGame)" class="source-icon">
+            <div class="game-console">{{selectedGame.ConsoleName}}</div>
+        </div>
+        <div class="game-achievements-information">
+            <div class="game-title-points">
+                <div class="game-title">{{selectedGame.Title}}</div>
+                <div class="game-points">{{getGamePoints(selectedGame)}}
+                    ({{getGameTruePoints(selectedGame)}}&nbsp;&nbsp;x{{getGameRatio(selectedGame)}}) </div>
+            </div>
+            <div class="game-progress-bar-wrapper">
+                <mat-progress-bar class="game-progress-bar" mode="determinate" [value]="selectedGame.Percent">
+                </mat-progress-bar>
+                <div class="game-progress-bar-value"> {{selectedGame.NumAwardedHardcore}} / {{selectedGame.MaxPossible}}
+                </div>
+            </div>
+            <button class="request-data-button" (click)="refreshData()" [disabled]="isRequestRunning">
+                Refresh data
+            </button>
+        </div>
+    </div>
+    @if(selectedGame.AchievementData.length > 0){
+    <div class="game-achievements-sort">
+        <mat-form-field style="align-self: center">
+            <mat-label>Sort</mat-label>
+            <mat-select (selectionChange)="changeSort($event)" [formControl]="sortOptions">
+                @for (sort of sortOptionsList; track sort){
+                <mat-option [value]="sort">{{sortText(sort)}}</mat-option>
+                }
+            </mat-select>
+        </mat-form-field>
+    </div>
+    }
+    <div class="game-achievements-data">
+        @if(sortedAchievements.length > 0){
+        <div class="game-achievements-list">
+            @for (ach of sortedAchievements; track ach){
+            @if(ach.achieved){
+            <button class="game-achievement-box" (click)="selectAchievement(ach)">
+                <img class="game-achievement-icon" [ngClass]="achievementIconClass(ach.percent)"
+                    [src]="ach.achieved ? ach.icon : ach.icongray" />
+                @if(isMissable(ach)){
+                <img src="missable.svg" class="missable-icon" />
+                }
+                @if(isProgression(ach)){
+                <img src="progression.svg" class="progression-icon" />
+                }
+                @if(isWinCondition(ach)){
+                <img src="win_condition.svg" class="win-condition-icon" />
+                }
+            </button>
+            }
+            }
+        </div>
+        <div class="game-achievements-list">
+            @for (ach of sortedAchievements; track ach){
+            @if(!ach.achieved){
+            <button class="game-achievement-box" (click)="selectAchievement(ach)">
+                <img class="game-achievement-icon" [ngClass]="achievementIconClass(ach.percent)"
+                    [src]="ach.achieved ? ach.icon : ach.icongray" />
+                @if(isMissable(ach)){
+                <img src="missable.svg" class="missable-icon" />
+                }
+                @if(isProgression(ach)){
+                <img src="progression.svg" class="progression-icon" />
+                }
+                @if(isWinCondition(ach)){
+                <img src="win_condition.svg" class="win-condition-icon" />
+                }
+            </button>
+            }
+            }
+        </div>
+        <div class="game-achievement-description-container">
+            @if(selectedAchievement != undefined){
+            <div class="game-achievement-description-box">
+                <div class="game-achievement-description-box-type">
+                    <img class="game-achievement-description-icon"
+                        [ngClass]="achievementIconClass(selectedAchievement.percent)"
+                        [src]="(selectedAchievement != undefined && selectedAchievement.achieved) ? selectedAchievement.icon : selectedAchievement.icongray" />
+                    @if(isMissable(selectedAchievement)){
+                    <div class="game-achievement-type">
+                        <img src="missable.svg" class="missable-icon-big" />
+                        <div class="game-achievement-type-text">Missable</div>
+                    </div>
+                    }
+                    @if(isProgression(selectedAchievement)){
+                    <div class="game-achievement-type">
+                        <img src="progression.svg" class="progression-icon-big" />
+                        <div class="game-achievement-type-text">Progression</div>
+                    </div>
+                    }
+                    @if(isWinCondition(selectedAchievement)){
+                    <div class="game-achievement-type">
+                        <img src="win_condition.svg" class="win-condition-icon-big" />
+                        <div class="game-achievement-type-text">Win condition</div>
+                    </div>
+                    }
+                </div>
+                <div class="game-achievement-title-points">
+                    <div class="game-achievement-title">{{selectedAchievement.displayName}}</div>
+                    <div class="game-achievement-points">{{selectedAchievement.Points}}
+                        ({{selectedAchievement.TrueRatio}})</div>
+                </div>
+                <div class="game-achievement-description">{{selectedAchievement.description}}</div>
+                <div class="game-achievement-rarity" [ngClass]="achievementIconClass(selectedAchievement.percent)">
+                    {{selectedAchievement.percent}} %</div>
+            </div>
+            }
+        </div>
+        }
+        @else {
+        <div class=" game-no-achievement">
+            No achievements
+        </div>
+        }
+    </div>
+</div>

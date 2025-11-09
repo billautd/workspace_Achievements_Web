@@ -22,8 +22,6 @@ public abstract class AbstractXboxRequestService extends AbstractStandaloneReque
 			data.setConsoleId(getId());
 			data.setConsoleName(getSource().getName());
 			parseGameDataFromLI(data, gameLi);
-			gameData.add(data);
-			model.getConsoleDataMap().get(getId()).getGameDataMap().put(data.getId(), data);
 			// Add region to JP games
 			if (htmlFile.getName().startsWith("JP")) {
 				data.setTitle(data.getTitle() + " (JP)");
@@ -35,6 +33,8 @@ public abstract class AbstractXboxRequestService extends AbstractStandaloneReque
 						+ ". Ignoring.");
 				continue;
 			}
+			gameData.add(data);
+			model.getConsoleDataMap().get(getId()).getGameDataMap().put(data.getId(), data);
 		}
 	}
 

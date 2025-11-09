@@ -20,6 +20,7 @@ public class SteamCompareService extends AbstractCompareService {
 	@Inject
 	Model model;
 
+	@Override
 	public List<CompareData> getCompareData() {
 		final List<PlayniteGameData> steamPlayniteData = model
 				.getPlayniteGameDataForSources(List.of(ConsoleSourceEnum.STEAM));

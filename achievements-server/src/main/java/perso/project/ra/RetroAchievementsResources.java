@@ -13,15 +13,13 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
-import perso.project.model.CompareData;
-import perso.project.model.ConsoleData;
 import perso.project.model.GameData;
 import perso.project.model.MainModel;
 import perso.project.model.enums.ConsoleSourceEnum;
-import perso.project.playnite.PlayniteService;
+import perso.project.utils.AbstractResources;
 
 @Path("/ra")
-public class RetroAchievementsResources {
+public class RetroAchievementsResources extends AbstractResources {
 	@Inject
 	RetroAchievementsRequestService raRequestService;
 
@@ -29,22 +27,17 @@ public class RetroAchievementsResources {
 	RetroAchievementsCompareService raCompareService;
 
 	@Inject
-	PlayniteService playniteService;
-
-	@Inject
 	MainModel model;
 
 	@Inject
-	@ConfigProperty(name = "playnite.data.path")
-	private java.nio.file.Path playniteDataPath;
+	@ConfigProperty(name = "ra.database.path")
+	private java.nio.file.Path raDatabasePath;
 
 	@GET
 	@Path("/console_data")
 	@Produces(MediaType.TEXT_PLAIN)
 	public String getConsoleIds() throws JsonProcessingException {
-		final List<ConsoleData> data = raRequestService.getConsoleIds();
-		Log.info("Returning RetroAchievements data for " + data.size() + " consoles");
-		return raRequestService.getMapper().writeValueAsString(data);
+		return getConsoleIds(raRequestService);
 	}
 
 	@GET
@@ -70,18 +63,34 @@ public class RetroAchievementsResources {
 	@Path("/compare_data")
 	@Produces(MediaType.TEXT_PLAIN)
 	public String getCompareData() throws JsonProcessingException {
-		playniteService.getPlayniteData(playniteDataPath);
-		final List<CompareData> data = raCompareService.getCompareData();
-		Log.info("Returning RetroAchievements " + data.size() + " compare data");
-		return raRequestService.getMapper().writeValueAsString(data);
+		return getCompareData(raRequestService, raCompareService);
 	}
 
 	@GET
 	@Path("/existing_data")
 	@Produces(MediaType.TEXT_PLAIN)
 	public String getExistingData() throws JsonProcessingException {
-		final List<GameData> data = model.getGameDataForSources(List.of(ConsoleSourceEnum.RETRO_ACHIEVEMENTS));
-		Log.info("Returning " + data.size() + " existing RetroAchievements games");
+		return getExistingData(raRequestService, raDatabasePath);
+	}
+
+	@GET
+	@Path("/full_game_data/{game_id}")
+	@Produces(MediaType.TEXT_PLAIN)
+	public String getFullGameData(@PathParam("game_id") final int gameId) throws JsonProcessingException {
+		final GameData data = raRequestService.getFullGameData(gameId);
+		Log.info("Returning Steam data for game " + data.getTitle() + " (" + gameId + ")");
 		return raRequestService.getMapper().writeValueAsString(data);
+	}
+
+	@GET
+	@Path("/write_database")
+	@Produces(MediaType.TEXT_PLAIN)
+	public String getWriteDatabase() throws JsonProcessingException {
+		return writeDatabase(raDatabasePath);
+	}
+
+	@Override
+	protected ConsoleSourceEnum getSource() {
+		return ConsoleSourceEnum.RETRO_ACHIEVEMENTS;
 	}
 }

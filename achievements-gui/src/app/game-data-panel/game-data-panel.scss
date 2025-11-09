@@ -1,0 +1,284 @@
+.game-data-parent {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    height: 90vh;
+    padding: 10px;
+    gap: 5px;
+}
+
+.game-header {
+    height: 100%;
+}
+
+.game-title {
+    font-size: 5vh;
+}
+
+.game-title-points {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 40px;
+}
+
+.game-points {
+    color: lightgray;
+    font-size: larger;
+}
+
+.game-info {
+    display: flex;
+    flex-direction: row;
+    gap: 50px;
+    height: 25vh;
+}
+
+.game-achievements-data {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    height: 55vh;
+}
+
+.game-no-achievement {
+    display: flex;
+    flex-direction: row;
+    height: 70vh;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    border: 3px solid var(--purple1);
+    background-color: var(--purple0);
+    font-size: 5vh;
+}
+
+.game-achievements-information {
+    display: flex;
+    flex-direction: column;
+    width: 60%;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    row-gap: 20px;
+}
+
+.game-info,
+.game-achievements-list,
+.game-achievement-description-container {
+    display: flex;
+    border: 3px solid var(--purple1);
+    background-color: var(--purple0);
+    border-radius: 10px;
+    padding: 10px;
+}
+
+.game-achievements-sort {
+    display: flex;
+    height: 6vh;
+}
+
+.game-achievements-list {
+    gap: 25px;
+    width: 35vw;
+    row-gap: 15px;
+    flex-wrap: wrap;
+    justify-content: center;
+    overflow-y: scroll;
+}
+
+.game-achievement-description-container {
+    width: 30vw;
+}
+
+
+.game-achievement-box,
+.game-achievement-icon {
+    position: relative;
+    width: 50px;
+    height: 50px;
+}
+
+.game-achievement-description-icon {
+    width: 140px;
+    height: 140px;
+}
+
+.game-achievement-box {
+    background: transparent;
+    border: 0px;
+}
+
+.game-achievement-icon,
+.game-achievement-description-icon {
+    border-radius: 7px;
+    border-width: 4px;
+    padding: 1px;
+    border-style: solid;
+}
+
+.game-achievement-icon:hover {
+    border-width: 5px;
+}
+
+.missable-icon,
+.win-condition-icon {
+    position: absolute;
+    height: 22px;
+    width: 22px;
+    top: 0px;
+    right: -25px;
+    color: white;
+    font-size: large;
+    border-width: 2px;
+    background-color: black;
+    border-color: grey;
+    border-radius: 9999px;
+    border-style: dashed;
+}
+
+.progression-icon {
+    position: absolute;
+    height: 25px;
+    width: 25px;
+    top: 0px;
+    right: -25px;
+    font-size: large;
+    background-color: black;
+    border-radius: 9999px;
+}
+
+.missable-icon-big,
+.progression-icon-big,
+.win-condition-icon-big {
+    height: 80px;
+    width: 80px;
+}
+
+.common-achievement {
+    border-color: var(--common);
+    color: var(--common);
+}
+
+.uncommon-achievement {
+    border-color: var(--uncommon);
+    color: var(--uncommon);
+}
+
+.rare-achievement {
+    border-color: var(--rare);
+    color: var(--rare)
+}
+
+.super-rare-achievement {
+    border-color: var(--super-rare);
+    color: var(--super-rare)
+}
+
+.ultra-rare-achievement {
+    border-color: var(--ultra-rare);
+    color: var(--ultra-rare);
+}
+
+.source-icon {
+    height: 100px;
+}
+
+.game-progress-bar-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.game-progress-bar-value {
+    position: absolute;
+    align-items: center;
+    justify-content: center;
+    top: 50%;
+    left: 50%;
+    transform: translateX(-50%);
+    line-height: 0;
+    color: white;
+    font-weight: 500;
+}
+
+.game-progress-bar {
+    display: flex;
+    flex-direction: row;
+    border-radius: 20px;
+    align-items: end;
+    width: 100%;
+    border: 1px solid var(--purple4);
+    --mat-progress-bar-active-indicator-color: var(--purple4);
+    --mat-progress-bar-active-indicator-height: 30px !important;
+}
+
+.game-console-data {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    row-gap: 50px;
+}
+
+.game-console {
+    font-size: xx-large;
+    font-style: italic;
+}
+
+.game-achievement-description-box {
+    display: flex;
+    flex-direction: column;
+    row-gap: 10px;
+}
+
+.game-achievement-title {
+    font-size: xx-large;
+}
+
+.game-achievement-points {
+    font-size: x-large;
+    color: grey;
+}
+
+.game-achievement-description {
+    font-size: larger;
+}
+
+.game-achievement-rarity {
+    font-size: larger;
+    font-weight: bold;
+}
+
+.game-achievement-description-box-type {
+    display: flex;
+    flex-direction: row;
+    gap: 50px;
+    align-items: center;
+}
+
+.game-achievement-type {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    border-width: 2px;
+    border-radius: 30px;
+    border-style: dashed;
+    border-color: grey;
+    background-color: black;
+    padding-right: 20px;
+}
+
+.missable-icon-big {
+    overflow: hidden;
+}
+
+.game-achievement-type-text {
+    font-size: xx-large;
+}
+
+.game-achievement-title-points {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 20px;
+}

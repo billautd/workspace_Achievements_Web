@@ -2,34 +2,27 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../environments/environment';
-import { CompareData } from '../model/compareData';
 import { ConsoleData, ConsoleSource } from '../model/consoleData';
 import { GameData } from '../model/gameData';
 import { Model, STEAM_CONSOLE_ID } from '../model/model';
+import { AbstractSpecificGameDataService } from './abstract-game-data-service';
 
 @Injectable({
   providedIn: 'root'
 })
-export class SteamGameDataService {
+export class SteamGameDataService extends AbstractSpecificGameDataService {
   STEAM_PATH: string = "steam/";
-  CONSOLE_DATA_METHOD: string = "console_data/";
-  OWNED_GAMES_METHOD: string = "owned_games/";
-  GAME_DATA_METHOD: string = "game_data/";
-  COMPARE_DATA_METHOD: string = "compare_data/";
-  EXISTING_DATA_METHOD: string = "existing_data/";
 
   gameReqCounter: number = 0;
 
-  /**
-   * 
-   * @param http : HttpClient
-   * @returns Promise for getting steam console data
-   */
-  requestSteamConsoleData(http: HttpClient): Promise<ConsoleData[]> {
-    return firstValueFrom(http.get<ConsoleData[]>(environment.API_URL + this.STEAM_PATH + this.CONSOLE_DATA_METHOD));
+  override getSource(): ConsoleSource {
+    return ConsoleSource.STEAM;
+  }
+  override getMainPath(): string {
+    return this.STEAM_PATH;
   }
 
-  async requestSteamGameData(model: Model, http: HttpClient): Promise<any> {
+  override async requestAllGameData(model: Model, http: HttpClient): Promise<any> {
     const ownedGames: GameData[] = await firstValueFrom(http.get<GameData[]>(environment.API_URL + this.STEAM_PATH + this.OWNED_GAMES_METHOD));
     const consoleData: ConsoleData | undefined = model.getConsoleData().get(STEAM_CONSOLE_ID);
     if (!consoleData) {
@@ -54,33 +47,7 @@ export class SteamGameDataService {
 
     //Send request for compare data
     this.compareData(model, http);
-
-    return null;
-  }
-
-  async requestSteamExistingGameData(model: Model, http: HttpClient): Promise<any> {
-    const gameData: GameData[] = await firstValueFrom(http.get<GameData[]>(environment.API_URL + this.STEAM_PATH + this.EXISTING_DATA_METHOD));
-    const consoleData: ConsoleData | undefined = model.getConsoleData().get(STEAM_CONSOLE_ID);
-    if (!consoleData) {
-      console.log("Steam console data not yet set")
-      return null;
-    }
-    //Add game to console game map
-    gameData.forEach((game) => {
-      consoleData.Games.set(game.ID, game);
-    })
-
-    console.log("Steam game data OK");
-
-    //Force refresh data
-    model.refreshData(gameData);
-  }
-
-  async compareData(model: Model, http: HttpClient): Promise<any> {
-    const compareData: CompareData[] = await firstValueFrom(http.get<any>(environment.API_URL + this.STEAM_PATH + this.COMPARE_DATA_METHOD))
-    model.getCompareData().set(ConsoleSource.STEAM, compareData);
-    model.refreshCompareData(compareData);
-    console.log("Process Steam " + compareData.length + " compare data");
+    this.writeDatabase(http);
     return null;
   }
 }

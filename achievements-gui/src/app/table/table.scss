@@ -1,119 +1,168 @@
-.table-with-filters {
-  display: flex;
-  flex-direction: row;
-  padding: 10px;
-}
+  @use '@angular/material' as mat;
 
-.games-table {
-  overflow-y: scroll;
-  display: flex;
-  flex-direction: column;
-  height: 80vh;
-  width: 70vw;
-  background-color: var(--purple1);
-  border: 1px solid white;
-}
+  .table-with-filters {
+    display: flex;
+    flex-direction: row;
+    padding: 10px;
+  }
 
-.mat-mdc-header-row,
-.mat-mdc-row,
-.mat-mdc-footer-row {
-  color: white;
-  border-bottom: 1px solid white;
-  text-align: left;
-  height: 35px;
-  display: flex;
-  align-items: center;
-  flex: none;
-}
+  .games-table {
+    overflow-y: scroll;
+    display: flex;
+    flex-direction: column;
+    height: 80vh;
+    width: 75vw;
+    background-color: var(--purple1);
+    border: 1px solid white;
+  }
 
-.mat-mdc-header-row,
-.mat-mdc-footer-row {
-  font-weight: bold;
-  background-color: var(--purple0);
-}
+  .mat-mdc-header-row,
+  .mat-mdc-row,
+  .mat-mdc-footer-row {
+    color: white;
+    border-bottom: 1px solid white;
+    text-align: left;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    flex: none;
+  }
 
-.mat-mdc-footer-row {
-  margin-top: auto;
-  border-top: 1px solid white;
-}
+  .mat-mdc-header-row,
+  .mat-mdc-footer-row {
+    font-weight: bold;
+    background-color: var(--purple0);
+  }
 
-.consoleNameColumn {
-  width: 15vw;
-}
+  .mat-mdc-footer-row {
+    margin-top: auto;
+    border-top: 1px solid white;
+  }
 
-.nameColumn {
-  width: 27vw;
-}
+  .consoleNameColumn {
+    width: 15vw;
+  }
 
-.title-span {
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
-}
+  .nameColumn {
+    width: 27vw;
+  }
 
-.idColumn {
-  width: 5vw
-}
+  .title-span {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }
 
-.statusColumn {
-  width: 10vw;
-}
+  .idColumn {
+    width: 5vw
+  }
 
-.achievementsColumn {
-  width: 8vw
-}
+  .linkToDataColumn {
+    width: 5vw
+  }
 
-.percentageColumn {
-  width: 8vw
-}
+  .statusColumn {
+    width: 10vw;
+  }
 
-.urlButton {
-  background: transparent;
-  border: 0px;
-  color: white;
-  text-decoration: underline;
-  font-size: medium;
-}
+  .achievementsColumn {
+    width: 8vw
+  }
 
-.urlButton:hover {
-  cursor: pointer;
-}
+  .percentageColumn {
+    width: 8vw
+  }
 
-.bottom-bar {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  margin-top: 10px;
-  justify-content: space-between;
-}
+  .urlButton {
+    background: transparent;
+    border: 0px;
+    color: white;
+    text-decoration: underline;
+    font-size: medium;
+  }
 
-.source-to-request {
-  display: flex;
-}
+  .urlButton:hover {
+    cursor: pointer;
+  }
 
-.source-to-request {
-  display: flex;
-  flex-grow: 0.5;
-}
+  .linkToDataButton {
+    background: transparent;
+    border: 0px;
+    text-decoration: underline;
+    font-size: medium;
+  }
 
-::ng-deep mat-option {
-  background-color: black !important;
-  color: white !important;
-}
+  .linkToDataButton:hover {
+    cursor: pointer;
+  }
 
-::ng-deep mat-form-field {
-  color: white;
-  width: 20vw;
-  margin-top: 10px;
-  margin-left: 10px;
-}
+  .link-icon {
+    width: 20px;
+    height: 20px;
+  }
 
-.closeButton {
-  background-color: transparent;
-  border: 0;
-  cursor: pointer;
-}
+  .bottom-bar {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-top: 10px;
+    justify-content: space-between;
+  }
 
-.closeIcon {
-  color: white;
-}
+  .source-to-request {
+    display: flex;
+  }
+
+  .source-to-request {
+    display: flex;
+    flex-grow: 0.5;
+  }
+
+  ::ng-deep mat-option {
+    background-color: black !important;
+    color: white !important;
+  }
+
+  ::ng-deep mat-form-field {
+    color: white;
+    width: 20vw;
+    margin-top: 10px;
+    margin-left: 10px;
+  }
+
+  .closeButton {
+    background-color: transparent;
+    border: 0;
+    cursor: pointer;
+  }
+
+  .closeIcon {
+    color: white;
+  }
+
+  .data-progress-bar-wrapper {
+    position: relative;
+  }
+
+  .data-progress-bar-value {
+    position: absolute;
+    align-items: center;
+    justify-content: center;
+    top: 50%;
+    left: 55%;
+    transform: translateX(-50%);
+    line-height: 0;
+    color: white;
+    font-weight: 500;
+  }
+
+  .data-progress-bar {
+    display: flex;
+    flex-direction: row;
+    border-radius: 20px;
+    align-items: end;
+    width: 100%;
+    border: 1px solid var(--purple4);
+    --mat-progress-bar-active-indicator-color: var(--purple4);
+    --mat-progress-bar-active-indicator-height: 20px !important;
+  }

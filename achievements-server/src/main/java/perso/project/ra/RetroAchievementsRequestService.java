@@ -3,12 +3,11 @@ package perso.project.ra;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.net.http.HttpResponse.BodyHandlers;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
@@ -20,6 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import perso.project.model.AchievementData;
 import perso.project.model.ConsoleData;
 import perso.project.model.GameData;
 import perso.project.model.enums.CompletionStatusEnum;
@@ -33,13 +33,21 @@ public class RetroAchievementsRequestService extends AbstractRequestService {
 	static final String RA_API_KEY_KEY = "RA_API_KEY";
 
 	static final String MAIN_URI = "https://retroachievements.org/API";
+	static final String MEDIA_URL = "https://media.retroachievements.org";
 
 	static final String CONSOLE_IDS_METHOD = "GetConsoleIDs";
 	static final String CONSOLE_GAMES_METHOD = "GetGameList";
 	static final String USER_COMPLETION_PROGRESS_METHOD = "GetUserCompletionProgress";
+	static final String GAME_INFO_PROGRESS_METHOD = "GetGameInfoAndUserProgress";
 
 	static final String MASTERY_COMPLETION_STRING = "mastered";
 	static final String GAME_BEATEN_STRING = "beaten-hardcore";
+
+	static final String BADGE_URL = MEDIA_URL + "/Badge/";
+	static final String BADGE_LOCKED = "_lock.png";
+	static final String BADGE_UNLOCKED = ".png";
+
+	static final String BOXART_URL = MEDIA_URL;
 
 	@Inject
 	@ConfigProperty(name = "ra.username")
@@ -66,17 +74,14 @@ public class RetroAchievementsRequestService extends AbstractRequestService {
 				uriString.append("&").append(param);
 			}
 			final URI uri = new URI(uriString.toString());
-			Log.debug("Creating request for URI : " + uri.toString());
-
-			final HttpClient client = HttpClient.newBuilder().build();
-			final HttpRequest request = HttpRequest.newBuilder(uri).build();
-			return client.send(request, BodyHandlers.ofString());
-		} catch (URISyntaxException | IOException | InterruptedException e) {
+			return requestHttpURI(uri);
+		} catch (final URISyntaxException e) {
 			Log.error("Error creating URI", e);
 			return null;
 		}
 	}
 
+	@Override
 	public List<ConsoleData> getConsoleIds() {
 		Log.info("Getting console ids");
 		final String resBody = requestData(CONSOLE_IDS_METHOD, "a=1", "g=1").body();
@@ -163,6 +168,7 @@ public class RetroAchievementsRequestService extends AbstractRequestService {
 				}
 				if (!consoleData.getGameDataMap().containsKey(data.getId())) {
 					consoleData.getGameDataMap().put(data.getId(), data);
+					data.setPercent(0d);
 					data.setCompletionStatus(CompletionStatusEnum.NOT_PLAYED);
 				}
 			});
@@ -170,6 +176,64 @@ public class RetroAchievementsRequestService extends AbstractRequestService {
 		} catch (JsonProcessingException e) {
 			Log.error("Error reading response body as GameData", e);
 			return null;
+		}
+	}
+
+	public GameData getFullGameData(final int gameId) {
+		final Optional<GameData> existingGameDataOpt = getRAGameById(gameId);
+		if (existingGameDataOpt.isEmpty()) {
+			Log.error("No RA game found for id " + gameId);
+			return null;
+		}
+		Log.info("Getting full game data for RA game " + gameId);
+		final GameData existingGameData = existingGameDataOpt.get();
+
+		// Game schema
+		final String schemaResBody = requestData(GAME_INFO_PROGRESS_METHOD, "g=" + gameId).body();
+		LoggingUtils.prettyPrint(mapper, schemaResBody);
+
+		try {
+			final JsonNode node = mapper.readTree(schemaResBody);
+			// Total players
+			final int totalPlayers = node.get("NumDistinctPlayers").asInt();
+			existingGameData.setTotalPlayers(totalPlayers);
+			// Image
+			final String imageBoxArt = node.get("ImageBoxArt").asText();
+			existingGameData.setImageURL(BOXART_URL + imageBoxArt);
+			// Achievements
+			final JsonNode achievementsNode = node.get("Achievements");
+			final String dataBody = achievementsNode.toString();
+			final Map<Integer, AchievementData> achievementData = mapper.readValue(dataBody,
+					new TypeReference<Map<Integer, AchievementData>>() {
+					});
+			achievementData.values().forEach(ach -> {
+				final Optional<AchievementData> existingAchievement = existingGameData.getAchievementData().stream()
+						.filter(existingAch -> existingAch.getId() == ach.getId()).findFirst();
+				AchievementData achievement;
+				if (existingAchievement.isEmpty()) {
+					achievement = ach;
+				} else {
+					achievement = existingAchievement.get();
+				}
+				// Update data from existing achievement
+				final double percent = Math.round(10d * 100d * ach.getNumAwarded() / totalPlayers) / 10d;
+				achievement.setUnlockPercentage(percent);
+				achievement.setIconUnlockedURL(BADGE_URL + ach.getBadgeId() + BADGE_UNLOCKED);
+				achievement.setIconLockedURL(BADGE_URL + ach.getBadgeId() + BADGE_LOCKED);
+				achievement.setAchieved(!ach.getDateEarned().isBlank());
+				if (existingAchievement.isEmpty()) {
+					existingGameData.getAchievementData().add(achievement);
+				}
+			});
+			// Game data
+			existingGameData.setAwardedAchievements(
+					(int) existingGameData.getAchievementData().stream().filter(AchievementData::isAchieved).count());
+			existingGameData.setTotalAchievements(existingGameData.getAchievementData().size());
+			setAchievementPercent(existingGameData);
+			return existingGameData;
+		} catch (JsonProcessingException e) {
+			Log.error("Error reading response body as AchievevementData", e);
+			return existingGameData;
 		}
 	}
 
@@ -186,7 +250,24 @@ public class RetroAchievementsRequestService extends AbstractRequestService {
 		} else {
 			gameData.setCompletionStatus(CompletionStatusEnum.TRIED);
 		}
-		Log.info(gameData.getTitle() + " (" + gameData.getId() + ") is " + gameData.getCompletionStatus());
+
+		setAchievementPercent(gameData);
+		Log.info(gameData.getTitle() + " (" + gameData.getId() + ") is " + gameData.getCompletionStatus()
+				+ " : Completion " + gameData.getPercent());
+	}
+
+	private Optional<GameData> getRAGameById(final int gameId) {
+		for (final ConsoleData console : model.getConsoleDataMap().values()) {
+			if (!ConsoleSourceEnum.RETRO_ACHIEVEMENTS.equals(console.getSource())) {
+				continue;
+			}
+			for (final GameData game : console.getGameDataMap().values()) {
+				if (game.getId() == gameId) {
+					return Optional.of(game);
+				}
+			}
+		}
+		return Optional.empty();
 	}
 
 	@Override

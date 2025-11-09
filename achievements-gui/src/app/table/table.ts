@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { Component, inject, ViewChild } from '@angular/core';
+import { Component, EventEmitter, inject, Output, ViewChild } from '@angular/core';
 import { FormBuilder, FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {
   MatDialog,
@@ -21,6 +21,7 @@ import { Model } from '../../model/model';
 import { GameDataService } from '../../services/game-data-service';
 import { LoadingDialog } from '../loading-dialog/loading-dialog';
 import { UtilsService } from '../../services/utils-service';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 interface FilterData {
   text: string;
@@ -33,11 +34,13 @@ interface FilterData {
   selector: 'app-table',
   imports: [MatTableModule, MatIconModule, MatFormFieldModule, MatSelectModule,
     FormsModule, CommonModule, ReactiveFormsModule, MatInputModule,
-    MatSortModule, MatPaginatorModule, MatCheckboxModule],
+    MatSortModule, MatPaginatorModule, MatCheckboxModule, MatProgressBarModule],
   templateUrl: './table.html',
   styleUrl: './table.scss'
 })
 export class Table {
+  @Output() selectTableEntry = new EventEmitter<GameData>();
+
   dialog = inject(MatDialog);
   formBuilder = inject(FormBuilder);
 
@@ -47,7 +50,7 @@ export class Table {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   data: MatTableDataSource<GameData> = new MatTableDataSource<GameData>();
-  columnsToDisplay: string[] = ["ConsoleName", "Title", "CompletionStatus", "Achievements", "Percentage", "ID"];
+  columnsToDisplay: string[] = ["ConsoleName", "Title", "CompletionStatus", "Achievements", "Percentage", "ID", "LinkToData"];
   filterText: string = "";
 
   selectedConsoles: string[] = [];
@@ -144,7 +147,7 @@ export class Table {
         case "Achievements":
           return item.MaxPossible;
         case "Percentage":
-          return this.percentageValue(item);
+          return item.Percent;
         case "Title":
           return item.Title;
         default:
@@ -184,7 +187,7 @@ export class Table {
     this.gameDataService.requestConsoleData(this.model).then(() => {
       console.log("Console data OK")
       this.updateConsolesList();
-      this.gameDataService.requestGameData(this.model).then(() => {
+      this.gameDataService.requestAllGameData(this.model).then(() => {
         console.log("Game data OK")
         this.isRequestRunning = false;
         dialogRef.close();
@@ -226,24 +229,8 @@ export class Table {
     return data.NumAwardedHardcore + " / " + data.MaxPossible;
   }
 
-  percentageValue(data: GameData): number {
-    let num: number;
-    if (data.NumAwardedHardcore == 0) {
-      if (data.CompletionStatus === CompletionStatusType.MASTERED) {
-        num = 1;
-      } else if (data.CompletionStatus === CompletionStatusType.BEATEN) {
-        num = 0.5
-      } else {
-        num = 0;
-      }
-    } else {
-      num = data.NumAwardedHardcore / data.MaxPossible;
-    }
-    return num;
-  }
-
   percentageText(data: GameData) {
-    return Number(this.percentageValue(data)).toLocaleString(undefined, { style: 'percent', minimumFractionDigits: 0 });;
+    return Number(data.Percent).toLocaleString(undefined, { style: 'percent', minimumFractionDigits: 0 });
   }
 
   openURL(data: GameData): void {
@@ -258,6 +245,10 @@ export class Table {
       url = "https://retroachievements.org/game/" + data.ID;
     }
     window.open(url, "_blank");
+  }
+
+  selectGameData(data: GameData): void {
+    this.selectTableEntry.emit(data);
   }
 
   parseXBOXGameName(name: string): string {

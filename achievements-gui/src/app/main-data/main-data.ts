@@ -144,7 +144,6 @@ export class MainData {
     //Get total and earned
     let earned: number = 0;
     let total: number = 0;
-    console.log(id);
     for (const console of this.model.getConsoleData()) {
       if (console[1].Source != ConsoleSource.RETRO_ACHIEVEMENTS) {
         continue;

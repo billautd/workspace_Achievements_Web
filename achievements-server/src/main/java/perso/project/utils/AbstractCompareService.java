@@ -1,5 +1,7 @@
 package perso.project.utils;
 
+import java.util.List;
+
 import io.quarkus.logging.Log;
 import perso.project.model.CompareData;
 import perso.project.model.GameData;
@@ -8,6 +10,8 @@ import perso.project.model.enums.CompareDataStatusEnum;
 import perso.project.model.enums.ConsoleSourceEnum;
 
 public abstract class AbstractCompareService {
+	protected abstract List<CompareData> getCompareData();
+
 	protected CompareData getOKCompareData(final PlayniteGameData playniteGame, final int consoleId) {
 		Log.debug(playniteGame.getName() + " for " + playniteGame.getPlatform() + " => OK");
 		return new CompareData(playniteGame.getPlatform(), consoleId, playniteGame.getName(), playniteGame.getSource(),

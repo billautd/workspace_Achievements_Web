@@ -22,6 +22,8 @@
     align-self: center;
     width: 100%;
     flex-grow: 1;
+    --mat-progress-bar-active-indicator-color: var(--purple4);
+    --mat-progress-bar-active-indicator-height: 10px !important;
 }
 
 .mat-mdc-progress-bar {

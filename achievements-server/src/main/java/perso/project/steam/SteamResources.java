@@ -1,7 +1,6 @@
 package perso.project.steam;
 
 import java.util.Collection;
-import java.util.List;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
@@ -14,16 +13,14 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
-import perso.project.model.CompareData;
-import perso.project.model.ConsoleData;
 import perso.project.model.GameData;
 import perso.project.model.MainModel;
 import perso.project.model.Model;
 import perso.project.model.enums.ConsoleSourceEnum;
-import perso.project.playnite.PlayniteService;
+import perso.project.utils.AbstractResources;
 
 @Path("/steam")
-public class SteamResources {
+public class SteamResources extends AbstractResources {
 	@Inject
 	SteamRequestService steamRequestService;
 
@@ -34,11 +31,8 @@ public class SteamResources {
 	SteamCompareService steamCompareService;
 
 	@Inject
-	PlayniteService playniteService;
-
-	@Inject
-	@ConfigProperty(name = "playnite.data.path")
-	private java.nio.file.Path playniteDataPath;
+	@ConfigProperty(name = "steam.database.path")
+	private java.nio.file.Path steamDatabasePath;
 
 	@Inject
 	@ConfigProperty(name = "steam.beaten.path")
@@ -56,9 +50,7 @@ public class SteamResources {
 	@Path("/console_data")
 	@Produces(MediaType.TEXT_PLAIN)
 	public String getConsoleIds() throws JsonProcessingException {
-		final List<ConsoleData> data = steamRequestService.getConsoleIds();
-		Log.info("Returning Steam console data");
-		return steamRequestService.getMapper().writeValueAsString(data);
+		return getConsoleIds(steamRequestService);
 	}
 
 	@GET
@@ -86,24 +78,37 @@ public class SteamResources {
 	}
 
 	@GET
+	@Path("/full_game_data/{game_id}")
+	@Produces(MediaType.TEXT_PLAIN)
+	public String getFullGameData(@PathParam("game_id") final int gameId) throws JsonProcessingException {
+		final GameData data = steamRequestService.getFullGameData(gameId);
+		Log.info("Returning Steam data for game " + data.getTitle() + " (" + gameId + ")");
+		return steamRequestService.getMapper().writeValueAsString(data);
+	}
+
+	@GET
+	@Path("/write_database")
+	@Produces(MediaType.TEXT_PLAIN)
+	public String getWriteDatabase() throws JsonProcessingException {
+		return writeDatabase(steamDatabasePath);
+	}
+
+	@GET
 	@Path("/compare_data")
 	@Produces(MediaType.TEXT_PLAIN)
 	public String getCompareData() throws JsonProcessingException {
-		playniteService.getPlayniteData(playniteDataPath);
-//		steamRequestService.getSteamGames_Beaten(steamBeatenPath);
-//		steamRequestService.getSteamGames_Mastered(steamMasteredPath);
-//		steamRequestService.getSteamGames_NotInDatabase(steamRemovedPath);
-		final List<CompareData> data = steamCompareService.getCompareData();
-		Log.info("Returning Steam " + data.size() + " compare data");
-		return steamRequestService.getMapper().writeValueAsString(data);
+		return getCompareData(steamRequestService, steamCompareService);
 	}
 
 	@GET
 	@Path("/existing_data")
 	@Produces(MediaType.TEXT_PLAIN)
 	public String getExistingData() throws JsonProcessingException {
-		final List<GameData> data = model.getGameDataForSources(List.of(ConsoleSourceEnum.STEAM));
-		Log.info("Returning " + data.size() + " existing Steam games");
-		return steamRequestService.getMapper().writeValueAsString(data);
+		return getExistingData(steamRequestService, steamDatabasePath);
+	}
+
+	@Override
+	protected ConsoleSourceEnum getSource() {
+		return ConsoleSourceEnum.STEAM;
 	}
 }

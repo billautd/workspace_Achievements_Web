@@ -21,6 +21,7 @@ public class RetroAchievementsCompareService extends AbstractCompareService {
 	@Inject
 	Model model;
 
+	@Override
 	public List<CompareData> getCompareData() {
 		final List<PlayniteGameData> raPlayniteData = model
 				.getPlayniteGameDataForSources(List.of(ConsoleSourceEnum.RETRO_ACHIEVEMENTS));

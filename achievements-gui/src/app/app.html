@@ -1,5 +1,6 @@
 <mat-tab-group (selectedTabChange)="onUpdateSelectedTab($event)">
-    <mat-tab label="Games list"><app-table></app-table></mat-tab>
+    <mat-tab label="Games list"><app-table (selectTableEntry)="onSelectTableEntry($event)"></app-table></mat-tab>
     <mat-tab label="Data" #mainDataTab><app-main-data #mainData></app-main-data></mat-tab>
     <mat-tab label="Compare"><app-compare></app-compare></mat-tab>
+    <mat-tab label="Game data" #gameDataTab disabled="true"><app-game-data #gameData></app-game-data></mat-tab>
 </mat-tab-group>

@@ -22,6 +22,7 @@ public abstract class AbstractStandaloneCompareService extends AbstractCompareSe
 
 	protected abstract int getId();
 
+	@Override
 	public List<CompareData> getCompareData() {
 		final List<PlayniteGameData> saPlayniteData = model.getPlayniteGameDataForSources(List.of(getSource()));
 		final List<GameData> saGameData = model.getGameDataForSources(List.of(getSource()));

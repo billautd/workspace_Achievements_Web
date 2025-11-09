@@ -39,8 +39,14 @@ public class GameData {
 	@JsonProperty("NumAwardedHardcore")
 	private int awardedAchievements = 0;
 
+	@JsonProperty("Percent")
+	private double percent = 0;
+
 	@JsonProperty("Points")
 	private int totalPoints = 0;
+
+	@JsonProperty("NumDistinctPlayersHardcore")
+	private int totalPlayers = 0;
 
 	@JsonProperty("HighestAwardKind")
 	private String awardKind = "";
@@ -49,25 +55,18 @@ public class GameData {
 	private CompletionStatusEnum completionStatus = CompletionStatusEnum.NOT_PLAYED;
 
 	@JsonProperty("AchievementData")
-	private List<SteamAchievementData> steamAchievementData = new ArrayList<>();
+	private List<AchievementData> achievementData = new ArrayList<>();
 
-	public void setGameData(final GameData data) {
-		setTitle(data.getTitle());
-		setConsoleName(data.getConsoleName());
-		setTotalAchievements(data.getTotalAchievements());
-		setAwardedAchievements(data.getAwardedAchievements());
-		setTotalPoints(data.getTotalPoints());
-		setCompletionStatus(data.getCompletionStatus());
-		setSteamAchievementData(data.getSteamAchievementData());
-	}
+	@JsonProperty("Image")
+	private String imageURL = "";
 
 	@Override
 	public String toString() {
 		return "Title : " + getTitle() + '\n' + "Id : " + getId() + '\n' + "Console id : " + getConsoleId() + '\n'
 				+ "Console name : " + getConsoleName() + '\n' + "Total achievements : " + getTotalAchievements() + '\n'
 				+ "Awarded achievements : " + getAwardedAchievements() + '\n' + "Total points : " + getTotalPoints()
-				+ '\n' + "Completion status : " + getCompletionStatus() + '\n' + "Steam achievements number : "
-				+ getSteamAchievementData().size();
+				+ '\n' + "Completion status : " + getCompletionStatus() + '\n' + "Achievements number : "
+				+ getAchievementData().size();
 	}
 
 	public int getId() {
@@ -118,12 +117,28 @@ public class GameData {
 		this.awardedAchievements = awardedAchievements;
 	}
 
+	public double getPercent() {
+		return percent;
+	}
+
+	public void setPercent(double percent) {
+		this.percent = percent;
+	}
+
 	public int getTotalPoints() {
 		return totalPoints;
 	}
 
 	public void setTotalPoints(int totalPoints) {
 		this.totalPoints = totalPoints;
+	}
+
+	public int getTotalPlayers() {
+		return totalPlayers;
+	}
+
+	public void setTotalPlayers(int totalPlayers) {
+		this.totalPlayers = totalPlayers;
 	}
 
 	public String getAwardKind() {
@@ -142,11 +157,19 @@ public class GameData {
 		this.completionStatus = completionStatus;
 	}
 
-	public List<SteamAchievementData> getSteamAchievementData() {
-		return steamAchievementData;
+	public List<AchievementData> getAchievementData() {
+		return achievementData;
 	}
 
-	public void setSteamAchievementData(List<SteamAchievementData> steamAchievementData) {
-		this.steamAchievementData = steamAchievementData;
+	public void setAchievementData(List<AchievementData> achievementData) {
+		this.achievementData = achievementData;
+	}
+
+	public String getImageURL() {
+		return imageURL;
+	}
+
+	public void setImageURL(String imageURL) {
+		this.imageURL = imageURL;
 	}
 }

@@ -1,19 +1,13 @@
 import { Injectable } from '@angular/core';
 import { ConsoleSource } from '../model/consoleData';
 import { PS3_CONSOLE_ID } from '../model/model';
-import { StandaloneDataService } from './abstract-standalone-game-data-service';
-import { GameDataService } from './game-data-service';
-import { UtilsService } from './utils-service';
+import { AbstractStandaloneDataService } from './abstract-standalone-game-data-service';
 
 @Injectable({
   providedIn: 'root'
 })
-export class PS3GameDataService extends StandaloneDataService {
+export class PS3GameDataService extends AbstractStandaloneDataService {
   PS3_PATH: string = "ps3/";
-  GAME_DATA_METHOD: string = "game_data/"
-  CONSOLE_DATA_METHOD: string = "console_data/";
-  COMPARE_DATA_METHOD: string = "compare_data/";
-  EXISTING_DATA_METHOD: string = "existing_data/";
 
   override getId(): number {
     return PS3_CONSOLE_ID;
@@ -24,19 +18,4 @@ export class PS3GameDataService extends StandaloneDataService {
   override getMainPath(): string {
     return this.PS3_PATH;
   }
-  override getConsoleDataPath(): string {
-    return this.CONSOLE_DATA_METHOD;
-  }
-  override getGameDataPath(): string {
-    return this.GAME_DATA_METHOD;
-  }
-  override getExistingGameDataPath(): string {
-    return this.EXISTING_DATA_METHOD;
-  }
-  override getCompareDataPath(): string {
-    return this.COMPARE_DATA_METHOD;
-  }
-
-
-
 }

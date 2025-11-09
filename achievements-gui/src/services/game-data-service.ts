@@ -9,6 +9,7 @@ import { PSVitaGameDataService } from './psvita-game-data-service';
 import { RAGameDataService } from './ra-game-data-service';
 import { SteamGameDataService } from './steam-game-data-service';
 import { Xbox360GameDataService } from './xbox360-game-data-service';
+import { AbstractSpecificGameDataService } from './abstract-game-data-service';
 
 @Injectable({
   providedIn: 'root',
@@ -65,9 +66,9 @@ export class GameDataService {
     //All requests are executed simultaneously but method returns when all 4 are done
 
     //RA console data
-    const raObs: Promise<ConsoleData[]> = this.raDataService.requestRAConsoleData(this.http);
+    const raObs: Promise<ConsoleData[]> = this.raDataService.requestConsoleData(this.http);
     //Steam console data
-    const steamObs: Promise<ConsoleData[]> = this.steamDataService.requestSteamConsoleData(this.http);
+    const steamObs: Promise<ConsoleData[]> = this.steamDataService.requestConsoleData(this.http);
     //PS3 console data
     const ps3Obs: Promise<ConsoleData[]> = this.ps3DataService.requestConsoleData(this.http);
     //PS vita console data
@@ -88,15 +89,15 @@ export class GameDataService {
     })
   }
 
-  async requestGameData(model: Model): Promise<any> {
+  async requestAllGameData(model: Model): Promise<any> {
     console.log("Requesting game data for sources : " + this.sourcesToRequest);
 
     return Promise.all([
-      this.sourcesToRequest.includes(ConsoleSource.RETRO_ACHIEVEMENTS) ? this.raDataService.requestRAGameData(model, this.http) : Promise.resolve<ConsoleData[]>([]),
-      this.sourcesToRequest.includes(ConsoleSource.STEAM) ? this.steamDataService.requestSteamGameData(model, this.http) : Promise.resolve<ConsoleData[]>([]),
-      this.sourcesToRequest.includes(ConsoleSource.PS3) ? this.ps3DataService.requestGameData(model, this.http) : Promise.resolve<ConsoleData[]>([]),
-      this.sourcesToRequest.includes(ConsoleSource.PSVITA) ? this.psVitaDataService.requestGameData(model, this.http) : Promise.resolve<ConsoleData[]>([]),
-      this.sourcesToRequest.includes(ConsoleSource.XBOX_360) ? this.xbox360DataService.requestGameData(model, this.http) : Promise.resolve<ConsoleData[]>([])
+      this.sourcesToRequest.includes(ConsoleSource.RETRO_ACHIEVEMENTS) ? this.raDataService.requestAllGameData(model, this.http) : Promise.resolve<ConsoleData[]>([]),
+      this.sourcesToRequest.includes(ConsoleSource.STEAM) ? this.steamDataService.requestAllGameData(model, this.http) : Promise.resolve<ConsoleData[]>([]),
+      this.sourcesToRequest.includes(ConsoleSource.PS3) ? this.ps3DataService.requestAllGameData(model, this.http) : Promise.resolve<ConsoleData[]>([]),
+      this.sourcesToRequest.includes(ConsoleSource.PSVITA) ? this.psVitaDataService.requestAllGameData(model, this.http) : Promise.resolve<ConsoleData[]>([]),
+      this.sourcesToRequest.includes(ConsoleSource.XBOX_360) ? this.xbox360DataService.requestAllGameData(model, this.http) : Promise.resolve<ConsoleData[]>([])
     ]).then(() => { });
   }
 
@@ -104,8 +105,8 @@ export class GameDataService {
     console.log("Requesting existing game data for sources : " + this.sourcesToRequest);
 
     return Promise.all([
-      this.sourcesToRequest.includes(ConsoleSource.RETRO_ACHIEVEMENTS) ? this.raDataService.requestRAExistingGameData(model, this.http) : Promise.resolve<ConsoleData[]>([]),
-      this.sourcesToRequest.includes(ConsoleSource.STEAM) ? this.steamDataService.requestSteamExistingGameData(model, this.http) : Promise.resolve<ConsoleData[]>([]),
+      this.sourcesToRequest.includes(ConsoleSource.RETRO_ACHIEVEMENTS) ? this.raDataService.requestExistingGameData(model, this.http) : Promise.resolve<ConsoleData[]>([]),
+      this.sourcesToRequest.includes(ConsoleSource.STEAM) ? this.steamDataService.requestExistingGameData(model, this.http) : Promise.resolve<ConsoleData[]>([]),
       this.sourcesToRequest.includes(ConsoleSource.PS3) ? this.ps3DataService.requestExistingGameData(model, this.http) : Promise.resolve<ConsoleData[]>([]),
       this.sourcesToRequest.includes(ConsoleSource.PSVITA) ? this.psVitaDataService.requestExistingGameData(model, this.http) : Promise.resolve<ConsoleData[]>([]),
       this.sourcesToRequest.includes(ConsoleSource.XBOX_360) ? this.xbox360DataService.requestExistingGameData(model, this.http) : Promise.resolve<ConsoleData[]>([])
@@ -122,5 +123,35 @@ export class GameDataService {
       this.sourcesToRequest.includes(ConsoleSource.PSVITA) ? this.psVitaDataService.compareData(model, this.http) : Promise.resolve<ConsoleData[]>([]),
       this.sourcesToRequest.includes(ConsoleSource.XBOX_360) ? this.xbox360DataService.compareData(model, this.http) : Promise.resolve<ConsoleData[]>([])
     ]).then(() => { });
+  }
+
+  async requestGameData(data: GameData, model: Model): Promise<any> {
+    console.log("Requesting individual game data for : " + data.Title);
+
+    let consoleId: number = data.ConsoleID;
+    let consoleData: ConsoleData | undefined = model.getConsoleData().get(consoleId);
+    if (!consoleData) {
+      console.log("No console data found for game " + data.Title)
+      return;
+    }
+    return this.getService(consoleData.Source)?.requestFullGameData(consoleId, data.ID, model, this.http)
+  }
+
+  getService(source: ConsoleSource): AbstractSpecificGameDataService | null {
+    switch (source) {
+      case ConsoleSource.PS3:
+        return this.ps3DataService;
+      case ConsoleSource.PSVITA:
+        return this.psVitaDataService;
+      case ConsoleSource.RETRO_ACHIEVEMENTS:
+        return this.raDataService;
+      case ConsoleSource.STEAM:
+        return this.steamDataService;
+      case ConsoleSource.XBOX_360:
+        return this.xbox360DataService;
+      default:
+        console.log("No service for source " + source);
+        return null;
+    }
   }
 }
