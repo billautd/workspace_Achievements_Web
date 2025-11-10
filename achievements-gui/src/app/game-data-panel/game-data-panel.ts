@@ -70,7 +70,8 @@ export class GameDataPanel {
   gameDataService: GameDataService;
   sortedAchievements: AchievementData[] = [];
 
-  sortOptions = new FormControl(SortOption.ID_DESCENDING);
+  defaultSort = SortOption.ID_ASCENDING
+  sortOptions = new FormControl(this.defaultSort);
   sortOptionsList: SortOption[] = Object.values(SortOption)
 
   http: HttpClient = inject(HttpClient);
@@ -86,7 +87,7 @@ export class GameDataPanel {
     this.gameDataService.requestGameData(data, this.model).then(newData => {
       this.selectedGame = newData
       this.clearAchievement();
-      this.sort(SortOption.ID_ASCENDING)
+      this.sort(this.sortOptions.value ? this.sortOptions.value : this.defaultSort)
       this.isRequestRunning = false;
     });
   }
