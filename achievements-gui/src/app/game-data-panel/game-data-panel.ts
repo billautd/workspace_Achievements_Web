@@ -158,7 +158,7 @@ export class GameDataPanel {
     let url: string = "";
     let csl: ConsoleData | undefined = this.model.getConsoleData().get(this.selectedGame.ConsoleID);
     if (csl?.Source === ConsoleSource.STEAM) {
-      // url = "https://store.steampowered.com/app/" + data.ID;
+      url = "https://steamcommunity.com/stats/" + this.selectedGame.ID + "/achievements";
     } else if (csl?.Source === ConsoleSource.PS3 || csl?.Source === ConsoleSource.PSVITA) {
       // url = "https://www.psnprofiles.com/trophies/" + data.ID;
     } else if (csl?.Source === ConsoleSource.XBOX_360) {
