@@ -63,4 +63,8 @@ export class UtilsService {
         return 999;
     }
   }
+
+  static spaceNumber(n: number): string {
+    return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+  }
 }

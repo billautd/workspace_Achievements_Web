@@ -57,8 +57,7 @@ public abstract class AbstractRequestService {
 		}
 	}
 
-	protected void setAchievementPercent(final GameData gameData) {
-		System.out.println(gameData.getTotalAchievements());
+	protected void setGameAchievementPercent(final GameData gameData) {
 		if (gameData.getTotalAchievements() == 0) {
 			switch (gameData.getCompletionStatus()) {
 			case BEATEN:

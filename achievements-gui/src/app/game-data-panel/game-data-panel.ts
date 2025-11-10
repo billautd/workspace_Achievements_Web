@@ -5,7 +5,7 @@ import { CompletionStatusType, GameData } from '../../model/gameData';
 import { GameDataService } from '../../services/game-data-service';
 import { AchievementData, AchievementType } from '../../model/achievementData';
 import { CommonModule } from '@angular/common';
-import { ConsoleSource } from '../../model/consoleData';
+import { ConsoleData, ConsoleSource } from '../../model/consoleData';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -26,7 +26,9 @@ export enum SortOption {
   TRUE_POINTS_DESCENDING = "TRUE_POINTS_DESCENDING",
   TRUE_POINTS_ASCENDING = "TRUE_POINTS_ASCENDING",
   RATIO_DESCENDING = "RATIO_DESCENDING",
-  RATIO_ASCENDING = "RATIO_ASCENDING"
+  RATIO_ASCENDING = "RATIO_ASCENDING",
+  ID_DESCENDING = "ID_DESCENDING",
+  ID_ASCENDING = "ID_ASCENDING"
 }
 
 @Component({
@@ -45,9 +47,14 @@ export class GameDataPanel {
     MaxPossible: 0,
     NumAwardedHardcore: 0,
     Points: 0,
+    TruePoints: 0,
+    Ratio: 0,
+    EarnedRatio: 0,
     AchievementData: [],
     Percent: 0,
-    Image: ''
+    Image: '',
+    EarnedPoints: 0,
+    EarnedTruePoints: 0
   };
 
   readonly COMMON_MAX_RARITY: number = 50;
@@ -63,13 +70,8 @@ export class GameDataPanel {
   gameDataService: GameDataService;
   sortedAchievements: AchievementData[] = [];
 
-  sortOptions = new FormControl(SortOption.RARITY_DESCENDING);
-  sortOptionsList: SortOption[] = [SortOption.RARITY_DESCENDING, SortOption.RARITY_ASCENDING,
-  SortOption.POINTS_DESCENDING, SortOption.POINTS_ASCENDING,
-  SortOption.DISPLAY_NAME_DESCENDING, SortOption.DISPLAY_NAME_ASCENDING,
-  SortOption.TYPE_DESCENDING, SortOption.TYPE_ASCENDING,
-  SortOption.TRUE_POINTS_DESCENDING, SortOption.TRUE_POINTS_ASCENDING,
-  SortOption.RATIO_DESCENDING, SortOption.RATIO_ASCENDING]
+  sortOptions = new FormControl(SortOption.ID_DESCENDING);
+  sortOptionsList: SortOption[] = Object.values(SortOption)
 
   http: HttpClient = inject(HttpClient);
 
@@ -84,7 +86,7 @@ export class GameDataPanel {
     this.gameDataService.requestGameData(data, this.model).then(newData => {
       this.selectedGame = newData
       this.clearAchievement();
-      this.sort(SortOption.RARITY_DESCENDING)
+      this.sort(SortOption.ID_ASCENDING)
       this.isRequestRunning = false;
     });
   }
@@ -151,6 +153,24 @@ export class GameDataPanel {
     this.sort(event.value);
   }
 
+  openAchievementURL(ach: AchievementData): void {
+    let url: string = "";
+    let csl: ConsoleData | undefined = this.model.getConsoleData().get(this.selectedGame.ConsoleID);
+    if (csl?.Source === ConsoleSource.STEAM) {
+      // url = "https://store.steampowered.com/app/" + data.ID;
+    } else if (csl?.Source === ConsoleSource.PS3 || csl?.Source === ConsoleSource.PSVITA) {
+      // url = "https://www.psnprofiles.com/trophies/" + data.ID;
+    } else if (csl?.Source === ConsoleSource.XBOX_360) {
+      // url = "https://www.xboxachievements.com/game/" + this.parseXBOXGameName(data.Title) + "/achievements";
+    } else if (csl?.Source === ConsoleSource.RETRO_ACHIEVEMENTS) {
+      url = "https://retroachievements.org/achievement/" + ach.ID;
+    } else {
+      console.log("No console source found for game " + this.selectedGame);
+      return;
+    }
+    window.open(url, "_blank");
+  }
+
   sort(sort: SortOption): void {
     let sortAlgo;
     switch (sort) {
@@ -190,6 +210,12 @@ export class GameDataPanel {
       case SortOption.RATIO_ASCENDING:
         sortAlgo = (ach1: AchievementData, ach2: AchievementData) => (ach1.TrueRatio / ach1.Points) - (ach2.TrueRatio / ach2.Points);
         break;
+      case SortOption.ID_DESCENDING:
+        sortAlgo = (ach1: AchievementData, ach2: AchievementData) => ach2.ID - ach1.ID;
+        break;
+      case SortOption.ID_ASCENDING:
+        sortAlgo = (ach1: AchievementData, ach2: AchievementData) => ach1.ID - ach2.ID;
+        break;
     }
     this.sortedAchievements = [...this.selectedGame.AchievementData].sort(sortAlgo);
   }
@@ -220,22 +246,10 @@ export class GameDataPanel {
         return "Ratio (Descending)"
       case SortOption.RATIO_ASCENDING:
         return "Ratio (Ascending)"
+      case SortOption.ID_DESCENDING:
+        return "ID (Descending)"
+      case SortOption.ID_ASCENDING:
+        return "ID (Ascending)"
     }
-  }
-
-  getGamePoints(game: GameData) {
-    let points: number = 0
-    game.AchievementData.forEach(ach => points += ach.Points);
-    return points;
-  }
-
-  getGameTruePoints(game: GameData) {
-    let points: number = 0
-    game.AchievementData.forEach(ach => points += ach.TrueRatio);
-    return points;
-  }
-
-  getGameRatio(game: GameData) {
-    return (this.getGameTruePoints(game) / this.getGamePoints(game)).toPrecision(3);
   }
 }

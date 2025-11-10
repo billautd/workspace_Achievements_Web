@@ -45,6 +45,21 @@ public class GameData {
 	@JsonProperty("Points")
 	private int totalPoints = 0;
 
+	@JsonProperty("TruePoints")
+	private int truePoints = 0;
+
+	@JsonProperty("EarnedPoints")
+	private int earnedPoints = 0;
+
+	@JsonProperty("EarnedTruePoints")
+	private int earnedTruePoints = 0;
+
+	@JsonProperty("Ratio")
+	private double ratio = 0d;
+
+	@JsonProperty("EarnedRatio")
+	private double earnedRatio = 0d;
+
 	@JsonProperty("NumDistinctPlayersHardcore")
 	private int totalPlayers = 0;
 
@@ -133,6 +148,30 @@ public class GameData {
 		this.totalPoints = totalPoints;
 	}
 
+	public int getTruePoints() {
+		return truePoints;
+	}
+
+	public void setTruePoints(int truePoints) {
+		this.truePoints = truePoints;
+	}
+
+	public int getEarnedPoints() {
+		return earnedPoints;
+	}
+
+	public void setEarnedPoints(int earnedPoints) {
+		this.earnedPoints = earnedPoints;
+	}
+
+	public int getEarnedTruePoints() {
+		return earnedTruePoints;
+	}
+
+	public void setEarnedTruePoints(int earnedTruePoints) {
+		this.earnedTruePoints = earnedTruePoints;
+	}
+
 	public int getTotalPlayers() {
 		return totalPlayers;
 	}
@@ -141,8 +180,24 @@ public class GameData {
 		this.totalPlayers = totalPlayers;
 	}
 
+	public double getRatio() {
+		return ratio;
+	}
+
+	public void setRatio(double ratio) {
+		this.ratio = ratio;
+	}
+
 	public String getAwardKind() {
 		return awardKind;
+	}
+
+	public double getEarnedRatio() {
+		return earnedRatio;
+	}
+
+	public void setEarnedRatio(double earnedRatio) {
+		this.earnedRatio = earnedRatio;
 	}
 
 	public void setAwardKind(String awardKind) {

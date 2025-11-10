@@ -120,7 +120,7 @@ public class RetroAchievementsRequestService extends AbstractRequestService {
 				Log.error("Console data not found for " + data.getConsoleName() + " (" + data.getConsoleId() + ")");
 				return;
 			}
-			mapCompletionStatus(data);
+			parseUserCompletionData(data);
 			if (!consoleData.getGameDataMap().containsKey(data.getId())) {
 				consoleData.getGameDataMap().put(data.getId(), data);
 			}
@@ -166,10 +166,15 @@ public class RetroAchievementsRequestService extends AbstractRequestService {
 					Log.error("Console data not found for " + data.getConsoleName() + " (" + data.getConsoleId() + ")");
 					return;
 				}
+				GameData existingGameData;
 				if (!consoleData.getGameDataMap().containsKey(data.getId())) {
-					consoleData.getGameDataMap().put(data.getId(), data);
-					data.setPercent(0d);
-					data.setCompletionStatus(CompletionStatusEnum.NOT_PLAYED);
+					existingGameData = data;
+					existingGameData.setPercent(0d);
+					existingGameData.setCompletionStatus(CompletionStatusEnum.NOT_PLAYED);
+					consoleData.getGameDataMap().put(data.getId(), existingGameData);
+				} else {
+					existingGameData = consoleData.getGameDataMap().get(data.getId());
+					existingGameData.setTotalPoints(data.getTotalPoints());
 				}
 			});
 			return gameData;
@@ -226,10 +231,7 @@ public class RetroAchievementsRequestService extends AbstractRequestService {
 				}
 			});
 			// Game data
-			existingGameData.setAwardedAchievements(
-					(int) existingGameData.getAchievementData().stream().filter(AchievementData::isAchieved).count());
-			existingGameData.setTotalAchievements(existingGameData.getAchievementData().size());
-			setAchievementPercent(existingGameData);
+			parseFullAchievementData(existingGameData);
 			return existingGameData;
 		} catch (JsonProcessingException e) {
 			Log.error("Error reading response body as AchievevementData", e);
@@ -237,7 +239,7 @@ public class RetroAchievementsRequestService extends AbstractRequestService {
 		}
 	}
 
-	private void mapCompletionStatus(final GameData gameData) {
+	private GameData mapCompletionStatus(final GameData gameData) {
 		if (MASTERY_COMPLETION_STRING.equals(gameData.getAwardKind())) {
 			// Check for previous mastery
 			if (gameData.getAwardedAchievements() < gameData.getTotalAchievements()) {
@@ -248,12 +250,55 @@ public class RetroAchievementsRequestService extends AbstractRequestService {
 		} else if (GAME_BEATEN_STRING.equals(gameData.getAwardKind())) {
 			gameData.setCompletionStatus(CompletionStatusEnum.BEATEN);
 		} else {
-			gameData.setCompletionStatus(CompletionStatusEnum.TRIED);
+			if (gameData.getAwardedAchievements() > 0) {
+				gameData.setCompletionStatus(CompletionStatusEnum.TRIED);
+			} else {
+				gameData.setCompletionStatus(CompletionStatusEnum.NOT_PLAYED);
+			}
 		}
 
-		setAchievementPercent(gameData);
-		Log.info(gameData.getTitle() + " (" + gameData.getId() + ") is " + gameData.getCompletionStatus()
-				+ " : Completion " + gameData.getPercent());
+		return gameData;
+	}
+
+	private GameData parseUserCompletionData(final GameData gameData) {
+		mapCompletionStatus(gameData);
+		gameData.setPercent(100d * gameData.getAwardedAchievements() / gameData.getTotalAchievements());
+		return gameData;
+	}
+
+	private GameData parseFullAchievementData(final GameData gameData) {
+		// Parse game total achievements
+		gameData.setTotalAchievements(gameData.getAchievementData().size());
+		gameData.setAwardedAchievements(
+				(int) gameData.getAchievementData().stream().filter(AchievementData::isAchieved).count());
+
+		mapCompletionStatus(gameData);
+		setGameAchievementPercent(gameData);
+
+		// Parse total achievements points
+		gameData.setTotalPoints(gameData.getAchievementData().stream().mapToInt(AchievementData::getPoints).sum());
+		gameData.setTruePoints(gameData.getAchievementData().stream().mapToInt(AchievementData::getRealPoints).sum());
+		if (gameData.getTotalPoints() != 0) {
+			gameData.setRatio((double) gameData.getTruePoints() / gameData.getTotalPoints());
+		} else {
+			gameData.setRatio(0);
+		}
+
+		// Parse earned achievements points
+		gameData.setEarnedPoints(gameData.getAchievementData().stream().filter(AchievementData::isAchieved)
+				.mapToInt(AchievementData::getPoints).sum());
+		gameData.setEarnedTruePoints(gameData.getAchievementData().stream().filter(AchievementData::isAchieved)
+				.mapToInt(AchievementData::getRealPoints).sum());
+		if (gameData.getEarnedPoints() != 0) {
+			gameData.setEarnedRatio((double) gameData.getEarnedTruePoints() / gameData.getEarnedPoints());
+		} else {
+			gameData.setEarnedRatio(0);
+		}
+
+		Log.info(gameData.getTitle() + " (" + gameData.getId() + ") for Steam is " + gameData.getCompletionStatus()
+				+ " with " + gameData.getAwardedAchievements() + " / " + gameData.getTotalAchievements()
+				+ " achievements and " + gameData.getTotalPoints() + " (" + gameData.getTruePoints() + ") points");
+		return gameData;
 	}
 
 	private Optional<GameData> getRAGameById(final int gameId) {

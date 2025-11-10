@@ -5,6 +5,7 @@ export enum AchievementType {
 }
 
 export type AchievementData = {
+    ID: number;
     achieved: boolean;
     apiname: string;
     description: string;

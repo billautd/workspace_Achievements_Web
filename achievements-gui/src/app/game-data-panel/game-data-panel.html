@@ -9,8 +9,13 @@
         <div class="game-achievements-information">
             <div class="game-title-points">
                 <div class="game-title">{{selectedGame.Title}}</div>
-                <div class="game-points">{{getGamePoints(selectedGame)}}
-                    ({{getGameTruePoints(selectedGame)}}&nbsp;&nbsp;x{{getGameRatio(selectedGame)}}) </div>
+                <div class="game-achievements-points">
+                    <div class="game-earned-points">Earned : {{selectedGame.EarnedPoints}}
+                        ({{selectedGame.EarnedTruePoints}}&nbsp;&nbsp;&nbsp;x{{selectedGame.EarnedRatio.toPrecision(3)}})
+                    </div>
+                    <div class="game-total-points">Total : {{selectedGame.Points}}
+                        ({{selectedGame.TruePoints}}&nbsp;&nbsp;&nbsp;x{{selectedGame.Ratio.toPrecision(3)}}) </div>
+                </div>
             </div>
             <div class="game-progress-bar-wrapper">
                 <mat-progress-bar class="game-progress-bar" mode="determinate" [value]="selectedGame.Percent">
@@ -103,13 +108,16 @@
                 </div>
                 <div class="game-achievement-title-points">
                     <div class="game-achievement-title">{{selectedAchievement.displayName}}</div>
-                    <div class="game-achievement-points">{{selectedAchievement.Points}}
-                        ({{selectedAchievement.TrueRatio}})</div>
                 </div>
+                <div class="game-achievement-points">{{selectedAchievement.Points}}
+                    ({{selectedAchievement.TrueRatio}})</div>
                 <div class="game-achievement-description">{{selectedAchievement.description}}</div>
                 <div class="game-achievement-rarity" [ngClass]="achievementIconClass(selectedAchievement.percent)">
                     {{selectedAchievement.percent}} %</div>
             </div>
+            <button class="linkToAchievementButton" (click)="openAchievementURL(selectedAchievement)">
+                <img src=" link.svg" class="link-icon">
+            </button>
             }
         </div>
         }

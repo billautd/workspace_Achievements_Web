@@ -32,6 +32,12 @@
     padding: 10px;
 }
 
+.data-specific-standalone {
+    display: flex;
+    flex-direction: row;
+    flex-grow: 1;
+    width: 100%;
+}
 
 .data-steam,
 .data-standalone {
@@ -52,17 +58,37 @@
     display: flex;
     flex-direction: row;
     align-items: center;
-    align-self: center;
+    align-self: baseline;
     flex-grow: 1;
+    width: 100%;
 }
 
 .data-steam-earned,
-.data-ra-earned {
+.data-ra-earned,
+.data-standalone-earned {
     display: flex;
     flex-direction: column;
     flex-grow: 1;
     align-self: center;
     align-items: center;
+    gap: 10px;
+}
+
+.data-earned-achievements,
+.data-earned-points {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    align-self: baseline;
+    justify-content: center;
+}
+
+.data-earned-title {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40%;
+    font-size: large;
 }
 
 .steam-icon {
@@ -107,4 +133,32 @@
 .standalone-chart {
     height: 300px;
     width: 300px;
+}
+
+.data-progress-bar-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.data-progress-bar-value {
+    position: absolute;
+    align-items: center;
+    justify-content: center;
+    top: 50%;
+    left: 50%;
+    transform: translateX(-50%);
+    line-height: 0;
+    color: white;
+    font-weight: 500;
+}
+
+.data-progress-bar {
+    display: flex;
+    flex-direction: row;
+    border-radius: 20px;
+    align-items: end;
+    width: 100%;
+    border: 1px solid var(--purple4);
+    --mat-progress-bar-active-indicator-color: var(--purple4);
+    --mat-progress-bar-active-indicator-height: 30px !important;
 }

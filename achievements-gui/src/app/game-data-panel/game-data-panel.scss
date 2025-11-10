@@ -22,8 +22,10 @@
     gap: 40px;
 }
 
-.game-points {
-    color: lightgray;
+.game-earned-points,
+.game-total-points {
+    align-self: center;
+    color: lightcyan;
     font-size: larger;
 }
 
@@ -79,18 +81,24 @@
 }
 
 .game-achievements-list {
-    gap: 25px;
+    gap: 15px;
     width: 35vw;
-    row-gap: 15px;
     flex-wrap: wrap;
-    justify-content: center;
+    align-content: flex-start;
+    justify-content: flex-start;
     overflow-y: scroll;
 }
 
 .game-achievement-description-container {
-    width: 30vw;
+    width: 27vw;
 }
 
+.game-achievements-points {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    gap: 10px;
+}
 
 .game-achievement-box,
 .game-achievement-icon {
@@ -122,30 +130,31 @@
 }
 
 .missable-icon,
-.win-condition-icon {
+.win-condition-icon,
+.progression-icon {
     position: absolute;
+    z-index: 999;
+    top: 0px;
+    right: -20px;
+    font-size: large;
+    background-color: black;
+    border-radius: 9999px;
+}
+
+.missable-icon,
+.win-condition-icon {
     height: 22px;
     width: 22px;
-    top: 0px;
-    right: -25px;
     color: white;
-    font-size: large;
     border-width: 2px;
-    background-color: black;
     border-color: grey;
-    border-radius: 9999px;
     border-style: dashed;
 }
 
 .progression-icon {
-    position: absolute;
     height: 25px;
     width: 25px;
-    top: 0px;
-    right: -25px;
-    font-size: large;
     background-color: black;
-    border-radius: 9999px;
 }
 
 .missable-icon-big,
@@ -281,4 +290,21 @@
     flex-direction: row;
     align-items: center;
     gap: 20px;
+}
+
+.linkToAchievementButton {
+    background: transparent;
+    border: 0px;
+    text-decoration: underline;
+    font-size: medium;
+    align-self: flex-start;
+}
+
+.linkToAchievementButton:hover {
+    cursor: pointer;
+}
+
+.link-icon {
+    width: 30px;
+    height: 30px;
 }

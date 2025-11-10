@@ -50,7 +50,7 @@ export class Table {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   data: MatTableDataSource<GameData> = new MatTableDataSource<GameData>();
-  columnsToDisplay: string[] = ["ConsoleName", "Title", "CompletionStatus", "Achievements", "Percentage", "ID", "LinkToData"];
+  columnsToDisplay: string[] = ["ConsoleName", "Title", "CompletionStatus", "Achievements", "Points", "Percentage", "ID", "LinkToData"];
   filterText: string = "";
 
   selectedConsoles: string[] = [];
@@ -148,6 +148,8 @@ export class Table {
           return item.MaxPossible;
         case "Percentage":
           return item.Percent;
+        case "Points":
+          return item.Points;
         case "Title":
           return item.Title;
         default:
@@ -235,14 +237,18 @@ export class Table {
 
   openURL(data: GameData): void {
     let url: string;
-    if (data.ConsoleName === "Steam") {
+    let csl: ConsoleData | undefined = this.model.getConsoleData().get(data.ConsoleID);
+    if (csl?.Source === ConsoleSource.STEAM) {
       url = "https://store.steampowered.com/app/" + data.ID;
-    } else if (data.ConsoleName === "PlayStation 3" || data.ConsoleName === "PlayStation Vita") {
+    } else if (csl?.Source === ConsoleSource.PS3 || csl?.Source === ConsoleSource.PSVITA) {
       url = "https://www.psnprofiles.com/trophies/" + data.ID;
-    } else if (data.ConsoleName === "Xbox 360") {
+    } else if (csl?.Source === ConsoleSource.XBOX_360) {
       url = "https://www.xboxachievements.com/game/" + this.parseXBOXGameName(data.Title) + "/achievements";
-    } else {
+    } else if (csl?.Source === ConsoleSource.RETRO_ACHIEVEMENTS) {
       url = "https://retroachievements.org/game/" + data.ID;
+    } else {
+      console.log("No console source found for game " + data);
+      return;
     }
     window.open(url, "_blank");
   }

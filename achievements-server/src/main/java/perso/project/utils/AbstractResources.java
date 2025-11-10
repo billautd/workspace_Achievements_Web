@@ -15,6 +15,7 @@ import perso.project.model.GameData;
 import perso.project.model.MainModel;
 import perso.project.model.enums.ConsoleSourceEnum;
 import perso.project.playnite.PlayniteService;
+import perso.project.steam.SteamRequestService;
 
 public abstract class AbstractResources {
 	@Inject
@@ -22,6 +23,9 @@ public abstract class AbstractResources {
 
 	@Inject
 	DatabaseService databaseService;
+
+	@Inject
+	SteamRequestService rService;
 
 	@Inject
 	MainModel model;

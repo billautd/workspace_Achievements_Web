@@ -18,6 +18,11 @@ export type GameData = {
     MaxPossible: number,
     NumAwardedHardcore: number;
     Points: number;
+    TruePoints: number;
+    EarnedPoints: number;
+    EarnedTruePoints: number;
+    Ratio: number;
+    EarnedRatio: number;
     AchievementData: AchievementData[];
     Percent: number;
     Image: string;

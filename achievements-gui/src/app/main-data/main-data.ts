@@ -7,10 +7,11 @@ import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectChange, MatSelectModule } from '@angular/material/select';
 import { UtilsService } from '../../services/utils-service';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 @Component({
   selector: 'app-main-data',
-  imports: [ChartCanvas, MatFormFieldModule, FormsModule, ReactiveFormsModule, MatSelectModule],
+  imports: [ChartCanvas, MatFormFieldModule, FormsModule, ReactiveFormsModule, MatSelectModule, MatProgressBarModule],
   templateUrl: './main-data.html',
   styleUrl: './main-data.scss'
 })
@@ -22,25 +23,32 @@ export class MainData {
 
   raConsoleIds: number[] = [];
   standaloneConsoleIds: number[] = [];
+  //To access in HTML
   steamConsoleId: number = STEAM_CONSOLE_ID;
 
 
   model: Model;
   gameDataService: GameDataService;
 
-  steamAchievementsText: string = "";
-  steamAchievementsPercentageText: string = "";
 
-  raAchievementsText: string = "";
-  raAchievementsPercentageText: string = "";
+  earnedAchievementsTexts: Map<number, string> = new Map();
+  totalAchievementsTexts: Map<number, string> = new Map();
+  totalAchievementsPercentages: Map<number, number> = new Map();
+  earnedPointsTexts: Map<number, string> = new Map();
+  totalPointsTexts: Map<number, string> = new Map();
+  totalPointsPercentages: Map<number, number> = new Map();
 
-  raConsoleAchievementsText: string = "";
-  raConsoleAchievementsPercentageText: string = "";
+  raEarnedAchievementsText: string = "";
+  raTotalAchievementsText: string = "";
+  raAchievementsPercentage: number = 0;
+  raEarnedPointsText: string = "";
+  raTotalPointsText: string = "";
+  raPointsPercentage: number = 0;
 
   selectedRAConsole: string = "";
   raConsoles = new FormControl();
   raConsolesList: string[] = [];
-  selectedRAConsoleId: number = 0;
+  selectedRAConsoleId: number = -1;
 
   selectedStandaloneConsole: string = "";
   standaloneConsoles = new FormControl();
@@ -62,9 +70,11 @@ export class MainData {
       this.updateStandaloneConsoleIds();
       this.updateStandaloneConsolesList();
 
-      this.updateSteamAchievementsText();
-      this.updateRAAchievementsText(this.raConsoleIds);
-      this.updateRAConsoleAchievementsText(this.selectedRAConsoleId);
+      this.updateAchievementsText(STEAM_CONSOLE_ID);
+      this.updateAchievementsText(this.selectedRAConsoleId);
+      this.updateAchievementsText(this.selectedStandaloneConsoleId)
+
+      this.updateRATotalAchievementsText(this.raConsoleIds);
     })
 
   }
@@ -83,36 +93,38 @@ export class MainData {
     this.standaloneConsoleIds = [PS3_CONSOLE_ID, PSVITA_CONSOLE_ID, XBOX360_CONSOLE_ID]
   }
 
-  updateSteamAchievementsText(): void {
-    //Get total and earned
-    let earned: number = 0;
-    let total: number = 0;
-    const steamData: ConsoleData | undefined = this.model.getConsoleData().get(STEAM_CONSOLE_ID);
-    if (!steamData) {
-      this.steamAchievementsText = "- / -";
-      this.steamAchievementsPercentageText = "- %";
+  updateAchievementsText(consoleId: number): void {
+    let totalAchievements = 0;
+    let earnedAchievements = 0;
+    let totalPoints = 0;
+    let earnedPoints = 0;
+
+    const consoleData: ConsoleData | undefined = this.model.getConsoleData().get(consoleId);
+
+    if (!consoleData) {
       return;
     }
-    for (const game of steamData.Games) {
-      earned += game[1].NumAwardedHardcore;
-      total += game[1].MaxPossible;
+    for (const game of consoleData.Games) {
+      earnedAchievements += game[1].NumAwardedHardcore;
+      totalAchievements += game[1].MaxPossible;
+      earnedPoints += game[1].EarnedPoints;
+      totalPoints += game[1].Points;
     }
-    //Update achivements number text
-    this.steamAchievementsText = earned + " / " + total;
+    this.totalAchievementsPercentages.set(consoleId, 100 * earnedAchievements / totalAchievements);
+    this.totalPointsPercentages.set(consoleId, 100 * earnedPoints / totalPoints);
 
-    //Update achivements percentage text
-    if (total == 0) {
-      this.steamAchievementsPercentageText = "- %";
-    } else {
-      const num: number = earned / total;
-      this.steamAchievementsPercentageText = Number(num).toLocaleString(undefined, { style: 'percent', minimumFractionDigits: 0 });;
-    }
+    //Texts
+    this.earnedAchievementsTexts.set(consoleId, UtilsService.spaceNumber(earnedAchievements));
+    this.totalAchievementsTexts.set(consoleId, UtilsService.spaceNumber(totalAchievements));
+    this.earnedPointsTexts.set(consoleId, UtilsService.spaceNumber(earnedPoints));
+    this.totalPointsTexts.set(consoleId, UtilsService.spaceNumber(totalPoints));
   }
 
-  updateRAAchievementsText(ids: number[]): void {
-    //Get total and earned
-    let earned: number = 0;
-    let total: number = 0;
+  updateRATotalAchievementsText(ids: number[]): void {
+    let totalAchievements = 0;
+    let earnedAchievements = 0;
+    let totalPoints = 0;
+    let earnedPoints = 0;
     for (const console of this.model.getConsoleData()) {
       if (console[1].Source != ConsoleSource.RETRO_ACHIEVEMENTS) {
         continue;
@@ -121,54 +133,20 @@ export class MainData {
         continue;
       }
       for (const game of console[1].Games) {
-        earned += game[1].NumAwardedHardcore;
-        total += game[1].MaxPossible;
+        earnedAchievements += game[1].NumAwardedHardcore;
+        totalAchievements += game[1].MaxPossible;
+        earnedPoints += game[1].EarnedPoints;
+        totalPoints += game[1].Points;
       }
     }
-    //Update achivements number text
-    const totalText: string = earned + " / " + total;
-    this.raAchievementsText = totalText;
+    this.raAchievementsPercentage = 100 * earnedAchievements / totalAchievements;
+    this.raPointsPercentage = 100 * earnedPoints / totalPoints;
 
-    //Update achivements percentage text
-    let percentageText: string;
-    if (total == 0) {
-      percentageText = "- %";
-    } else {
-      const num: number = earned / total;
-      percentageText = Number(num).toLocaleString(undefined, { style: 'percent', minimumFractionDigits: 0 });;
-    }
-    this.raAchievementsPercentageText = percentageText;
-  }
-
-  updateRAConsoleAchievementsText(id: number) {
-    //Get total and earned
-    let earned: number = 0;
-    let total: number = 0;
-    for (const console of this.model.getConsoleData()) {
-      if (console[1].Source != ConsoleSource.RETRO_ACHIEVEMENTS) {
-        continue;
-      }
-      if (id == console[1].ID) {
-        for (const game of console[1].Games) {
-          earned += game[1].NumAwardedHardcore;
-          total += game[1].MaxPossible;
-        }
-        break;
-      }
-    }
-    //Update achivements number text
-    const totalText: string = earned + " / " + total;
-    this.raConsoleAchievementsText = totalText
-
-    //Update achivements percentage text
-    let percentageText: string;
-    if (total == 0) {
-      percentageText = "- %";
-    } else {
-      const num: number = earned / total;
-      percentageText = Number(num).toLocaleString(undefined, { style: 'percent', minimumFractionDigits: 0 });;
-    }
-    this.raConsoleAchievementsPercentageText = percentageText;
+    //Texts
+    this.raEarnedAchievementsText = UtilsService.spaceNumber(earnedAchievements);
+    this.raTotalAchievementsText = UtilsService.spaceNumber(totalAchievements);
+    this.raEarnedPointsText = UtilsService.spaceNumber(earnedPoints);
+    this.raTotalPointsText = UtilsService.spaceNumber(totalPoints);
   }
 
   updateRAConsolesList(): void {
@@ -198,7 +176,7 @@ export class MainData {
       }
     }
     this.raConsoleChartCanvas.updateChartData([this.selectedRAConsoleId]);
-    this.updateRAConsoleAchievementsText(this.selectedRAConsoleId);
+    this.updateAchievementsText(this.selectedRAConsoleId);
   }
 
   changeStandaloneSelectedConsole(event: MatSelectChange<any>) {
@@ -210,5 +188,6 @@ export class MainData {
       }
     }
     this.standaloneChartCanvas.updateChartData([this.selectedStandaloneConsoleId]);
+    this.updateAchievementsText(this.selectedStandaloneConsoleId)
   }
 }

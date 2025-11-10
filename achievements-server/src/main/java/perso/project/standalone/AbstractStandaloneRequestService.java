@@ -117,7 +117,7 @@ public abstract class AbstractStandaloneRequestService extends AbstractRequestSe
 					gameData.setConsoleName(getSource().getName());
 				}
 				gameData.setCompletionStatus(CompletionStatusEnum.BEATEN);
-				setAchievementPercent(gameData);
+				setGameAchievementPercent(gameData);
 
 				model.getConsoleDataMap().get(getId()).getGameDataMap().put(gameId, gameData);
 				beatenList.add(gameData);
@@ -154,7 +154,7 @@ public abstract class AbstractStandaloneRequestService extends AbstractRequestSe
 					gameData.setConsoleName(getSource().getName());
 				}
 				gameData.setCompletionStatus(CompletionStatusEnum.MASTERED);
-				setAchievementPercent(gameData);
+				setGameAchievementPercent(gameData);
 
 				model.getConsoleDataMap().get(getId()).getGameDataMap().put(gameId, gameData);
 				masteredList.add(gameData);
@@ -182,7 +182,7 @@ public abstract class AbstractStandaloneRequestService extends AbstractRequestSe
 				gameData.setCompletionStatus(CompletionStatusEnum.TRIED);
 			}
 		}
-		setAchievementPercent(gameData);
+		setGameAchievementPercent(gameData);
 		return gameData;
 	}
 }

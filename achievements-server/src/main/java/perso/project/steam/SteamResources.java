@@ -72,7 +72,7 @@ public class SteamResources extends AbstractResources {
 	@Path("/game_data/{game_id}")
 	@Produces(MediaType.TEXT_PLAIN)
 	public String getGameData(@PathParam("game_id") final int gameId) throws JsonProcessingException {
-		final GameData data = steamRequestService.getAchievements(gameId);
+		final GameData data = steamRequestService.getSimpleGameData(gameId);
 		Log.info("Returning Steam data for game " + data.getTitle() + " (" + gameId + ")");
 		return steamRequestService.getMapper().writeValueAsString(data);
 	}

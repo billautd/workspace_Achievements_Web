@@ -7,9 +7,28 @@
                     [consoleIds]="[steamConsoleId]"></app-chart-canvas>
             </div>
             <div class="data-steam-earned">
-                <h1>Earned</h1>
-                <h2>{{steamAchievementsText}}</h2>
-                <h2>{{steamAchievementsPercentageText}}</h2>
+                <div class="data-earned-achievements">
+                    <div class="data-earned-title">Achievements : </div>
+                    <div class="data-progress-bar-wrapper">
+                        <mat-progress-bar class="data-progress-bar" mode="determinate"
+                            [value]="totalAchievementsPercentages.get(steamConsoleId)">
+                        </mat-progress-bar>
+                        <div class="data-progress-bar-value"> {{earnedAchievementsTexts.get(steamConsoleId)}} /
+                            {{totalAchievementsTexts.get(steamConsoleId)}}
+                        </div>
+                    </div>
+                </div>
+                <div class="data-earned-points">
+                    <div class="data-earned-title">Points : </div>
+                    <div class="data-progress-bar-wrapper">
+                        <mat-progress-bar class="data-progress-bar" mode="determinate"
+                            [value]="totalPointsPercentages.get(steamConsoleId)">
+                        </mat-progress-bar>
+                        <div class="data-progress-bar-value"> {{earnedPointsTexts.get(steamConsoleId)}} /
+                            {{totalPointsTexts.get(steamConsoleId)}}
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="data-standalone">
@@ -19,6 +38,15 @@
                     <img src="ps3.png" class="ps3-icon">
                     <img src="psvita.png" class="psvita-icon">
                     <img src="xbox360.png" class="xbox360-icon">
+                    <mat-form-field style="align-self: center">
+                        <mat-label>Console</mat-label>
+                        <mat-select (selectionChange)="changeStandaloneSelectedConsole($event)"
+                            [formControl]="standaloneConsoles">
+                            @for (console of standaloneConsolesList; track console){
+                            <mat-option [value]="console">{{console}}</mat-option>
+                            }
+                        </mat-select>
+                    </mat-form-field>
                 </div>
 
                 <div class="data-specific-standalone">
@@ -26,33 +54,57 @@
                         <app-chart-canvas class="standalone-chart" #standaloneChartCanvas
                             [consoleIds]="[selectedStandaloneConsoleId]"></app-chart-canvas>
                     </div>
+                    <div class="data-standalone-earned">
+                        <div class="data-earned-achievements">
+                            <div class="data-earned-title">Achievements : </div>
+                            <div class="data-progress-bar-wrapper">
+                                <mat-progress-bar class="data-progress-bar" mode="determinate"
+                                    [value]="totalAchievementsPercentages.get(selectedStandaloneConsoleId)">
+                                </mat-progress-bar>
+                                <div class="data-progress-bar-value">
+                                    {{earnedAchievementsTexts.get(selectedStandaloneConsoleId)}} /
+                                    {{totalAchievementsTexts.get(selectedStandaloneConsoleId)}}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="data-earned-points">
+                            <div class="data-earned-title">Points : </div>
+                            <div class="data-progress-bar-wrapper">
+                                <mat-progress-bar class="data-progress-bar" mode="determinate"
+                                    [value]="totalPointsPercentages.get(selectedStandaloneConsoleId)">
+                                </mat-progress-bar>
+                                <div class="data-progress-bar-value">
+                                    {{earnedPointsTexts.get(selectedStandaloneConsoleId)}} /
+                                    {{totalPointsTexts.get(selectedStandaloneConsoleId)}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <mat-form-field style="align-self: center">
-                <mat-label>Console</mat-label>
-                <mat-select (selectionChange)="changeStandaloneSelectedConsole($event)"
-                    [formControl]="standaloneConsoles">
-                    @for (console of standaloneConsolesList; track console){
-                    <mat-option [value]="console">{{console}}</mat-option>
-                    }
-                </mat-select>
-            </mat-form-field>
         </div>
     </div>
     <div class="data-right">
         <div class="data-ra">
             <img src="ra.png" class="ra-icon">
             <div style="display:flex; flex-direction: column; flex-grow: 1;">
-
                 <div class="data-total-ra">
                     <div class="ra-chart">
                         <app-chart-canvas class="ra-chart" #raChartCanvas
                             [consoleIds]="raConsoleIds"></app-chart-canvas>
                     </div>
                     <div class="data-ra-earned">
-                        <h1>Earned</h1>
-                        <h2>{{raAchievementsText}}</h2>
-                        <h2>{{raAchievementsPercentageText}}</h2>
+                        <div class="data-earned-achievements">
+                            <div class="data-earned-title">Achievements : </div>
+                            <div class="data-progress-bar-wrapper">
+                                <mat-progress-bar class="data-progress-bar" mode="determinate"
+                                    [value]="raAchievementsPercentage">
+                                </mat-progress-bar>
+                                <div class="data-progress-bar-value"> {{raEarnedAchievementsText}} /
+                                    {{raTotalAchievementsText}}
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -70,9 +122,18 @@
                             [consoleIds]="[selectedRAConsoleId]"></app-chart-canvas>
                     </div>
                     <div class="data-ra-earned">
-                        <h1>Earned</h1>
-                        <h2>{{raConsoleAchievementsText}}</h2>
-                        <h2>{{raConsoleAchievementsPercentageText}}</h2>
+                        <div class="data-earned-achievements">
+                            <div class="data-earned-title">Achievements : </div>
+                            <div class="data-progress-bar-wrapper">
+                                <mat-progress-bar class="data-progress-bar" mode="determinate"
+                                    [value]="totalAchievementsPercentages.get(selectedRAConsoleId)">
+                                </mat-progress-bar>
+                                <div class="data-progress-bar-value">
+                                    {{earnedAchievementsTexts.get(selectedRAConsoleId)}} /
+                                    {{totalAchievementsTexts.get(selectedRAConsoleId)}}
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

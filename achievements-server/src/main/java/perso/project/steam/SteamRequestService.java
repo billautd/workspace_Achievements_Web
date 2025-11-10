@@ -136,7 +136,47 @@ public class SteamRequestService extends AbstractRequestService {
 		}
 	}
 
-	public GameData getAchievements(final int gameId) {
+	public GameData getSimpleGameData(final int gameId) {
+		Log.info("Getting simple game data for Steam game " + gameId);
+		final GameData existingGameData = model.getConsoleDataMap().get(Model.STEAM_CONSOLE_ID).getGameDataMap()
+				.get(gameId);
+		if (existingGameData == null) {
+			Log.error("No Steam game found for id " + gameId);
+			return null;
+		}
+
+		getAchievements(gameId);
+		setPercentageData(existingGameData);
+		parseAchievementData(existingGameData);
+
+		return existingGameData;
+	}
+
+	public GameData getFullGameData(final int gameId) {
+		Log.info("Getting full game data for Steam game " + gameId);
+		final GameData existingGameData = model.getConsoleDataMap().get(Model.STEAM_CONSOLE_ID).getGameDataMap()
+				.get(gameId);
+		if (existingGameData == null) {
+			Log.error("No Steam game found for id " + gameId);
+			return null;
+		}
+
+		getAchievements(gameId);
+		setAchievementData(existingGameData);
+		setPercentageData(existingGameData);
+		setImageURL(existingGameData);
+		parseAchievementData(existingGameData);
+
+		return existingGameData;
+	}
+
+	/**
+	 * Gets which achievement user has unlocked
+	 * 
+	 * @param gameId
+	 * @return
+	 */
+	private GameData getAchievements(final int gameId) {
 		Log.info("Getting achievements for Steam game " + gameId);
 		final GameData existingGameData = model.getConsoleDataMap().get(Model.STEAM_CONSOLE_ID).getGameDataMap()
 				.get(gameId);
@@ -160,9 +200,9 @@ public class SteamRequestService extends AbstractRequestService {
 				final List<AchievementData> achievementData = mapper.readValue(dataBody,
 						new TypeReference<List<AchievementData>>() {
 						});
-				achievementData.forEach(existingGameData.getAchievementData()::add);
+				existingGameData.getAchievementData().clear();
+				existingGameData.getAchievementData().addAll(achievementData);
 			}
-			parseAchievementData(existingGameData);
 			retryIndex = 1;
 			return existingGameData;
 		} catch (JsonProcessingException e) {
@@ -178,22 +218,12 @@ public class SteamRequestService extends AbstractRequestService {
 		}
 	}
 
-	public GameData getFullGameData(final int gameId) {
-		Log.info("Getting full game data for Steam game " + gameId);
-		final GameData existingGameData = model.getConsoleDataMap().get(Model.STEAM_CONSOLE_ID).getGameDataMap()
-				.get(gameId);
-		if (existingGameData == null) {
-			Log.error("No Steam game found for id " + gameId);
-			return null;
-		}
-
-		setAchievementData(existingGameData);
-		setPercentageData(existingGameData);
-		setImageURL(existingGameData);
-
-		return existingGameData;
-	}
-
+	/**
+	 * Gets description and icons for each achievement
+	 * 
+	 * @param gameData
+	 * @return
+	 */
 	private GameData setAchievementData(final GameData gameData) {
 		// Game schema
 		final String schemaResBody = requestData(STEAM_USER_STATS, GAME_SCHEMA_METHOD, V002,
@@ -204,7 +234,7 @@ public class SteamRequestService extends AbstractRequestService {
 			final JsonNode gameNode = node.get("game").get("availableGameStats");
 			// No achievements
 			if (gameNode == null) {
-				Log.info("Game " + gameData.getId() + "No achievements. Returning");
+				Log.info("Game " + gameData.getTitle() + " " + (gameData.getId()) + " has no achievements. Returning");
 				return gameData;
 			}
 			final JsonNode achievementsNode = gameNode.get("achievements");
@@ -235,13 +265,32 @@ public class SteamRequestService extends AbstractRequestService {
 					}
 				});
 			}
+			retryIndex = 1;
 		} catch (JsonProcessingException e) {
 			Log.error("Error reading response body as AchievevementData", e);
+			if (retryIndex > RETRY_MAX) {
+				Log.error("Out of retries for " + gameData.getId());
+				return null;
+			} else {
+				Log.error("Retrying for " + gameData.getId() + " => " + retryIndex + " / " + RETRY_MAX + "...");
+				retryIndex++;
+				return setAchievementData(gameData);
+			}
 		}
 		return gameData;
 	}
 
+	/**
+	 * Gets unlock percentage data for all achievements
+	 * 
+	 * @param gameData
+	 * @return
+	 */
 	private GameData setPercentageData(final GameData gameData) {
+		if (gameData.getAchievementData().isEmpty()) {
+			Log.info("No achievements for Steam game " + gameData.getTitle() + " (" + gameData.getId() + "). Ignoring");
+			return gameData;
+		}
 		// Unlock rates
 		final String percentagesResBody = requestData(STEAM_USER_STATS, PERCENTAGES_METHOD, V002,
 				"gameid=" + gameData.getId()).body();
@@ -269,33 +318,66 @@ public class SteamRequestService extends AbstractRequestService {
 					}
 					// Update data from existing achievement
 					achievement.setUnlockPercentage(ach.getUnlockPercentage());
-					parseAchievementPoints(gameData, achievement);
 					if (existingAchievement.isEmpty()) {
 						gameData.getAchievementData().add(ach);
 					}
 				});
 			}
+			retryIndex = 1;
 		} catch (JsonProcessingException e) {
 			Log.error("Error reading response body as AchievevementData", e);
+			if (retryIndex > RETRY_MAX) {
+				Log.error("Out of retries for " + gameData.getId());
+				return null;
+			} else {
+				Log.error("Retrying for " + gameData.getId() + " => " + retryIndex + " / " + RETRY_MAX + "...");
+				retryIndex++;
+				return setPercentageData(gameData);
+			}
 		}
 		return gameData;
 	}
 
+	/**
+	 * Gets game header image
+	 * 
+	 * @param gameData
+	 * @return
+	 */
 	private GameData setImageURL(final GameData gameData) {
 		// Game schema
 		final String schemaResBody = requestHttpURI(URI.create(APPDETAILS_URL + gameData.getId())).body();
 		LoggingUtils.prettyPrint(mapper, schemaResBody);
 		try {
 			final JsonNode node = mapper.readTree(schemaResBody);
-			final String headerImageURL = node.get(Integer.toString(gameData.getId())).get("data").get("header_image")
-					.asText();
+			final JsonNode gameNode = node.get(Integer.toString(gameData.getId()));
+			if (!gameNode.get("success").asBoolean()) {
+				Log.info("No image for game " + gameData.getTitle() + " (" + gameData.getId() + " )");
+				return gameData;
+			}
+			final String headerImageURL = gameNode.get("data").get("header_image").asText();
 			gameData.setImageURL(headerImageURL);
+			retryIndex = 1;
 		} catch (JsonProcessingException e) {
-			Log.error("Error reading response body as AchievevementData", e);
+			Log.error("Error reading response body as GameData", e);
+			if (retryIndex > RETRY_MAX) {
+				Log.error("Out of retries for " + gameData.getId());
+				return null;
+			} else {
+				Log.error("Retrying for " + gameData.getId() + " => " + retryIndex + " / " + RETRY_MAX + "...");
+				retryIndex++;
+				return setImageURL(gameData);
+			}
 		}
 		return gameData;
 	}
 
+	/**
+	 * Reads SteamBeaten file and update or add list
+	 * 
+	 * @param path
+	 * @return
+	 */
 	public List<GameData> getSteamGames_Beaten(final Path path) {
 		Log.info("Reading " + path);
 		final List<GameData> beatenList = new ArrayList<>();
@@ -320,7 +402,7 @@ public class SteamRequestService extends AbstractRequestService {
 					gameData.setConsoleName("Steam");
 				}
 				gameData.setCompletionStatus(CompletionStatusEnum.BEATEN);
-				setAchievementPercent(gameData);
+				parseAchievementData(gameData);
 
 				model.getConsoleDataMap().get(Model.STEAM_CONSOLE_ID).getGameDataMap().put(gameId, gameData);
 				beatenList.add(gameData);
@@ -333,6 +415,12 @@ public class SteamRequestService extends AbstractRequestService {
 		}
 	}
 
+	/**
+	 * Reads SteamMastered file and update or add list
+	 * 
+	 * @param path
+	 * @return
+	 */
 	public List<GameData> getSteamGames_Mastered(final Path path) {
 		Log.info("Reading " + path);
 		final List<GameData> masteredList = new ArrayList<>();
@@ -357,7 +445,7 @@ public class SteamRequestService extends AbstractRequestService {
 					gameData.setConsoleName("Steam");
 				}
 				gameData.setCompletionStatus(CompletionStatusEnum.MASTERED);
-				setAchievementPercent(gameData);
+				parseAchievementData(gameData);
 
 				model.getConsoleDataMap().get(Model.STEAM_CONSOLE_ID).getGameDataMap().put(gameId, gameData);
 				masteredList.add(gameData);
@@ -370,6 +458,12 @@ public class SteamRequestService extends AbstractRequestService {
 		}
 	}
 
+	/**
+	 * Reads games that are in user database but removed from store
+	 * 
+	 * @param path
+	 * @return
+	 */
 	public List<GameData> getSteamGames_NotInDatabase(final Path path) {
 		Log.info("Reading " + path);
 		final List<GameData> removedList = new ArrayList<>();
@@ -418,8 +512,9 @@ public class SteamRequestService extends AbstractRequestService {
 		gameData.setTotalAchievements(gameData.getAchievementData().size());
 		gameData.setAwardedAchievements(
 				(int) gameData.getAchievementData().stream().filter(ach -> ach.isAchieved()).count());
-		// Check if already set by Steambeaten and SteamMastered files
-		// If beaten or mastered, already set by other methods
+
+		// Check if already set by Steam beaten and SteamMastered files
+		// If beaten or mastered, already set by other methodso
 		if (CompletionStatusEnum.NOT_PLAYED.equals(gameData.getCompletionStatus())) {
 			if (gameData.getTotalAchievements() == 0) {
 				gameData.setCompletionStatus(CompletionStatusEnum.NO_ACHIEVEMENTS);
@@ -430,10 +525,33 @@ public class SteamRequestService extends AbstractRequestService {
 			}
 		}
 
-		setAchievementPercent(gameData);
+		// Parse achievements percentage and points
+		setGameAchievementPercent(gameData);
+		gameData.getAchievementData().forEach(ach -> parseAchievementPoints(gameData, ach));
+
+		// Parse total achievement data
+		gameData.setTotalPoints(gameData.getAchievementData().stream().mapToInt(AchievementData::getPoints).sum());
+		gameData.setTruePoints(gameData.getAchievementData().stream().mapToInt(AchievementData::getRealPoints).sum());
+		if (gameData.getTotalPoints() != 0) {
+			gameData.setRatio((double) gameData.getTruePoints() / gameData.getTotalPoints());
+		} else {
+			gameData.setRatio(0);
+		}
+
+		// Parse earned achievement data
+		gameData.setEarnedPoints(gameData.getAchievementData().stream().filter(AchievementData::isAchieved)
+				.mapToInt(AchievementData::getPoints).sum());
+		gameData.setEarnedTruePoints(gameData.getAchievementData().stream().filter(AchievementData::isAchieved)
+				.mapToInt(AchievementData::getRealPoints).sum());
+		if (gameData.getEarnedPoints() != 0) {
+			gameData.setEarnedRatio((double) gameData.getEarnedTruePoints() / gameData.getEarnedPoints());
+		} else {
+			gameData.setEarnedRatio(0);
+		}
+
 		Log.info(gameData.getTitle() + " (" + gameData.getId() + ") for Steam is " + gameData.getCompletionStatus()
 				+ " with " + gameData.getAwardedAchievements() + " / " + gameData.getTotalAchievements()
-				+ " achievements");
+				+ " achievements and " + gameData.getTotalPoints() + " (" + gameData.getTruePoints() + ") points");
 		return gameData;
 	}
 
@@ -473,7 +591,7 @@ public class SteamRequestService extends AbstractRequestService {
 		// RP = p * r + ( p * ( t / a ) * ( 1 - r ) )
 		// This formula is the same but replaces t / a by 100/percentage
 		double ratio = 0.6;
-		int truePoints = (int) Math.round(points * ratio + points * (100 / p) * (1 - ratio));
+		int truePoints = (int) Math.round((points * ratio) + points * (100 / p) * (1 - ratio));
 		ach.setRealPoints(truePoints);
 
 		return ach;

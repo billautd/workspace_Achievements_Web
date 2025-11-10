@@ -75,6 +75,9 @@ export abstract class AbstractSpecificGameDataService {
     consoleData.Games.set(fullGameData.ID, fullGameData)
     this.writeDatabase(http);
 
+    //Force refresh data
+    model.refreshData([fullGameData]);
+
     return fullGameData;
   }
 }

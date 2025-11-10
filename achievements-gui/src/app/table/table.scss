@@ -11,7 +11,7 @@
     display: flex;
     flex-direction: column;
     height: 80vh;
-    width: 75vw;
+    width: 78vw;
     background-color: var(--purple1);
     border: 1px solid white;
   }
@@ -40,11 +40,11 @@
   }
 
   .consoleNameColumn {
-    width: 15vw;
+    width: 12vw;
   }
 
   .nameColumn {
-    width: 27vw;
+    width: 25vw;
   }
 
   .title-span {
@@ -62,11 +62,15 @@
   }
 
   .statusColumn {
-    width: 10vw;
+    width: 9vw;
   }
 
   .achievementsColumn {
-    width: 8vw
+    width: 7vw
+  }
+
+  .pointsColumn {
+    width: 11vw
   }
 
   .percentageColumn {
