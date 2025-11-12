@@ -2,7 +2,7 @@
 
   .table-with-filters {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     padding: 10px;
   }
 
@@ -10,10 +10,16 @@
     overflow-y: scroll;
     display: flex;
     flex-direction: column;
-    height: 80vh;
-    width: 78vw;
+    height: 78vh;
+    width: 100%;
     background-color: var(--purple1);
     border: 1px solid white;
+  }
+
+  .filters-parent {
+    display: flex;
+    flex-direction: row;
+    gap: 5vw;
   }
 
   .mat-mdc-header-row,
@@ -39,18 +45,38 @@
     border-top: 1px solid white;
   }
 
-  .consoleNameColumn {
-    width: 12vw;
-  }
-
-  .nameColumn {
-    width: 25vw;
-  }
-
   .title-span {
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: nowrap;
+  }
+
+  .consoleNameColumn {
+    width: 14vw;
+  }
+
+  .nameColumn {
+    width: 30vw;
+  }
+
+  .statusColumn {
+    width: 12vw;
+  }
+
+  .achievementsColumn {
+    width: 8vw
+  }
+
+  .pointsColumn {
+    width: 9vw
+  }
+
+  .ratioColumn {
+    width: 5vw;
+  }
+
+  .percentageColumn {
+    width: 10vw
   }
 
   .idColumn {
@@ -61,21 +87,10 @@
     width: 5vw
   }
 
-  .statusColumn {
-    width: 9vw;
-  }
 
-  .achievementsColumn {
-    width: 7vw
-  }
 
-  .pointsColumn {
-    width: 11vw
-  }
 
-  .percentageColumn {
-    width: 8vw
-  }
+
 
   .urlButton {
     background: transparent;

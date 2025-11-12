@@ -50,7 +50,7 @@ export class Table {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   data: MatTableDataSource<GameData> = new MatTableDataSource<GameData>();
-  columnsToDisplay: string[] = ["ConsoleName", "Title", "CompletionStatus", "Achievements", "Points", "Percentage", "ID", "LinkToData"];
+  columnsToDisplay: string[] = ["ConsoleName", "Title", "CompletionStatus", "Achievements", "Points", "Ratio", "Percentage", "ID", "LinkToData"];
   filterText: string = "";
 
   selectedConsoles: string[] = [];
@@ -150,6 +150,8 @@ export class Table {
           return item.Percent;
         case "Points":
           return item.Points;
+        case "Ratio":
+          return item.Ratio;
         case "Title":
           return item.Title;
         default:

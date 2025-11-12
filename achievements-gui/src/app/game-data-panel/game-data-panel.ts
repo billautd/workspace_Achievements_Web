@@ -12,7 +12,13 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectChange, MatSelectModule } from '@angular/material/select';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { UtilsService } from '../../services/utils-service';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
 
+
+interface FilterData {
+  text: string;
+}
 
 export enum SortOption {
   RARITY_DESCENDING = "RARITY_DESCENDING",
@@ -33,7 +39,8 @@ export enum SortOption {
 
 @Component({
   selector: 'app-game-data',
-  imports: [CommonModule, MatProgressBarModule, MatDividerModule, MatFormFieldModule, MatSelectModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, MatProgressBarModule, MatDividerModule, MatIconModule,
+    MatFormFieldModule, MatSelectModule, FormsModule, ReactiveFormsModule, MatInputModule],
   templateUrl: './game-data-panel.html',
   styleUrl: './game-data-panel.scss'
 })
@@ -74,6 +81,8 @@ export class GameDataPanel {
   sortOptions = new FormControl(this.defaultSort);
   sortOptionsList: SortOption[] = Object.values(SortOption)
 
+  filterText: string = "";
+
   http: HttpClient = inject(HttpClient);
 
   constructor(model: Model,
@@ -87,7 +96,7 @@ export class GameDataPanel {
     this.gameDataService.requestGameData(data, this.model).then(newData => {
       this.selectedGame = newData
       this.clearAchievement();
-      this.sort(this.sortOptions.value ? this.sortOptions.value : this.defaultSort)
+      this.applySortFilter(this.sortOptions.value ? this.sortOptions.value : this.defaultSort, this.filterText)
       this.isRequestRunning = false;
     });
   }
@@ -151,7 +160,16 @@ export class GameDataPanel {
   }
 
   changeSort(event: MatSelectChange<SortOption>): void {
-    this.sort(event.value);
+    this.applySortFilter(event.value, this.filterText);
+  }
+
+  changeFilter(): void {
+    this.applySortFilter(this.sortOptions.value ? this.sortOptions.value : this.defaultSort, this.filterText)
+  }
+
+  clearFilter(): void {
+    this.filterText = "";
+    this.changeFilter();
   }
 
   openAchievementURL(ach: AchievementData): void {
@@ -172,7 +190,7 @@ export class GameDataPanel {
     window.open(url, "_blank");
   }
 
-  sort(sort: SortOption): void {
+  applySortFilter(sort: SortOption, filter: string): void {
     let sortAlgo;
     switch (sort) {
       case SortOption.RARITY_DESCENDING:
@@ -218,7 +236,11 @@ export class GameDataPanel {
         sortAlgo = (ach1: AchievementData, ach2: AchievementData) => ach1.ID - ach2.ID;
         break;
     }
-    this.sortedAchievements = [...this.selectedGame.AchievementData].sort(sortAlgo);
+
+    this.sortedAchievements = [...this.selectedGame.AchievementData.
+      filter(ach => ach.displayName.trim().toLocaleLowerCase().includes(this.filterText.trim().toLocaleLowerCase())
+        || ach.description.trim().toLocaleLowerCase().includes(this.filterText.trim().toLocaleLowerCase()))
+      .sort(sortAlgo)];
   }
 
   sortText(sort: SortOption) {

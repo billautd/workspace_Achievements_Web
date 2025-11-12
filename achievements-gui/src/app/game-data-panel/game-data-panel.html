@@ -38,6 +38,15 @@
                 }
             </mat-select>
         </mat-form-field>
+        <mat-form-field style="align-self: center">
+            <mat-label>Filter</mat-label>
+            <input matInput type="text" [(ngModel)]="filterText" (keyup)="changeFilter()">
+            @if (filterText) {
+            <button matSuffix matIconButton (click)="clearFilter()" class="closeButton">
+                <mat-icon class="closeIcon">close</mat-icon>
+            </button>
+            }
+        </mat-form-field>
     </div>
     }
     <div class="game-achievements-data">

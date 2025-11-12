@@ -558,6 +558,7 @@ public class SteamRequestService extends AbstractRequestService {
 	private AchievementData parseAchievementPoints(final GameData game, final AchievementData ach) {
 		final double p = ach.getUnlockPercentage();
 		int points;
+		System.out.println(p);
 		if (p <= 100 && p >= 90) {
 			points = 1;
 		} else if (p < 90 && p >= 75) {
@@ -576,10 +577,13 @@ public class SteamRequestService extends AbstractRequestService {
 			points = 30;
 		} else if (p < 3 && p >= 1) {
 			points = 50;
-		} else if (p < 1 && p >= 0) {
+		} else if (p < 1 && p > 0) {
 			points = 100;
 		} else {
-			points = 0;
+			Log.error("No achievements found for " + game.getTitle() + " (" + game.getId() + ")");
+			ach.setPoints(0);
+			ach.setRealPoints(0);
+			return ach;
 		}
 		ach.setPoints(points);
 

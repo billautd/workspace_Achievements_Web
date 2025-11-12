@@ -16,6 +16,7 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import perso.project.model.AchievementData;
 import perso.project.model.GameData;
 import perso.project.model.Model;
 import perso.project.model.enums.ConsoleSourceEnum;
@@ -121,9 +122,18 @@ public class PS3RequestService extends AbstractPSNRequestService {
 					.filter(g -> g.getTitle().toLowerCase().equals(gameText.toLowerCase())).findFirst();
 			if (gameDataOpt.isEmpty()) {
 				Log.error("Could not find game " + gameText + ". TODO : Try to find by region");
-			} else {
-				Log.info("Found game " + gameText);
+				return gameDataOpt;
 			}
+			Log.info("Found game " + gameText);
+			final JsonNode trophyNodes = node.get("trophy");
+			trophyNodes.forEach(t -> {
+				final AchievementData ach = new AchievementData();
+				ach.setId(t.get("id").asInt());
+				ach.setName(t.get("name").asText());
+				ach.setDescription(t.get("detail").asText());
+				gameDataOpt.get().getAchievementData().add(ach);
+			});
+			System.out.println(node);
 			return gameDataOpt;
 		} catch (IOException e) {
 			Log.error("Error reading " + gameDataFile.getName(), e);
