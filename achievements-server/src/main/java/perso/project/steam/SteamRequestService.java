@@ -256,6 +256,7 @@ public class SteamRequestService extends AbstractRequestService {
 						achievement = existingAchievement.get();
 					}
 					// Update data from existing achievement
+					achievement.setDisplayOrder(achievement.getId());
 					achievement.setDisplayName(ach.getDisplayName());
 					achievement.setDescription(ach.getDescription());
 					achievement.setIconLockedURL(ach.getIconLockedURL());
@@ -558,7 +559,6 @@ public class SteamRequestService extends AbstractRequestService {
 	private AchievementData parseAchievementPoints(final GameData game, final AchievementData ach) {
 		final double p = ach.getUnlockPercentage();
 		int points;
-		System.out.println(p);
 		if (p <= 100 && p >= 90) {
 			points = 1;
 		} else if (p < 90 && p >= 75) {

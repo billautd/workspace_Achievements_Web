@@ -75,6 +75,12 @@ public class GameData {
 	@JsonProperty("Image")
 	private String imageURL = "";
 
+	@JsonProperty("ImageBase64")
+	private String imageBase64 = "";
+
+	@JsonProperty("UUID")
+	private String UUID = "";
+
 	@Override
 	public String toString() {
 		return "Title : " + getTitle() + '\n' + "Id : " + getId() + '\n' + "Console id : " + getConsoleId() + '\n'
@@ -227,4 +233,21 @@ public class GameData {
 	public void setImageURL(String imageURL) {
 		this.imageURL = imageURL;
 	}
+
+	public String getImageBase64() {
+		return imageBase64;
+	}
+
+	public void setImageBase64(String imageBase64) {
+		this.imageBase64 = imageBase64;
+	}
+
+	public String getUUID() {
+		return UUID;
+	}
+
+	public void setUUID(String uUID) {
+		UUID = uUID;
+	}
+
 }

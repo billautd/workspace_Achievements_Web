@@ -10,7 +10,7 @@ import perso.project.model.enums.AchievementTypeEnum;
 		// Steam
 		"unlocktime", "defaultvalue", "hidden",
 		// Retro Achievements
-		"NumAwarded", "Author", "AuthorULID", "DateModified", "DateCreated", "DisplayOrder", "MemAddr", "DateEarned" })
+		"NumAwarded", "Author", "AuthorULID", "DateModified", "DateCreated", "MemAddr", "DateEarned" })
 public class AchievementData {
 	@JsonProperty("apiname")
 	@JsonAlias({ "name" })
@@ -18,6 +18,9 @@ public class AchievementData {
 
 	@JsonProperty("ID")
 	private int id = -1;
+
+	@JsonProperty("DisplayOrder")
+	private int displayOrder = 0;
 
 	@JsonProperty("achieved")
 	private boolean achieved = false;
@@ -72,6 +75,14 @@ public class AchievementData {
 
 	public void setId(int id) {
 		this.id = id;
+	}
+
+	public int getDisplayOrder() {
+		return displayOrder;
+	}
+
+	public void setDisplayOrder(int displayOrder) {
+		this.displayOrder = displayOrder;
 	}
 
 	public boolean isAchieved() {

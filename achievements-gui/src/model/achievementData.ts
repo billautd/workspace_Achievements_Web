@@ -16,4 +16,5 @@ export type AchievementData = {
     Type: AchievementType;
     Points: number;
     TrueRatio: number;
+    DisplayOrder: number;
 }

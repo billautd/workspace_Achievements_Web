@@ -11,6 +11,7 @@ import java.util.List;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import io.quarkus.logging.Log;
@@ -21,6 +22,7 @@ import perso.project.model.MainModel;
 
 public abstract class AbstractRequestService {
 	protected ObjectMapper mapper;
+	protected XmlMapper xmlMapper;
 
 	@Inject
 	protected MainModel model;
@@ -32,11 +34,16 @@ public abstract class AbstractRequestService {
 	ObjectMapper setupMapper() {
 		mapper = JsonMapper.builder().addModule(new JavaTimeModule())
 				.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS, true).build();
+		xmlMapper = new XmlMapper();
 		return mapper;
 	}
 
 	public ObjectMapper getMapper() {
 		return mapper;
+	}
+
+	public XmlMapper getXmlMapper() {
+		return xmlMapper;
 	}
 
 	/**

@@ -33,8 +33,8 @@ export enum SortOption {
   TRUE_POINTS_ASCENDING = "TRUE_POINTS_ASCENDING",
   RATIO_DESCENDING = "RATIO_DESCENDING",
   RATIO_ASCENDING = "RATIO_ASCENDING",
-  ID_DESCENDING = "ID_DESCENDING",
-  ID_ASCENDING = "ID_ASCENDING"
+  DISPLAY_ORDER_DESCENDING = "DISPLAY_ORDER_DESCENDING",
+  DISPLAY_ORDER_ASCENDING = "DISPLAY_ORDER_ASCENDING",
 }
 
 @Component({
@@ -77,7 +77,7 @@ export class GameDataPanel {
   gameDataService: GameDataService;
   sortedAchievements: AchievementData[] = [];
 
-  defaultSort = SortOption.ID_ASCENDING
+  defaultSort = SortOption.DISPLAY_ORDER_ASCENDING
   sortOptions = new FormControl(this.defaultSort);
   sortOptionsList: SortOption[] = Object.values(SortOption)
 
@@ -110,6 +110,9 @@ export class GameDataPanel {
   }
 
   achievementIconClass(percentage: number) {
+    if (percentage == 0) {
+      return "no-data-achievement";
+    }
     if (percentage >= this.COMMON_MAX_RARITY) {
       return "common-achievement";
     }
@@ -229,11 +232,11 @@ export class GameDataPanel {
       case SortOption.RATIO_ASCENDING:
         sortAlgo = (ach1: AchievementData, ach2: AchievementData) => (ach1.TrueRatio / ach1.Points) - (ach2.TrueRatio / ach2.Points);
         break;
-      case SortOption.ID_DESCENDING:
-        sortAlgo = (ach1: AchievementData, ach2: AchievementData) => ach2.ID - ach1.ID;
+      case SortOption.DISPLAY_ORDER_DESCENDING:
+        sortAlgo = (ach1: AchievementData, ach2: AchievementData) => ach2.DisplayOrder - ach1.DisplayOrder;
         break;
-      case SortOption.ID_ASCENDING:
-        sortAlgo = (ach1: AchievementData, ach2: AchievementData) => ach1.ID - ach2.ID;
+      case SortOption.DISPLAY_ORDER_ASCENDING:
+        sortAlgo = (ach1: AchievementData, ach2: AchievementData) => ach1.DisplayOrder - ach2.DisplayOrder;
         break;
     }
 
@@ -269,10 +272,10 @@ export class GameDataPanel {
         return "Ratio (Descending)"
       case SortOption.RATIO_ASCENDING:
         return "Ratio (Ascending)"
-      case SortOption.ID_DESCENDING:
-        return "ID (Descending)"
-      case SortOption.ID_ASCENDING:
-        return "ID (Ascending)"
+      case SortOption.DISPLAY_ORDER_DESCENDING:
+        return "Display order (Descending)"
+      case SortOption.DISPLAY_ORDER_ASCENDING:
+        return "Display order (Ascending)"
     }
   }
 }

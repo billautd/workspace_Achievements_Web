@@ -3,15 +3,16 @@ package perso.project.ps3;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
 import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -30,6 +31,10 @@ public class PS3RequestService extends AbstractPSNRequestService {
 	static final int MIN_LENGTH = 58;
 	static final String USER_TROPHY_DATA_NAME = "TROPUSR.DAT";
 	static final String GAME_TROPHY_DATA_NAME = "TROPCONF.SFM";
+	static final String GAME_IMAGE_NAME = "ICON0.PNG";
+	static final String TROPHY_ICON_PREFIX = "TROP";
+	static final String TROPHY_ICON_SUFFIX = ".png";
+	static final String BASE64_PREFIX = "data:image/png;base64,";
 
 	@Inject
 	@ConfigProperty(name = "ps3.html.folder.path")
@@ -78,62 +83,60 @@ public class PS3RequestService extends AbstractPSNRequestService {
 	 */
 	@Override
 	protected void parseAchievements(final List<GameData> gameData) {
+		readStandaloneGamesByIds();
 		for (final File trophyFolder : ps3EmulatorData.toFile().listFiles()) {
-			final File[] trophyFolderFiles = trophyFolder.listFiles();
-			File gameDataFile = null;
-			for (final File trophyFolderFile : trophyFolderFiles) {
-				if (trophyFolderFile.getName().equals(GAME_TROPHY_DATA_NAME)) {
-					gameDataFile = trophyFolderFile;
-					break;
-				}
+			final String gameUUID = trophyFolder.getName();
+			// Game data file
+			final Path gameDataFile = getGameDataFile(gameUUID);
+			if (!gameDataFile.toFile().exists()) {
+				Log.error("No game data file for UUID " + gameUUID);
+				continue;
 			}
-			if (gameDataFile == null) {
-				Log.error("Could not find " + GAME_TROPHY_DATA_NAME + " in folder " + trophyFolder.getName());
+			// User data file
+			final Path userDataFile = getUserDataFile(gameUUID);
+			if (!userDataFile.toFile().exists()) {
+				Log.error("No user data file for UUID " + gameUUID);
 				continue;
 			}
 
-			File userDataFile = null;
-			for (final File trophyFolderFile : trophyFolderFiles) {
-				if (trophyFolderFile.getName().equals(USER_TROPHY_DATA_NAME)) {
-					userDataFile = trophyFolderFile;
-					break;
-				}
-			}
-			if (userDataFile == null) {
-				Log.error("Could not find " + USER_TROPHY_DATA_NAME + " in folder " + trophyFolder.getName());
-				continue;
-			}
-
-			final Optional<GameData> gameDataOpt = getGameForFolder(gameData, gameDataFile);
+			final Optional<GameData> gameDataOpt = readGameDataFile(gameDataFile.toFile(), gameUUID);
 			if (gameDataOpt.isEmpty()) {
+				Log.error("Game not found for UUID " + gameUUID);
 				continue;
 			}
-
-			parseAchievementsData(gameDataOpt.get(), userDataFile);
+			readAchievementsFile(gameDataOpt.get(), userDataFile.toFile());
+			parseAchievementData(gameDataOpt.get());
 		}
 	}
 
-	private Optional<GameData> getGameForFolder(final List<GameData> gameData, final File gameDataFile) {
-		final XmlMapper xmlMapper = new XmlMapper();
-		try (final FileInputStream fis = new FileInputStream(gameDataFile)) {
-			final JsonNode node = xmlMapper.reader().readTree(fis);
-			final String gameText = node.get("title-name").asText();
-			final Optional<GameData> gameDataOpt = gameData.stream()
-					.filter(g -> g.getTitle().toLowerCase().equals(gameText.toLowerCase())).findFirst();
+	private Optional<GameData> readGameDataFile(final File gameDataFile, final String gameUUID) {
+		final String gameName = model.getStandaloneGamesByIds().get(gameUUID);
+		if (gameName == null) {
+			Log.error("Cannot find PSVita game for UUID " + gameUUID);
+			return Optional.empty();
+		}
+
+		try {
+			final Optional<GameData> gameDataOpt = model.getConsoleDataMap().get(Model.PS3_CONSOLE_ID).getGameDataMap()
+					.values().stream().filter(g -> g.getTitle().equals(gameName)).findFirst();
 			if (gameDataOpt.isEmpty()) {
-				Log.error("Could not find game " + gameText + ". TODO : Try to find by region");
+				Log.error("Could not find PS3 game " + gameName + " for UUID " + gameUUID);
 				return gameDataOpt;
 			}
-			Log.info("Found game " + gameText);
+			Log.info("Found PS3 game " + gameName + " for UUID " + gameUUID);
+
+			final JsonNode node = xmlMapper.readTree(gameDataFile);
+			// Link UUID to game found
+			final GameData gameData = gameDataOpt.get();
+			gameData.setUUID(gameUUID);
+
+			// Read achievement descriptions
+			gameData.getAchievementData().clear();
 			final JsonNode trophyNodes = node.get("trophy");
 			trophyNodes.forEach(t -> {
-				final AchievementData ach = new AchievementData();
-				ach.setId(t.get("id").asInt());
-				ach.setName(t.get("name").asText());
-				ach.setDescription(t.get("detail").asText());
-				gameDataOpt.get().getAchievementData().add(ach);
+				gameData.getAchievementData().add(readAchievementDescription(t));
 			});
-			System.out.println(node);
+
 			return gameDataOpt;
 		} catch (IOException e) {
 			Log.error("Error reading " + gameDataFile.getName(), e);
@@ -141,7 +144,27 @@ public class PS3RequestService extends AbstractPSNRequestService {
 		}
 	}
 
-	private GameData parseAchievementsData(final GameData gameData, final File userDataFile) {
+	private AchievementData readAchievementDescription(final JsonNode trophyNode) {
+		final AchievementData ach = new AchievementData();
+		ach.setId(trophyNode.get("id").asInt());
+		ach.setDisplayOrder(ach.getId());
+		ach.setDisplayName(trophyNode.get("name").asText());
+		ach.setDescription(trophyNode.get("detail").asText());
+		// Set points
+		ach.setPoints(switch (trophyNode.get("ttype").asText()) {
+		case "B" -> 15;
+		case "S" -> 30;
+		case "G" -> 90;
+		case "P" -> 300;
+		default -> 0;
+		});
+		// Ratio is 1, no data for unlock percentage
+		ach.setRealPoints(ach.getPoints());
+
+		return ach;
+	}
+
+	private GameData readAchievementsFile(final GameData gameData, final File userDataFile) {
 		String hexStr = "";
 		try (final FileInputStream fis = new FileInputStream(userDataFile)) {
 			final byte[] bytes = fis.readAllBytes();
@@ -158,24 +181,123 @@ public class PS3RequestService extends AbstractPSNRequestService {
 				}
 			}
 
-			int unlockedCount = 0;
 			for (final String hexData : allSplits) {
 				if (hexData.length() < MIN_LENGTH) {
 					continue;
 				}
-				final String unlockedStr = hexData.substring(18, 26);
-				if (unlockedStr.equals(UNLOCKED_STRING)) {
-					unlockedCount++;
+				final int achievementId = Integer.parseInt(hexData.substring(0, 2), 16);
+				final Optional<AchievementData> achOpt = gameData.getAchievementData().stream()
+						.filter(ach -> ach.getId() == achievementId).findAny();
+				if (achOpt.isEmpty()) {
+					Log.error("Game " + gameData.getTitle() + " : Achievement " + achievementId + " not found");
+					continue;
 				}
+
+				final String unlockedStr = hexData.substring(18, 26);
+				achOpt.get().setAchieved(UNLOCKED_STRING.equals(unlockedStr));
 			}
-			gameData.setAwardedAchievements(unlockedCount);
-			parseCompletionStatus(gameData);
-			Log.info("Found " + unlockedCount + " / " + gameData.getTotalAchievements() + " achievements for "
-					+ gameData.getTitle() + " (" + gameData.getId() + ")");
+
 		} catch (final Exception e) {
 			Log.error("Error reading " + userDataFile.getName(), e);
 		}
 		return gameData;
+	}
+
+	private GameData parseAchievementData(final GameData gameData) {
+		gameData.setTotalAchievements(gameData.getAchievementData().size());
+		gameData.setAwardedAchievements(
+				(int) gameData.getAchievementData().stream().filter(ach -> ach.isAchieved()).count());
+
+		// Parse completion status
+		parseCompletionStatus(gameData);
+
+		// Parse achievements percentage and points
+		setGameAchievementPercent(gameData);
+
+		// Parse total achievement data
+		gameData.setTotalPoints(gameData.getAchievementData().stream().mapToInt(AchievementData::getPoints).sum());
+		gameData.setTruePoints(gameData.getAchievementData().stream().mapToInt(AchievementData::getRealPoints).sum());
+		if (gameData.getTotalPoints() != 0) {
+			gameData.setRatio((double) gameData.getTruePoints() / gameData.getTotalPoints());
+		} else {
+			gameData.setRatio(0);
+		}
+
+		// Parse earned achievement data
+		gameData.setEarnedPoints(gameData.getAchievementData().stream().filter(AchievementData::isAchieved)
+				.mapToInt(AchievementData::getPoints).sum());
+		gameData.setEarnedTruePoints(gameData.getAchievementData().stream().filter(AchievementData::isAchieved)
+				.mapToInt(AchievementData::getRealPoints).sum());
+		if (gameData.getEarnedPoints() != 0) {
+			gameData.setEarnedRatio((double) gameData.getEarnedTruePoints() / gameData.getEarnedPoints());
+		} else {
+			gameData.setEarnedRatio(0);
+		}
+
+		Log.info(gameData.getTitle() + " (" + gameData.getId() + ") for PS3 is " + gameData.getCompletionStatus()
+				+ " with " + gameData.getAwardedAchievements() + " / " + gameData.getTotalAchievements()
+				+ " achievements and " + gameData.getTotalPoints() + " (" + gameData.getTruePoints() + ") points");
+		return gameData;
+	}
+
+	public GameData getFullGameData(final int gameId) {
+		Log.info("Getting full game data for PS3 game " + gameId);
+		final GameData existingGameData = model.getConsoleDataMap().get(Model.PS3_CONSOLE_ID).getGameDataMap()
+				.get(gameId);
+		if (existingGameData == null) {
+			Log.error("No PS3 game found for id " + gameId);
+			return null;
+		}
+
+		parseAchievements(
+				model.getConsoleDataMap().get(Model.PS3_CONSOLE_ID).getGameDataMap().values().stream().toList());
+		// Set local images as base64
+		parseImages(existingGameData);
+
+		return existingGameData;
+	}
+
+	private GameData parseImages(final GameData gameData) {
+		// Game image
+		try {
+			final byte[] imageBytes = Files.readAllBytes(getGameImagePath(gameData.getUUID()));
+			final String imageBase64 = Base64.getEncoder().encodeToString(imageBytes);
+			gameData.setImageURL(BASE64_PREFIX + imageBase64);
+		} catch (IOException e) {
+			Log.error("Cannot convert game image to Base64 for game " + gameData.getTitle());
+			return gameData;
+		}
+
+		// Achievement icons
+		gameData.getAchievementData().forEach(ach -> {
+			try {
+				final byte[] iconBytes = Files.readAllBytes(getTrophyIconPath(gameData.getUUID(), ach.getId()));
+				final String iconBase64 = Base64.getEncoder().encodeToString(iconBytes);
+				ach.setIconLockedURL(BASE64_PREFIX + iconBase64);
+				ach.setIconUnlockedURL(BASE64_PREFIX + iconBase64);
+			} catch (IOException e) {
+				Log.error("Cannot convert game image to Base64 for game " + gameData.getTitle());
+			}
+		});
+
+		return gameData;
+	}
+
+	private Path getGameDataFile(final String gameUUID) {
+		return Path.of(ps3EmulatorData + "\\" + gameUUID + "\\" + GAME_TROPHY_DATA_NAME);
+	}
+
+	private Path getUserDataFile(final String gameUUID) {
+		return Path.of(ps3EmulatorData + "\\" + gameUUID + "\\" + USER_TROPHY_DATA_NAME);
+	}
+
+	private Path getGameImagePath(final String gameUUID) {
+		return Path.of(ps3EmulatorData + "\\" + gameUUID + "\\" + GAME_IMAGE_NAME);
+	}
+
+	private Path getTrophyIconPath(final String gameUUID, final int achievementId) {
+		return Path.of(ps3EmulatorData + "\\" + gameUUID + "\\" + TROPHY_ICON_PREFIX
+				+ String.format("%03d", achievementId) + TROPHY_ICON_SUFFIX);
 	}
 
 }

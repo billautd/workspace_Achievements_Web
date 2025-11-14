@@ -7,11 +7,14 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.io.FilenameUtils;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import com.opencsv.RFC4180Parser;
@@ -19,6 +22,7 @@ import com.opencsv.RFC4180ParserBuilder;
 import com.opencsv.exceptions.CsvException;
 
 import io.quarkus.logging.Log;
+import jakarta.inject.Inject;
 import perso.project.model.ConsoleData;
 import perso.project.model.GameData;
 import perso.project.model.enums.CompletionStatusEnum;
@@ -28,6 +32,10 @@ import perso.project.utils.AbstractRequestService;
 public abstract class AbstractStandaloneRequestService extends AbstractRequestService {
 	static final String HTM_EXTENSION = "htm";
 	protected int id = 1;
+
+	@Inject
+	@ConfigProperty(name = "standalone.games.by.ids.path")
+	private Path standaloneGamesByIdsPath;
 
 	protected abstract Path getHTMLPath();
 
@@ -184,5 +192,18 @@ public abstract class AbstractStandaloneRequestService extends AbstractRequestSe
 		}
 		setGameAchievementPercent(gameData);
 		return gameData;
+	}
+
+	protected void readStandaloneGamesByIds() {
+
+		try {
+			final Map<String, String> values = mapper.readValue(standaloneGamesByIdsPath.toFile(),
+					new TypeReference<Map<String, String>>() {
+					});
+			model.getStandaloneGamesByIds().clear();
+			values.forEach(model.getStandaloneGamesByIds()::put);
+		} catch (final IOException e) {
+			Log.error("Cannot read file at " + standaloneGamesByIdsPath);
+		}
 	}
 }

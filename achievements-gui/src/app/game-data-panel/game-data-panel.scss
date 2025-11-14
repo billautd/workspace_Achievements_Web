@@ -126,7 +126,7 @@
 }
 
 .game-achievement-icon:hover {
-    border-width: 5px;
+    scale: 1.1;
 }
 
 .missable-icon,
@@ -187,6 +187,11 @@
 .ultra-rare-achievement {
     border-color: var(--ultra-rare);
     color: var(--ultra-rare);
+}
+
+.no-data-achievement {
+    border-color: black;
+    color: white;
 }
 
 .source-icon {

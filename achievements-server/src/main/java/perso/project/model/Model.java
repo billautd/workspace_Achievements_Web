@@ -14,9 +14,15 @@ public class Model {
 	public static final int PSVITA_CONSOLE_ID = 300000;
 	public static final int XBOX360_CONSOLE_ID = 400000;
 
+	public static final String DEFAULT_GAME_IMAGE = "default_game.png";
+	public static final String DEFAULT_LOCKED_ICON = "default_locked.png";
+	public static final String DEFAULT_UNLOCKED_ICON = "default_unlocked.png";
+
 	private final Map<Integer, ConsoleData> consoleDataMap = new HashMap<>();
 
 	private final Map<String, PlayniteGameData> playniteData = new HashMap<>();
+
+	private final Map<String, String> standaloneGamesByIds = new HashMap<>();
 
 	public Map<Integer, ConsoleData> getConsoleDataMap() {
 		return consoleDataMap;
@@ -24,6 +30,10 @@ public class Model {
 
 	public Map<String, PlayniteGameData> getPlayniteData() {
 		return playniteData;
+	}
+
+	public Map<String, String> getStandaloneGamesByIds() {
+		return standaloneGamesByIds;
 	}
 
 	public List<GameData> getGameDataForSources(final List<ConsoleSourceEnum> sources) {
