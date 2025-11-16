@@ -19,6 +19,8 @@
   .filters-parent {
     display: flex;
     flex-direction: row;
+    align-items: center;
+    justify-content: baseline;
     gap: 5vw;
   }
 
@@ -125,16 +127,13 @@
     flex-direction: row;
     align-items: center;
     margin-top: 10px;
-    justify-content: space-between;
+    justify-content: baseline;
+    gap: 20px;
   }
 
   .source-to-request {
     display: flex;
-  }
-
-  .source-to-request {
-    display: flex;
-    flex-grow: 0.5;
+    flex-grow: 0.3;
   }
 
   ::ng-deep mat-option {
@@ -142,9 +141,9 @@
     color: white !important;
   }
 
-  ::ng-deep mat-form-field {
+  .mat-mdc-form-field {
     color: white;
-    width: 20vw;
+    min-width: 300px;
     margin-top: 10px;
     margin-left: 10px;
   }

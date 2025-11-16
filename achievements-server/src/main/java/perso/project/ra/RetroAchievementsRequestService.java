@@ -176,6 +176,7 @@ public class RetroAchievementsRequestService extends AbstractRequestService {
 					existingGameData = consoleData.getGameDataMap().get(data.getId());
 					existingGameData.setTotalPoints(data.getTotalPoints());
 				}
+				existingGameData.setTruePoints(existingGameData.getTotalPoints());
 			});
 			return gameData;
 		} catch (JsonProcessingException e) {
@@ -256,6 +257,8 @@ public class RetroAchievementsRequestService extends AbstractRequestService {
 				gameData.setCompletionStatus(CompletionStatusEnum.NOT_PLAYED);
 			}
 		}
+		Log.info(gameData + " (" + gameData.getId() + ") for " + gameData.getConsoleName() + " is "
+				+ gameData.getCompletionStatus());
 
 		return gameData;
 	}
@@ -281,7 +284,7 @@ public class RetroAchievementsRequestService extends AbstractRequestService {
 		if (gameData.getTotalPoints() != 0) {
 			gameData.setRatio((double) gameData.getTruePoints() / gameData.getTotalPoints());
 		} else {
-			gameData.setRatio(0);
+			gameData.setRatio(1);
 		}
 
 		// Parse earned achievements points
@@ -292,7 +295,7 @@ public class RetroAchievementsRequestService extends AbstractRequestService {
 		if (gameData.getEarnedPoints() != 0) {
 			gameData.setEarnedRatio((double) gameData.getEarnedTruePoints() / gameData.getEarnedPoints());
 		} else {
-			gameData.setEarnedRatio(0);
+			gameData.setEarnedRatio(1);
 		}
 
 		Log.info(gameData.getTitle() + " (" + gameData.getId() + ") for Steam is " + gameData.getCompletionStatus()

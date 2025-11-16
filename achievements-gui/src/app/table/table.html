@@ -84,7 +84,7 @@
                 <mat-label>Filter</mat-label>
                 <input matInput type="text" [(ngModel)]="filterText" (keyup)="applyFilter()">
                 @if (filterText) {
-                <button matSuffix matIconButton (click)="clearFilter()" class="closeButton">
+                <button matSuffix matIconButton (click)="clearFilterText()" class="closeButton">
                     <mat-icon class="closeIcon">close</mat-icon>
                 </button>
                 }
@@ -114,10 +114,14 @@
                     }
                 </mat-select>
             </mat-form-field>
+            <button class="request-data-button" (click)="clearFilters()"> Clear filters </button>
         </div>
         <div class="bottom-bar">
             <button class="request-data-button" (click)="requestAllData()" [disabled]="isRequestRunning">
                 Request games data
+            </button>
+            <button class="request-data-button" (click)="requestAllExistingData()" [disabled]="isRequestRunning">
+                Get existing games data
             </button>
             <section class="source-to-request" [formGroup]="sourcesToRequest">
                 <mat-checkbox class="source-to-request" formControlName="ra" (change)="updateSources()">
@@ -136,10 +140,7 @@
                     Xbox 360
                 </mat-checkbox>
             </section>
-            <button class="request-data-button" (click)="requestAllExistingData()" [disabled]="isRequestRunning">
-                Get existing games data
-            </button>
-            <mat-paginator [pageSize]="27" hidePageSize showFirstLastButtons></mat-paginator>
+            <mat-paginator [pageSize]="27" hidePageSize showFirstLastButtons style="margin-left:auto"></mat-paginator>
         </div>
     </div>
 

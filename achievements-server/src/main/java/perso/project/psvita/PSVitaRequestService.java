@@ -244,7 +244,7 @@ public class PSVitaRequestService extends AbstractPSNRequestService {
 		if (gameData.getTotalPoints() != 0) {
 			gameData.setRatio((double) gameData.getTruePoints() / gameData.getTotalPoints());
 		} else {
-			gameData.setRatio(0);
+			gameData.setRatio(1);
 		}
 
 		// Parse earned achievement data
@@ -255,7 +255,7 @@ public class PSVitaRequestService extends AbstractPSNRequestService {
 		if (gameData.getEarnedPoints() != 0) {
 			gameData.setEarnedRatio((double) gameData.getEarnedTruePoints() / gameData.getEarnedPoints());
 		} else {
-			gameData.setEarnedRatio(0);
+			gameData.setEarnedRatio(1);
 		}
 
 		Log.info(gameData.getTitle() + " (" + gameData.getId() + ") for PSVita is " + gameData.getCompletionStatus()

@@ -309,7 +309,7 @@ export class Table {
     this.data.filter = JSON.stringify(filter);
   }
 
-  clearFilter(): void {
+  clearFilterText(): void {
     this.filterText = '';
     this.applyFilter();
   }
@@ -326,5 +326,20 @@ export class Table {
 
   completionStatusText(status: CompletionStatusType): string {
     return UtilsService.completionStatusText(status);
+  }
+
+  clearFilters(): void {
+    this.clearFilterText()
+
+    this.completionStatuses.setValue([])
+    this.selectedCompletionStatuses = []
+
+    this.consoles.setValue([])
+    this.selectedConsoles = []
+
+    this.sources.setValue([])
+    this.selectedSources = []
+
+    this.applyFilter();
   }
 }

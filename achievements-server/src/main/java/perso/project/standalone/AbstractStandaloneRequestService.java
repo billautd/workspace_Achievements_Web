@@ -195,7 +195,6 @@ public abstract class AbstractStandaloneRequestService extends AbstractRequestSe
 	}
 
 	protected void readStandaloneGamesByIds() {
-
 		try {
 			final Map<String, String> values = mapper.readValue(standaloneGamesByIdsPath.toFile(),
 					new TypeReference<Map<String, String>>() {

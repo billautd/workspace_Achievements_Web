@@ -55,6 +55,7 @@ public abstract class AbstractXboxRequestService extends AbstractStandaloneReque
 		// Points
 		final int points = Integer.parseInt(splitStr[1]);
 		data.setTotalPoints(points);
+		data.setTruePoints(points);
 
 		Log.debug("Getting " + getSource() + " game " + data.getTitle() + " (" + data.getId() + ") with "
 				+ data.getTotalAchievements() + " trophies");

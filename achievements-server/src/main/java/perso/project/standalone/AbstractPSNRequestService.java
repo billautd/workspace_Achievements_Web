@@ -64,6 +64,7 @@ public abstract class AbstractPSNRequestService extends AbstractStandaloneReques
 		final int points = Integer
 				.parseInt(trophyCount.selectFirst("span.small-info").select("b").last().text().replace(",", ""));
 		data.setTotalPoints(points);
+		data.setTruePoints(points);
 
 		Log.debug("Getting " + getSource().getName() + " game " + data.getTitle() + " (" + data.getId() + ") with "
 				+ data.getTotalAchievements() + " trophies");

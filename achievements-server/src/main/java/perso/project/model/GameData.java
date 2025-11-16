@@ -55,7 +55,7 @@ public class GameData {
 	private int earnedTruePoints = 0;
 
 	@JsonProperty("Ratio")
-	private double ratio = 0d;
+	private double ratio = 1.0d;
 
 	@JsonProperty("EarnedRatio")
 	private double earnedRatio = 0d;
