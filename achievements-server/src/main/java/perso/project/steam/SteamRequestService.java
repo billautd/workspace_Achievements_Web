@@ -63,6 +63,18 @@ public class SteamRequestService extends AbstractRequestService {
 	@ConfigProperty(name = "steam.id")
 	String steamId;
 
+	@Inject
+	@ConfigProperty(name = "steam.beaten.path")
+	private java.nio.file.Path steamBeatenPath;
+
+	@Inject
+	@ConfigProperty(name = "steam.mastered.path")
+	private java.nio.file.Path steamMasteredPath;
+
+	@Inject
+	@ConfigProperty(name = "steam.removed.path")
+	private java.nio.file.Path steamRemovedPath;
+
 	/**
 	 * Creates <b>blocking</b> HTTP request
 	 * 
@@ -108,6 +120,12 @@ public class SteamRequestService extends AbstractRequestService {
 			steamConsoleData = model.getConsoleDataMap().get(Model.STEAM_CONSOLE_ID);
 		}
 		return List.of(steamConsoleData);
+	}
+
+	public void getLocalData() {
+		getSteamGames_Beaten(steamBeatenPath);
+		getSteamGames_Mastered(steamMasteredPath);
+		getSteamGames_NotInDatabase(steamRemovedPath);
 	}
 
 	public List<GameData> getOwnedGames() {
@@ -160,6 +178,9 @@ public class SteamRequestService extends AbstractRequestService {
 			Log.error("No Steam game found for id " + gameId);
 			return null;
 		}
+
+		// First, re-read local files
+		getLocalData();
 
 		getAchievements(gameId);
 		setAchievementData(existingGameData);
@@ -402,6 +423,7 @@ public class SteamRequestService extends AbstractRequestService {
 					gameData.setConsoleId(Model.STEAM_CONSOLE_ID);
 					gameData.setConsoleName("Steam");
 				}
+				gameData.setLocalData(true);
 				gameData.setCompletionStatus(CompletionStatusEnum.BEATEN);
 				parseAchievementData(gameData);
 
@@ -445,6 +467,7 @@ public class SteamRequestService extends AbstractRequestService {
 					gameData.setConsoleId(Model.STEAM_CONSOLE_ID);
 					gameData.setConsoleName("Steam");
 				}
+				gameData.setLocalData(true);
 				gameData.setCompletionStatus(CompletionStatusEnum.MASTERED);
 				parseAchievementData(gameData);
 
@@ -497,6 +520,7 @@ public class SteamRequestService extends AbstractRequestService {
 				} else {
 					Log.error("Removed game " + gameName + " (" + gameId + ") exists in Steam database");
 				}
+				gameData.setLocalData(true);
 				// Completion status is parsed in standard way through parseAchievementData
 				model.getConsoleDataMap().get(Model.STEAM_CONSOLE_ID).getGameDataMap().put(gameId, gameData);
 				removedList.add(gameData);
@@ -516,7 +540,7 @@ public class SteamRequestService extends AbstractRequestService {
 
 		// Check if already set by Steam beaten and SteamMastered files
 		// If beaten or mastered, already set by other methodso
-		if (CompletionStatusEnum.NOT_PLAYED.equals(gameData.getCompletionStatus())) {
+		if (!gameData.isLocalData()) {
 			if (gameData.getTotalAchievements() == 0) {
 				gameData.setCompletionStatus(CompletionStatusEnum.NO_ACHIEVEMENTS);
 			} else if (gameData.getAwardedAchievements() == gameData.getTotalAchievements()) {

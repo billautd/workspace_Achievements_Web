@@ -124,6 +124,7 @@ public abstract class AbstractStandaloneRequestService extends AbstractRequestSe
 					gameData.setConsoleId(getId());
 					gameData.setConsoleName(getSource().getName());
 				}
+				gameData.setLocalData(true);
 				gameData.setCompletionStatus(CompletionStatusEnum.BEATEN);
 				setGameAchievementPercent(gameData);
 
@@ -161,6 +162,7 @@ public abstract class AbstractStandaloneRequestService extends AbstractRequestSe
 					gameData.setConsoleId(getId());
 					gameData.setConsoleName(getSource().getName());
 				}
+				gameData.setLocalData(true);
 				gameData.setCompletionStatus(CompletionStatusEnum.MASTERED);
 				setGameAchievementPercent(gameData);
 
@@ -181,7 +183,7 @@ public abstract class AbstractStandaloneRequestService extends AbstractRequestSe
 			return gameData;
 		}
 		// If beaten or mastered, already set by other methods
-		if (CompletionStatusEnum.NOT_PLAYED.equals(gameData.getCompletionStatus())) {
+		if (!gameData.isLocalData()) {
 			if (gameData.getTotalAchievements() == 0) {
 				gameData.setCompletionStatus(CompletionStatusEnum.NO_ACHIEVEMENTS);
 			} else if (gameData.getAwardedAchievements() == gameData.getTotalAchievements()) {

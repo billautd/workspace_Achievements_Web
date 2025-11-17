@@ -34,18 +34,6 @@ public class SteamResources extends AbstractResources {
 	@ConfigProperty(name = "steam.database.path")
 	private java.nio.file.Path steamDatabasePath;
 
-	@Inject
-	@ConfigProperty(name = "steam.beaten.path")
-	private java.nio.file.Path steamBeatenPath;
-
-	@Inject
-	@ConfigProperty(name = "steam.mastered.path")
-	private java.nio.file.Path steamMasteredPath;
-
-	@Inject
-	@ConfigProperty(name = "steam.removed.path")
-	private java.nio.file.Path steamRemovedPath;
-
 	@GET
 	@Path("/console_data")
 	@Produces(MediaType.TEXT_PLAIN)
@@ -58,9 +46,7 @@ public class SteamResources extends AbstractResources {
 	@Produces(MediaType.TEXT_PLAIN)
 	public String getOwnedGames() throws JsonProcessingException {
 		steamRequestService.getOwnedGames();
-		steamRequestService.getSteamGames_Beaten(steamBeatenPath);
-		steamRequestService.getSteamGames_Mastered(steamMasteredPath);
-		steamRequestService.getSteamGames_NotInDatabase(steamRemovedPath);
+		steamRequestService.getLocalData();
 
 		final Collection<GameData> data = model.getConsoleDataMap().get(Model.STEAM_CONSOLE_ID).getGameDataMap()
 				.values();
