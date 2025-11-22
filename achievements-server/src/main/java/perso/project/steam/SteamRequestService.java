@@ -131,7 +131,6 @@ public class SteamRequestService extends AbstractRequestService {
 	public void getLocalData() {
 		getSteamGames_Beaten(steamBeatenPath);
 		getSteamGames_Mastered(steamMasteredPath);
-//		getSteamGames_NotInDatabase(steamRemovedPath);
 	}
 
 	public List<GameData> getOwnedGames() {
@@ -512,57 +511,6 @@ public class SteamRequestService extends AbstractRequestService {
 			return masteredList;
 		} catch (final IOException | CsvException e) {
 			Log.error("Cannot read Steam mastered file at " + path);
-			return null;
-		}
-	}
-
-	/**
-	 * Reads games that are in user database but removed from store
-	 * 
-	 * @param path
-	 * @return
-	 */
-	public List<GameData> getSteamGames_NotInDatabase(final Path path) {
-		Log.info("Reading " + path);
-		final List<GameData> removedList = new ArrayList<>();
-		final RFC4180Parser rfc4180Parser = new RFC4180ParserBuilder().build();
-		try (final FileReader fileReader = new FileReader(path.toFile(), StandardCharsets.UTF_8)) {
-			final CSVReader reader = new CSVReaderBuilder(fileReader).withCSVParser(rfc4180Parser).build();
-			final List<String[]> stringList = reader.readAll();
-			for (int i = 0; i < stringList.size(); i++) {
-				final String[] str = stringList.get(i);
-				final String gameName = str[0];
-				final String gameIdStr = str[1];
-				Integer gameId = null;
-				if (gameIdStr.isBlank()) {
-					Log.error("No game id for game " + gameName);
-					continue;
-				}
-				try {
-					gameId = Integer.parseInt(gameIdStr);
-				} catch (final NumberFormatException e) {
-					Log.error("Cannot parse int value for string " + gameIdStr + " at index " + i);
-					continue;
-				}
-				GameData gameData = model.getConsoleDataMap().get(Model.STEAM_CONSOLE_ID).getGameDataMap().get(gameId);
-				if (gameData == null) {
-					gameData = new GameData();
-					gameData.setTitle(gameName);
-					gameData.setId(gameId);
-					gameData.setConsoleId(Model.STEAM_CONSOLE_ID);
-					gameData.setConsoleName("Steam");
-				} else {
-					Log.error("Removed game " + gameName + " (" + gameId + ") exists in Steam database");
-				}
-				gameData.setLocalData(true);
-				// Completion status is parsed in standard way through parseAchievementData
-				model.getConsoleDataMap().get(Model.STEAM_CONSOLE_ID).getGameDataMap().put(gameId, gameData);
-				removedList.add(gameData);
-				Log.info(gameName + " (" + gameId + ") for Steam is not in database");
-			}
-			return removedList;
-		} catch (final IOException | CsvException e) {
-			Log.error("Cannot read Steam removed file at " + path);
 			return null;
 		}
 	}
