@@ -45,9 +45,11 @@ public class SteamRequestService extends AbstractRequestService {
 	static final String MAIN_URI = "https://api.steampowered.com/";
 
 	static final String PLAYER_SERVICE = "IPlayerService";
+	static final String CLIENT_SERVICE = "IClientCommService";
 	static final String STEAM_USER_STATS = "ISteamUserStats";
 
 	static final String OWNED_GAMES_METHOD = "GetOwnedGames";
+	static final String CLIENT_APP_LIST_METHOD = "GetClientAppList";
 	static final String PLAYER_ACHIEVEMENTS_METHOD = "GetPlayerAchievements";
 	static final String GAME_SCHEMA_METHOD = "GetSchemaForGame";
 	static final String PERCENTAGES_METHOD = "GetGlobalAchievementPercentagesForApp";
@@ -62,6 +64,10 @@ public class SteamRequestService extends AbstractRequestService {
 	@Inject
 	@ConfigProperty(name = "steam.id")
 	String steamId;
+
+	@Inject
+	@ConfigProperty(name = "steam_access_token")
+	String steamAccessToken;
 
 	@Inject
 	@ConfigProperty(name = "steam.beaten.path")
@@ -125,33 +131,61 @@ public class SteamRequestService extends AbstractRequestService {
 	public void getLocalData() {
 		getSteamGames_Beaten(steamBeatenPath);
 		getSteamGames_Mastered(steamMasteredPath);
-		getSteamGames_NotInDatabase(steamRemovedPath);
+//		getSteamGames_NotInDatabase(steamRemovedPath);
 	}
 
 	public List<GameData> getOwnedGames() {
 		Log.info("Getting all Steam owned games");
-		final String resBody = requestData(PLAYER_SERVICE, OWNED_GAMES_METHOD, V001, "format=json", "include_appinfo=1",
-				"include_played_free_games=1", "skip_unvetted_apps=0").body();
-		LoggingUtils.prettyPrint(mapper, resBody);
+
+		// ClientAppList has all games, even free ones but less details
+		final String clientResBody = requestData(CLIENT_SERVICE, CLIENT_APP_LIST_METHOD, V001,
+				"access_token=" + steamAccessToken, "fields=games").body();
+		LoggingUtils.prettyPrint(mapper, clientResBody);
 
 		try {
-			final JsonNode node = mapper.readTree(resBody);
+			final JsonNode node = mapper.readTree(clientResBody);
+			final JsonNode gameDataNode = node.get("response").get("apps");
+			gameDataNode.forEach(n -> {
+				final int id = n.get("appid").asInt();
+				// Ignore games already setup before
+				final GameData data = new GameData();
+				data.setId(id);
+				data.setTitle(n.get("app").asText());
+				model.getConsoleDataMap().get(Model.STEAM_CONSOLE_ID).getGameDataMap().put(data.getId(), data);
+			});
+			Log.info("Found " + gameDataNode.size() + " games for Steam");
+		} catch (JsonProcessingException e) {
+			Log.error("Error reading response body as GameData", e);
+			return null;
+		}
+
+		// OwnedGames has image URL
+		final String ownedGamesResBody = requestData(PLAYER_SERVICE, OWNED_GAMES_METHOD, V001, "format=json",
+				"include_appinfo=1", "include_played_free_games=1", "skip_unvetted_apps=0").body();
+		LoggingUtils.prettyPrint(mapper, ownedGamesResBody);
+
+		try {
+			final JsonNode node = mapper.readTree(ownedGamesResBody);
 			final String gameDataBody = node.get("response").get("games").toString();
 			final List<GameData> gameData = mapper.readValue(gameDataBody, new TypeReference<List<GameData>>() {
 			});
 			gameData.forEach(data -> {
-				data.setConsoleId(Model.STEAM_CONSOLE_ID);
-				data.setConsoleName("Steam");
 				data.setImageURL(
 						IMAGE_URL + Integer.toString(data.getId()) + "/" + data.getImageURL() + "/" + IMAGE_URL_SUFFIX);
 				model.getConsoleDataMap().get(Model.STEAM_CONSOLE_ID).getGameDataMap().put(data.getId(), data);
 			});
 			Log.info("Found " + gameData.size() + " games for Steam");
-			return gameData;
 		} catch (JsonProcessingException e) {
 			Log.error("Error reading response body as GameData", e);
 			return null;
 		}
+
+		model.getConsoleDataMap().get(Model.STEAM_CONSOLE_ID).getGameDataMap().values().forEach(g -> {
+			g.setConsoleId(Model.STEAM_CONSOLE_ID);
+			g.setConsoleName("Steam");
+		});
+
+		return model.getConsoleDataMap().get(Model.STEAM_CONSOLE_ID).getGameDataMap().values().stream().toList();
 	}
 
 	public GameData getSimpleGameData(final int gameId) {
