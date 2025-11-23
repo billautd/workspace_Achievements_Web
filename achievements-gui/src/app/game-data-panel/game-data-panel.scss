@@ -12,7 +12,7 @@
 }
 
 .game-title {
-    font-size: 5vh;
+    font-size: 4vh;
 }
 
 .game-title-points {
@@ -323,4 +323,9 @@
 
 .closeIcon {
     color: white;
+}
+
+.game-completion-status {
+    display: flex;
+    align-items: center;
 }

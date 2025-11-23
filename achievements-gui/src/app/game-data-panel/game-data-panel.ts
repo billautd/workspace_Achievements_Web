@@ -278,4 +278,12 @@ export class GameDataPanel {
         return "Display order (Ascending)"
     }
   }
+
+  completionStatusClass(status: CompletionStatusType): any {
+    return UtilsService.completionStatusClass(status);
+  }
+
+  completionStatusText(status: CompletionStatusType): string {
+    return UtilsService.completionStatusText(status);
+  }
 }

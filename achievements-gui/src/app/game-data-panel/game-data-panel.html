@@ -6,6 +6,11 @@
             <img [src]="sourceIcon(selectedGame)" class="source-icon">
             <div class="game-console">{{selectedGame.ConsoleName}}</div>
         </div>
+        <div class="game-completion-status">
+            <div class="status-text" [ngClass]="completionStatusClass(selectedGame.CompletionStatus)">
+                {{completionStatusText(selectedGame.CompletionStatus)}}
+            </div>
+        </div>
         <div class="game-achievements-information">
             <div class="game-title-points">
                 <div class="game-title">{{selectedGame.Title}}</div>
