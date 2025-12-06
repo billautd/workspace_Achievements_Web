@@ -26,6 +26,12 @@ public class PlayniteService {
 	@Inject
 	Model model;
 
+	static final int NAME_COLUMN = 0;
+	static final int ID_COLUMN = 1;
+	static final int COMPLETION_STATUS_COLUMN = 2;
+	static final int PLATFORM_COLUMN = 3;
+	static final int SOURCE_COLUMN = 4;
+
 	public void getPlayniteData(final Path path) {
 		final Map<String, PlayniteGameData> playniteDataMap = model.getPlayniteData();
 		synchronized (playniteDataMap) {
@@ -37,17 +43,17 @@ public class PlayniteService {
 				reader.readNextSilently();
 				final List<String[]> stringList = reader.readAll();
 				for (final String[] str : stringList) {
-					final String id = str[1];
+					final String id = str[ID_COLUMN];
 					PlayniteGameData playniteData = playniteDataMap.get(id);
 					if (playniteData == null) {
 						playniteData = new PlayniteGameData();
 						playniteData.setGameId(id);
 						playniteDataMap.put(playniteData.getGameId(), playniteData);
 					}
-					playniteData.setName(str[0]);
-					playniteData.setPlatform(str[3]);
-					mapSource(playniteData, str[4]);
-					mapCompletionStatus(playniteData, str[2]);
+					playniteData.setName(str[NAME_COLUMN]);
+					playniteData.setPlatform(str[PLATFORM_COLUMN]);
+					mapSource(playniteData, str[SOURCE_COLUMN]);
+					mapCompletionStatus(playniteData, str[COMPLETION_STATUS_COLUMN]);
 				}
 				Log.info("Found Playnite data with " + playniteDataMap.size() + " games");
 			} catch (final IOException | CsvException e) {

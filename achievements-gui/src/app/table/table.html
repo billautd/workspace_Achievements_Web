@@ -2,12 +2,6 @@
     <div class="table-parent">
         <mat-table class="games-table" [dataSource]="data" matSort (matSortChange)="announceSortChange()"
             matSortActive="Title" matSortDirection="asc">
-            <ng-container matColumnDef="ConsoleName">
-                <th mat-header-cell mat-sort-header *matHeaderCellDef class="consoleNameColumn">Console name</th>
-                <td mat-cell *matCellDef="let data" class="consoleNameColumn"> {{data.ConsoleName}} </td>
-                <td mat-footer-cell *matFooterCellDef class="consoleNameColumn">Total</td>
-            </ng-container>
-
             <ng-container matColumnDef="Title">
                 <th mat-header-cell mat-sort-header *matHeaderCellDef class="nameColumn">Name</th>
                 <td mat-cell *matCellDef="let data" class="nameColumn">
@@ -15,7 +9,11 @@
                 </td>
                 <td mat-footer-cell *matFooterCellDef class="nameColumn">{{totalText()}}</td>
             </ng-container>
-
+            <ng-container matColumnDef="ConsoleName">
+                <th mat-header-cell mat-sort-header *matHeaderCellDef class="consoleNameColumn">Console name</th>
+                <td mat-cell *matCellDef="let data" class="consoleNameColumn"> {{data.ConsoleName}} </td>
+                <td mat-footer-cell *matFooterCellDef class="consoleNameColumn">Total</td>
+            </ng-container>
             <ng-container matColumnDef="CompletionStatus">
                 <th mat-header-cell mat-sort-header *matHeaderCellDef class="statusColumn">Status</th>
                 <td mat-cell *matCellDef="let data" class="statusColumn">
