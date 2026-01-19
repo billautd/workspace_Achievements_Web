@@ -206,8 +206,11 @@ public class PSVitaRequestService extends AbstractPSNRequestService {
 			// Always read by groups of 2 bytes to then reverse the groups of 8 binary
 			// values
 			final int bytesToRead = (int) (2 * Math.ceil(gameData.getAchievementData().size() / 8d));
+			System.out.println(hexStr);
 			final String trophyProgressString = hexStr.substring(8, 8 + bytesToRead);
+			System.out.println(trophyProgressString);
 			final String binaryProgressString = GenericUtils.hexToBin(trophyProgressString);
+			System.out.println(binaryProgressString);
 			String reversedProgressString = "";
 			for (int i = 0; i < bytesToRead / 2; i++) {
 				final String substringI = binaryProgressString.substring(8 * i, 8 * (i + 1));

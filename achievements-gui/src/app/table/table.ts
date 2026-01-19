@@ -110,8 +110,8 @@ export class Table {
       const sources: string[] = searchTerms.sources;
 
       //Contains string text
-      const strFilter: boolean = (data.ID.toString().trim().toLowerCase().includes(text) ||
-        data.Title.trim().toLowerCase().includes(text));
+      const strFilter: boolean = (data.ID.toString().trim().toLowerCase().includes(text.toLowerCase()) ||
+        data.Title.trim().toLowerCase().includes(text.toLowerCase()));
       //Contains filtered consoles
       const consoleFilter: boolean = consoles.includes(data.ConsoleName) || consoles.length == 0;
       //Contains completion status

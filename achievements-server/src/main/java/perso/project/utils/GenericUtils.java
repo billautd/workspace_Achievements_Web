@@ -30,11 +30,17 @@ public class GenericUtils {
 		hex = hex.replaceAll("8", "1000");
 		hex = hex.replaceAll("9", "1001");
 		hex = hex.replaceAll("A", "1010");
+		hex = hex.replaceAll("a", "1010");
 		hex = hex.replaceAll("B", "1011");
+		hex = hex.replaceAll("b", "1011");
 		hex = hex.replaceAll("C", "1100");
+		hex = hex.replaceAll("c", "1100");
 		hex = hex.replaceAll("D", "1101");
+		hex = hex.replaceAll("d", "1101");
 		hex = hex.replaceAll("E", "1110");
+		hex = hex.replaceAll("e", "1110");
 		hex = hex.replaceAll("F", "1111");
+		hex = hex.replaceAll("f", "1111");
 		return hex;
 	}
 
