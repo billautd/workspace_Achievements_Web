@@ -33,7 +33,6 @@ import perso.project.model.Model;
 import perso.project.model.enums.CompletionStatusEnum;
 import perso.project.model.enums.ConsoleSourceEnum;
 import perso.project.utils.AbstractRequestService;
-import perso.project.utils.LoggingUtils;
 
 @ApplicationScoped
 public class SteamRequestService extends AbstractRequestService {
@@ -136,12 +135,10 @@ public class SteamRequestService extends AbstractRequestService {
 	public List<GameData> getOwnedGames() {
 		Log.info("Getting all Steam owned games");
 
-		// ClientAppList has all games, even free ones but less details
-		final String clientResBody = requestData(CLIENT_SERVICE, CLIENT_APP_LIST_METHOD, V001,
-				"access_token=" + steamAccessToken, "fields=games").body();
-		LoggingUtils.prettyPrint(mapper, clientResBody);
-
 		try {
+			// ClientAppList has all games, even free ones but less details
+			final String clientResBody = parseResponse(requestData(CLIENT_SERVICE, CLIENT_APP_LIST_METHOD, V001,
+					"access_token=" + steamAccessToken, "fields=games"));
 			final JsonNode node = mapper.readTree(clientResBody);
 			final JsonNode gameDataNode = node.get("response").get("apps");
 			gameDataNode.forEach(n -> {
@@ -158,12 +155,10 @@ public class SteamRequestService extends AbstractRequestService {
 			return null;
 		}
 
-		// OwnedGames has image URL
-		final String ownedGamesResBody = requestData(PLAYER_SERVICE, OWNED_GAMES_METHOD, V001, "format=json",
-				"include_appinfo=1", "include_played_free_games=1", "skip_unvetted_apps=0").body();
-		LoggingUtils.prettyPrint(mapper, ownedGamesResBody);
-
 		try {
+			// OwnedGames has image URL
+			final String ownedGamesResBody = parseResponse(requestData(PLAYER_SERVICE, OWNED_GAMES_METHOD, V001,
+					"format=json", "include_appinfo=1", "include_played_free_games=1", "skip_unvetted_apps=0"));
 			final JsonNode node = mapper.readTree(ownedGamesResBody);
 			final String gameDataBody = node.get("response").get("games").toString();
 			final List<GameData> gameData = mapper.readValue(gameDataBody, new TypeReference<List<GameData>>() {
@@ -239,11 +234,9 @@ public class SteamRequestService extends AbstractRequestService {
 			return null;
 		}
 
-		final String resBody = requestData(STEAM_USER_STATS, PLAYER_ACHIEVEMENTS_METHOD, V001, "appid=" + gameId)
-				.body();
-		LoggingUtils.prettyPrint(mapper, resBody);
-
 		try {
+			final String resBody = parseResponse(
+					requestData(STEAM_USER_STATS, PLAYER_ACHIEVEMENTS_METHOD, V001, "appid=" + gameId));
 			final JsonNode node = mapper.readTree(resBody);
 			final JsonNode achievementsNode = node.get("playerstats").get("achievements");
 			if (achievementsNode == null) {
@@ -279,11 +272,10 @@ public class SteamRequestService extends AbstractRequestService {
 	 * @return
 	 */
 	private GameData setAchievementData(final GameData gameData) {
-		// Game schema
-		final String schemaResBody = requestData(STEAM_USER_STATS, GAME_SCHEMA_METHOD, V002,
-				"appid=" + gameData.getId()).body();
-		LoggingUtils.prettyPrint(mapper, schemaResBody);
 		try {
+			// Game schema
+			final String schemaResBody = parseResponse(
+					requestData(STEAM_USER_STATS, GAME_SCHEMA_METHOD, V002, "appid=" + gameData.getId()));
 			final JsonNode node = mapper.readTree(schemaResBody);
 			final JsonNode gameNode = node.get("game").get("availableGameStats");
 			// No achievements
@@ -346,12 +338,11 @@ public class SteamRequestService extends AbstractRequestService {
 			Log.info("No achievements for Steam game " + gameData.getTitle() + " (" + gameData.getId() + "). Ignoring");
 			return gameData;
 		}
-		// Unlock rates
-		final String percentagesResBody = requestData(STEAM_USER_STATS, PERCENTAGES_METHOD, V002,
-				"gameid=" + gameData.getId()).body();
-		LoggingUtils.prettyPrint(mapper, percentagesResBody);
 
 		try {
+			// Unlock rates
+			final String percentagesResBody = parseResponse(
+					requestData(STEAM_USER_STATS, PERCENTAGES_METHOD, V002, "gameid=" + gameData.getId()));
 			final JsonNode node = mapper.readTree(percentagesResBody);
 			final JsonNode achievementsNode = node.get("achievementpercentages");
 			if (achievementsNode == null) {
@@ -400,10 +391,8 @@ public class SteamRequestService extends AbstractRequestService {
 	 * @return
 	 */
 	private GameData setImageURL(final GameData gameData) {
-		// Game schema
-		final String schemaResBody = requestHttpURI(URI.create(APPDETAILS_URL + gameData.getId())).body();
-		LoggingUtils.prettyPrint(mapper, schemaResBody);
 		try {
+			final String schemaResBody = parseResponse(requestHttpURI(URI.create(APPDETAILS_URL + gameData.getId())));
 			final JsonNode node = mapper.readTree(schemaResBody);
 			final JsonNode gameNode = node.get(Integer.toString(gameData.getId()));
 			if (!gameNode.get("success").asBoolean()) {
@@ -462,7 +451,6 @@ public class SteamRequestService extends AbstractRequestService {
 
 				model.getConsoleDataMap().get(Model.STEAM_CONSOLE_ID).getGameDataMap().put(gameId, gameData);
 				beatenList.add(gameData);
-				Log.info(gameName + " (" + gameId + ") for Steam is Beaten");
 			}
 			return beatenList;
 		} catch (final IOException | CsvException e) {
@@ -506,7 +494,6 @@ public class SteamRequestService extends AbstractRequestService {
 
 				model.getConsoleDataMap().get(Model.STEAM_CONSOLE_ID).getGameDataMap().put(gameId, gameData);
 				masteredList.add(gameData);
-				Log.info(gameName + " (" + gameId + ") for Steam is Mastered");
 			}
 			return masteredList;
 		} catch (final IOException | CsvException e) {

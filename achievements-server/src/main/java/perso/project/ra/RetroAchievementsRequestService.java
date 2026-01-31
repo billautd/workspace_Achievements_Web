@@ -25,7 +25,6 @@ import perso.project.model.GameData;
 import perso.project.model.enums.CompletionStatusEnum;
 import perso.project.model.enums.ConsoleSourceEnum;
 import perso.project.utils.AbstractRequestService;
-import perso.project.utils.LoggingUtils;
 import perso.project.utils.SleepUtils;
 
 @ApplicationScoped
@@ -84,9 +83,8 @@ public class RetroAchievementsRequestService extends AbstractRequestService {
 	@Override
 	public List<ConsoleData> getConsoleIds() {
 		Log.info("Getting console ids");
-		final String resBody = requestData(CONSOLE_IDS_METHOD, "a=1", "g=1").body();
-		LoggingUtils.prettyPrint(mapper, resBody);
 		try {
+			final String resBody = parseResponse(requestData(CONSOLE_IDS_METHOD, "a=1", "g=1"));
 			final List<ConsoleData> consoleData = mapper.readValue(resBody, new TypeReference<List<ConsoleData>>() {
 			});
 			Log.info("Found " + consoleData.size() + " consoles");
@@ -129,8 +127,8 @@ public class RetroAchievementsRequestService extends AbstractRequestService {
 	}
 
 	private List<GameData> requestCompletionProgressLoop(final int currentCount, final List<GameData> data) {
-		final String resBody = requestData(USER_COMPLETION_PROGRESS_METHOD, "o=" + currentCount).body();
 		try {
+			final String resBody = parseResponse(requestData(USER_COMPLETION_PROGRESS_METHOD, "o=" + currentCount));
 			final JsonNode node = mapper.readTree(resBody);
 			final int newCount = node.get("Count").asInt();
 			final int totalCount = node.get("Total").asInt();
@@ -153,9 +151,9 @@ public class RetroAchievementsRequestService extends AbstractRequestService {
 
 	public List<GameData> getConsoleGames(final int consoleId) {
 		Log.info("Getting console games for console id " + consoleId);
-		final String resBody = requestData(CONSOLE_GAMES_METHOD, "i=" + Integer.toString(consoleId), "f=1").body();
-		LoggingUtils.prettyPrint(mapper, resBody);
 		try {
+			final String resBody = parseResponse(
+					requestData(CONSOLE_GAMES_METHOD, "i=" + Integer.toString(consoleId), "f=1"));
 			final List<GameData> gameData = mapper.readValue(resBody, new TypeReference<List<GameData>>() {
 			});
 			Log.info("Found " + gameData.size() + " games for console " + consoleId);
@@ -194,11 +192,9 @@ public class RetroAchievementsRequestService extends AbstractRequestService {
 		Log.info("Getting full game data for RA game " + gameId);
 		final GameData existingGameData = existingGameDataOpt.get();
 
-		// Game schema
-		final String schemaResBody = requestData(GAME_INFO_PROGRESS_METHOD, "g=" + gameId).body();
-		LoggingUtils.prettyPrint(mapper, schemaResBody);
-
 		try {
+			// Game schema
+			final String schemaResBody = parseResponse(requestData(GAME_INFO_PROGRESS_METHOD, "g=" + gameId));
 			final JsonNode node = mapper.readTree(schemaResBody);
 			// Total players
 			final int totalPlayers = node.get("NumDistinctPlayers").asInt();
@@ -234,7 +230,7 @@ public class RetroAchievementsRequestService extends AbstractRequestService {
 			// Game data
 			parseFullAchievementData(existingGameData);
 			return existingGameData;
-		} catch (JsonProcessingException e) {
+		} catch (final JsonProcessingException e) {
 			Log.error("Error reading response body as AchievevementData", e);
 			return existingGameData;
 		}

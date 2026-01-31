@@ -67,11 +67,11 @@ export class Table {
   standalone: string = "Standalone"
 
   sourcesToRequest = this.formBuilder.group({
-    ra: true,
-    steam: true,
-    ps3: true,
-    psvita: true,
-    xbox360: true
+    ra: false,
+    steam: false,
+    ps3: false,
+    psvita: false,
+    xbox360: false
   });
 
   model: Model;

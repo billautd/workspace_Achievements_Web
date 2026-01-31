@@ -64,6 +64,16 @@ public abstract class AbstractRequestService {
 		}
 	}
 
+	protected String parseResponse(final HttpResponse<String> response) throws IllegalStateException {
+		if (response == null) {
+			Log.error("Response is null");
+			throw new IllegalStateException("HttpResponse is null");
+		}
+		final String body = response.body();
+		LoggingUtils.prettyPrint(mapper, body);
+		return body;
+	}
+
 	protected void setGameAchievementPercent(final GameData gameData) {
 		if (gameData.getTotalAchievements() == 0) {
 			switch (gameData.getCompletionStatus()) {
