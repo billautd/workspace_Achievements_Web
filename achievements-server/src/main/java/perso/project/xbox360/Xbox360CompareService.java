@@ -3,10 +3,10 @@ package perso.project.xbox360;
 import jakarta.enterprise.context.ApplicationScoped;
 import perso.project.model.Model;
 import perso.project.model.enums.ConsoleSourceEnum;
-import perso.project.standalone.AbstractStandaloneCompareService;
+import perso.project.utils.AbstractCompareService;
 
 @ApplicationScoped
-public class Xbox360CompareService extends AbstractStandaloneCompareService {
+public class Xbox360CompareService extends AbstractCompareService {
 
 	@Override
 	protected ConsoleSourceEnum getSource() {
@@ -17,5 +17,4 @@ public class Xbox360CompareService extends AbstractStandaloneCompareService {
 	protected int getId() {
 		return Model.XBOX360_CONSOLE_ID;
 	}
-
 }

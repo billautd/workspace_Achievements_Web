@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Component, EventEmitter, inject, Output, ViewChild } from '@angular/core';
-import { FormBuilder, FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {
   MatDialog,
   MatDialogConfig,
@@ -66,13 +66,7 @@ export class Table {
   sourcesList: string[] = [];
   standalone: string = "Standalone"
 
-  sourcesToRequest = this.formBuilder.group({
-    ra: false,
-    steam: false,
-    ps3: false,
-    psvita: false,
-    xbox360: false
-  });
+  sourcesToRequest: FormGroup | any = null;
 
   model: Model;
   gameDataService: GameDataService;
@@ -87,6 +81,14 @@ export class Table {
   }
 
   ngOnInit() {
+    this.sourcesToRequest = this.formBuilder.group({
+      ra: true,
+      steam: true,
+      ps3: true,
+      psvita: true,
+      xbox360: true
+    });
+
     //No data is passed through this behavior subject, it's only a trigger to refresh table data
     this.model.getUpdateBehaviorSubject().subscribe(() => {
       this.data.data = this.model.flattenMap();

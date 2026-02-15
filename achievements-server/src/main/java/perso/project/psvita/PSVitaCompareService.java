@@ -3,10 +3,10 @@ package perso.project.psvita;
 import jakarta.enterprise.context.ApplicationScoped;
 import perso.project.model.Model;
 import perso.project.model.enums.ConsoleSourceEnum;
-import perso.project.standalone.AbstractStandaloneCompareService;
+import perso.project.utils.AbstractCompareService;
 
 @ApplicationScoped
-public class PSVitaCompareService extends AbstractStandaloneCompareService {
+public class PSVitaCompareService extends AbstractCompareService {
 
 	@Override
 	protected ConsoleSourceEnum getSource() {
