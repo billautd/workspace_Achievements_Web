@@ -83,6 +83,8 @@ public class SteamResources extends AbstractResources {
 	@Path("/compare_data")
 	@Produces(MediaType.TEXT_PLAIN)
 	public String getCompareData() throws JsonProcessingException {
+		steamRequestService.getLocalData();
+
 		return getCompareData(steamRequestService, steamCompareService);
 	}
 
