@@ -3,6 +3,7 @@
         <img class="game-header" [src]="selectedGame.Image" />
         <mat-divider vertical="true"></mat-divider>
         <div class="game-console-data">
+            <div>{{selectedGame.ID}}</div>
             <img [src]="sourceIcon(selectedGame)" class="source-icon">
             <div class="game-console">{{selectedGame.ConsoleName}}</div>
         </div>
