@@ -171,6 +171,7 @@ public class PS3RequestService extends AbstractPSNRequestService {
 			for (final byte b : bytes) {
 				hexStr += String.format("%02x", b);
 			}
+			Log.trace("Hex str : " + hexStr);
 			List<String> allSplits = new ArrayList<>();
 
 			final String[] splits1 = hexStr.split(TROPHY_SPLIT_1);
@@ -180,12 +181,14 @@ public class PS3RequestService extends AbstractPSNRequestService {
 					allSplits.add(str2);
 				}
 			}
+			Log.trace("Hex str split : " + allSplits);
 
 			for (final String hexData : allSplits) {
 				if (hexData.length() < MIN_LENGTH) {
 					continue;
 				}
 				final int achievementId = Integer.parseInt(hexData.substring(0, 2), 16);
+				Log.trace("Achievement id : " + achievementId);
 				final Optional<AchievementData> achOpt = gameData.getAchievementData().stream()
 						.filter(ach -> ach.getId() == achievementId).findAny();
 				if (achOpt.isEmpty()) {
@@ -195,6 +198,7 @@ public class PS3RequestService extends AbstractPSNRequestService {
 
 				final String unlockedStr = hexData.substring(18, 26);
 				achOpt.get().setAchieved(UNLOCKED_STRING.equals(unlockedStr));
+				Log.trace("Is unlocked : " + achOpt.get().isAchieved());
 			}
 
 		} catch (final Exception e) {

@@ -204,7 +204,7 @@ public abstract class AbstractStandaloneRequestService extends AbstractRequestSe
 			model.getStandaloneGamesByIds().clear();
 			values.forEach(model.getStandaloneGamesByIds()::put);
 		} catch (final IOException e) {
-			Log.error("Cannot read file at " + standaloneGamesByIdsPath);
+			Log.error("Cannot read file at " + standaloneGamesByIdsPath, e);
 		}
 	}
 }

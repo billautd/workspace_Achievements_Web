@@ -22,13 +22,13 @@ public abstract class AbstractPSNRequestService extends AbstractStandaloneReques
 			data.setConsoleId(getId());
 			data.setConsoleName(getSource().getName());
 			parseGameDataFromTR(data, gameTr);
-			// Ignore duplicates for PSN, no way to differentiate
-			if (gameData.stream()
-					.anyMatch(existing -> existing.getTitle().toLowerCase().equals(data.getTitle().toLowerCase()))) {
-				Log.warn("Game " + data.getTitle() + " (" + data.getId() + ") is duplicate for " + getSource().getName()
-						+ ". Ignoring.");
-				continue;
-			}
+//			// Ignore duplicates for PSN, no way to differentiate
+//			if (gameData.stream()
+//					.anyMatch(existing -> existing.getTitle().toLowerCase().equals(data.getTitle().toLowerCase()))) {
+//				Log.warn("Game " + data.getTitle() + " (" + data.getId() + ") is duplicate for " + getSource().getName()
+//						+ ". Ignoring.");
+//				continue;
+//			}
 			model.getConsoleDataMap().get(getId()).getGameDataMap().put(data.getId(), data);
 			gameData.add(data);
 		}
