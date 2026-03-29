@@ -76,7 +76,7 @@ export class GameDataPanel {
 
   isRequestRunning: boolean = false;
 
-  isAutoRefresh: boolean = true;
+  isAutoRefresh: boolean = false;
 
   model: Model;
   gameDataService: GameDataService;
