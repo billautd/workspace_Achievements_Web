@@ -14,6 +14,7 @@ import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { UtilsService } from '../../services/utils-service';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { MatCheckboxChange, MatCheckboxModule } from '@angular/material/checkbox';
 
 
 interface FilterData {
@@ -40,7 +41,7 @@ export enum SortOption {
 @Component({
   selector: 'app-game-data',
   imports: [CommonModule, MatProgressBarModule, MatDividerModule, MatIconModule,
-    MatFormFieldModule, MatSelectModule, FormsModule, ReactiveFormsModule, MatInputModule],
+    MatFormFieldModule, MatSelectModule, FormsModule, ReactiveFormsModule, MatInputModule, MatCheckboxModule],
   templateUrl: './game-data-panel.html',
   styleUrl: './game-data-panel.scss'
 })
@@ -69,9 +70,13 @@ export class GameDataPanel {
   readonly RARE_MAX_RARITY: number = 10;
   readonly SUPER_RARE_MAX_RARITY: number = 5;
 
+  readonly TIMER: number = 2 * 60 * 1000;
+
   selectedAchievement!: AchievementData | null;
 
   isRequestRunning: boolean = false;
+
+  isAutoRefresh: boolean = true;
 
   model: Model;
   gameDataService: GameDataService;
@@ -91,7 +96,22 @@ export class GameDataPanel {
     this.gameDataService = gameDataService;
   }
 
-  selectGame(data: GameData): void {
+  ngOnInit(): void {
+    this.setupTimer();
+  }
+
+  setupTimer(): void {
+    setInterval(() => {
+      if (this.isAutoRefresh) {
+        console.log("Sending refresh");
+        this.refreshData();
+      } else {
+        console.log("No auto refresh")
+      }
+    }, this.TIMER);
+  }
+
+  requestGameData(data: GameData): void {
     this.isRequestRunning = true;
     this.gameDataService.requestGameData(data, this.model).then(newData => {
       this.selectedGame = newData
@@ -101,12 +121,17 @@ export class GameDataPanel {
     });
   }
 
+
   selectAchievement(ach: AchievementData): void {
     this.selectedAchievement = ach;
   }
 
   clearAchievement() {
     this.selectedAchievement = null;
+  }
+
+  setAutoRefresh(event: MatCheckboxChange): void {
+    this.isAutoRefresh = event.checked;
   }
 
   achievementIconClass(percentage: number) {
@@ -148,7 +173,9 @@ export class GameDataPanel {
   }
 
   refreshData() {
-    this.selectGame(this.selectedGame)
+    if (this.selectedGame) {
+      this.requestGameData(this.selectedGame)
+    }
   }
 
   isMissable(ach: AchievementData): boolean {
