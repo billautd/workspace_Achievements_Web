@@ -44,6 +44,9 @@
                 }
             </mat-select>
         </mat-form-field>
+        <button class="changeSortDirectionButton" (click)="changeSortDirection()">
+            <img src="{{sortDirectionIcon}}" class="change-sort-direction-icon">
+        </button>
         <mat-form-field style="align-self: center">
             <mat-label>Filter</mat-label>
             <input matInput type="text" [(ngModel)]="filterText" (keyup)="changeFilter()">
@@ -134,7 +137,7 @@
                     {{selectedAchievement.percent}} %</div>
             </div>
             <button class="linkToAchievementButton" (click)="openAchievementURL(selectedAchievement)">
-                <img src=" link.svg" class="link-icon">
+                <img src="link.svg" class="link-icon">
             </button>
             }
         </div>

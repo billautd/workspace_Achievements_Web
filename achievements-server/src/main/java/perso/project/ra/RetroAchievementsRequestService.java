@@ -226,6 +226,7 @@ public class RetroAchievementsRequestService extends AbstractRequestService {
 				if (existingAchievement.isEmpty()) {
 					existingGameData.getAchievementData().add(achievement);
 				}
+				achievement.setDisplayOrder(existingGameData.getAchievementData().indexOf(achievement));
 			});
 			// Game data
 			parseFullAchievementData(existingGameData);

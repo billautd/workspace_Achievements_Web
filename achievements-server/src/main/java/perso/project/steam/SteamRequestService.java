@@ -302,7 +302,6 @@ public class SteamRequestService extends AbstractRequestService {
 						achievement = existingAchievement.get();
 					}
 					// Update data from existing achievement
-					achievement.setDisplayOrder(achievement.getId());
 					achievement.setDisplayName(ach.getDisplayName());
 					achievement.setDescription(ach.getDescription());
 					achievement.setIconLockedURL(ach.getIconLockedURL());
@@ -310,6 +309,7 @@ public class SteamRequestService extends AbstractRequestService {
 					if (existingAchievement.isEmpty()) {
 						gameData.getAchievementData().add(achievement);
 					}
+					achievement.setDisplayOrder(gameData.getAchievementData().indexOf(achievement));
 				});
 			}
 			retryIndex = 1;

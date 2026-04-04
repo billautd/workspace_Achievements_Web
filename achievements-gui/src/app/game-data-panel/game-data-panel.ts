@@ -22,20 +22,12 @@ interface FilterData {
 }
 
 export enum SortOption {
-  RARITY_DESCENDING = "RARITY_DESCENDING",
-  RARITY_ASCENDING = "RARITY_ASCENDING",
-  DISPLAY_NAME_DESCENDING = "DISPLAY_NAME_DESCENDING",
-  DISPLAY_NAME_ASCENDING = "DISPLAY_NAME_ASCENDING",
-  TYPE_DESCENDING = "TYPE_DESCENDING",
-  TYPE_ASCENDING = "TYPE_ASCENDING",
-  POINTS_DESCENDING = "POINTS_DESCENDING",
-  POINTS_ASCENDING = "POINTS_ASCENDING",
-  TRUE_POINTS_DESCENDING = "TRUE_POINTS_DESCENDING",
-  TRUE_POINTS_ASCENDING = "TRUE_POINTS_ASCENDING",
-  RATIO_DESCENDING = "RATIO_DESCENDING",
-  RATIO_ASCENDING = "RATIO_ASCENDING",
-  DISPLAY_ORDER_DESCENDING = "DISPLAY_ORDER_DESCENDING",
-  DISPLAY_ORDER_ASCENDING = "DISPLAY_ORDER_ASCENDING",
+  RARITY = "RARITY",
+  DISPLAY_NAME = "DISPLAY_NAME",
+  TYPE = "TYPE",
+  POINTS = "POINTS",
+  DISPLAY_ORDER = "DISPLAY_ORDER",
+  RANDOM = "RANDOM"
 }
 
 @Component({
@@ -70,7 +62,10 @@ export class GameDataPanel {
   readonly RARE_MAX_RARITY: number = 10;
   readonly SUPER_RARE_MAX_RARITY: number = 5;
 
-  readonly TIMER: number = 2 * 60 * 1000;
+  readonly TIMER: number = 3 * 60 * 1000;
+
+  readonly UP_ICON: string = "up_arrow.svg"
+  readonly DOWN_ICON: string = "down_arrow.svg"
 
   selectedAchievement!: AchievementData | null;
 
@@ -82,9 +77,11 @@ export class GameDataPanel {
   gameDataService: GameDataService;
   sortedAchievements: AchievementData[] = [];
 
-  defaultSort = SortOption.DISPLAY_ORDER_ASCENDING
+  defaultSort = SortOption.DISPLAY_ORDER;
   sortOptions = new FormControl(this.defaultSort);
   sortOptionsList: SortOption[] = Object.values(SortOption)
+  isSortAscending: boolean = true;
+  sortDirectionIcon: string = this.UP_ICON;
 
   filterText: string = "";
 
@@ -116,7 +113,7 @@ export class GameDataPanel {
     this.gameDataService.requestGameData(data, this.model).then(newData => {
       this.selectedGame = newData
       this.clearAchievement();
-      this.applySortFilter(this.sortOptions.value ? this.sortOptions.value : this.defaultSort, this.filterText)
+      this.applySortFilter(this.sortOptions.value ? this.sortOptions.value : this.defaultSort)
       this.isRequestRunning = false;
     });
   }
@@ -189,12 +186,19 @@ export class GameDataPanel {
     return ach.Type === AchievementType.WIN_CONDITION;
   }
 
+  changeSortDirection(): void {
+    this.isSortAscending = !this.isSortAscending;
+    this.sortDirectionIcon = this.isSortAscending ? this.UP_ICON : this.DOWN_ICON;
+    this.applySortFilter(this.sortOptions.value ? this.sortOptions.value : this.defaultSort)
+  }
+
   changeSort(event: MatSelectChange<SortOption>): void {
-    this.applySortFilter(event.value, this.filterText);
+    this.applyDefaultSortDirection(event.value);
+    this.applySortFilter(event.value);
   }
 
   changeFilter(): void {
-    this.applySortFilter(this.sortOptions.value ? this.sortOptions.value : this.defaultSort, this.filterText)
+    this.applySortFilter(this.sortOptions.value ? this.sortOptions.value : this.defaultSort)
   }
 
   clearFilter(): void {
@@ -220,50 +224,43 @@ export class GameDataPanel {
     window.open(url, "_blank");
   }
 
-  applySortFilter(sort: SortOption, filter: string): void {
+  applyDefaultSortDirection(sort: SortOption) {
+    switch (sort) {
+      case SortOption.RARITY:
+        this.isSortAscending = false;
+        break;
+      case SortOption.DISPLAY_NAME:
+      case SortOption.RANDOM:
+      case SortOption.POINTS:
+      case SortOption.TYPE:
+      case SortOption.DISPLAY_ORDER:
+        this.isSortAscending = true;
+        break;
+    }
+    this.sortDirectionIcon = this.isSortAscending ? this.UP_ICON : this.DOWN_ICON;
+  }
+
+  applySortFilter(sort: SortOption): void {
     let sortAlgo;
     switch (sort) {
-      case SortOption.RARITY_DESCENDING:
-        sortAlgo = (ach1: AchievementData, ach2: AchievementData) => ach2.percent - ach1.percent;
+      case SortOption.RARITY:
+        sortAlgo = (ach1: AchievementData, ach2: AchievementData) => this.isSortAscending ? (ach1.percent - ach2.percent) : (ach2.percent - ach1.percent);
         break;
-      case SortOption.RARITY_ASCENDING:
-        sortAlgo = (ach1: AchievementData, ach2: AchievementData) => ach1.percent - ach2.percent;
+      case SortOption.DISPLAY_NAME:
+        sortAlgo = (ach1: AchievementData, ach2: AchievementData) => this.isSortAscending ? ach1.displayName.localeCompare(ach2.displayName) : ach2.displayName.localeCompare(ach1.displayName);
         break;
-      case SortOption.DISPLAY_NAME_DESCENDING:
-        sortAlgo = (ach1: AchievementData, ach2: AchievementData) => ach2.displayName.localeCompare(ach1.displayName);
+      case SortOption.POINTS:
+        sortAlgo = (ach1: AchievementData, ach2: AchievementData) => this.isSortAscending ? (ach1.Points - ach2.Points) : (ach2.Points - ach1.Points);
         break;
-      case SortOption.DISPLAY_NAME_ASCENDING:
-        sortAlgo = (ach1: AchievementData, ach2: AchievementData) => ach1.displayName.localeCompare(ach2.displayName);
+      case SortOption.TYPE:
+        sortAlgo = (ach1: AchievementData, ach2: AchievementData) => this.isSortAscending ?
+          (UtilsService.sortAchievementType(ach1.Type) - UtilsService.sortAchievementType(ach2.Type)) : (UtilsService.sortAchievementType(ach2.Type) - UtilsService.sortAchievementType(ach1.Type));
         break;
-      case SortOption.POINTS_DESCENDING:
-        sortAlgo = (ach1: AchievementData, ach2: AchievementData) => ach2.Points - ach1.Points;
+      case SortOption.DISPLAY_ORDER:
+        sortAlgo = (ach1: AchievementData, ach2: AchievementData) => this.isSortAscending ? (ach1.DisplayOrder - ach2.DisplayOrder) : (ach2.DisplayOrder - ach1.DisplayOrder);
         break;
-      case SortOption.POINTS_ASCENDING:
-        sortAlgo = (ach1: AchievementData, ach2: AchievementData) => ach1.Points - ach2.Points;
-        break;
-      case SortOption.TRUE_POINTS_DESCENDING:
-        sortAlgo = (ach1: AchievementData, ach2: AchievementData) => ach2.TrueRatio - ach1.TrueRatio;
-        break;
-      case SortOption.TRUE_POINTS_ASCENDING:
-        sortAlgo = (ach1: AchievementData, ach2: AchievementData) => ach1.TrueRatio - ach2.TrueRatio;
-        break;
-      case SortOption.TYPE_DESCENDING:
-        sortAlgo = (ach1: AchievementData, ach2: AchievementData) => UtilsService.sortAchievementType(ach2.Type) - UtilsService.sortAchievementType(ach1.Type);
-        break;
-      case SortOption.TYPE_ASCENDING:
-        sortAlgo = (ach1: AchievementData, ach2: AchievementData) => UtilsService.sortAchievementType(ach1.Type) - UtilsService.sortAchievementType(ach2.Type);
-        break;
-      case SortOption.RATIO_DESCENDING:
-        sortAlgo = (ach1: AchievementData, ach2: AchievementData) => (ach2.TrueRatio / ach2.Points) - (ach1.TrueRatio / ach1.Points);
-        break;
-      case SortOption.RATIO_ASCENDING:
-        sortAlgo = (ach1: AchievementData, ach2: AchievementData) => (ach1.TrueRatio / ach1.Points) - (ach2.TrueRatio / ach2.Points);
-        break;
-      case SortOption.DISPLAY_ORDER_DESCENDING:
-        sortAlgo = (ach1: AchievementData, ach2: AchievementData) => ach2.DisplayOrder - ach1.DisplayOrder;
-        break;
-      case SortOption.DISPLAY_ORDER_ASCENDING:
-        sortAlgo = (ach1: AchievementData, ach2: AchievementData) => ach1.DisplayOrder - ach2.DisplayOrder;
+      case SortOption.RANDOM:
+        sortAlgo = (ach1: AchievementData, ach2: AchievementData) => Math.random() < 0.5 ? 1 : -1;
         break;
     }
 
@@ -275,34 +272,18 @@ export class GameDataPanel {
 
   sortText(sort: SortOption) {
     switch (sort) {
-      case SortOption.RARITY_DESCENDING:
-        return "Rarity (Descending)"
-      case SortOption.RARITY_ASCENDING:
-        return "Rarity (Ascending)";
-      case SortOption.DISPLAY_NAME_DESCENDING:
-        return "Display name (Descending)"
-      case SortOption.DISPLAY_NAME_ASCENDING:
-        return "Display name (Ascending)"
-      case SortOption.POINTS_DESCENDING:
-        return "Points (Descending)"
-      case SortOption.POINTS_ASCENDING:
-        return "Points (Ascending)"
-      case SortOption.TYPE_DESCENDING:
-        return "Type (Descending)"
-      case SortOption.TYPE_ASCENDING:
-        return "Type (Ascending)";
-      case SortOption.TRUE_POINTS_DESCENDING:
-        return "True points (Descending)"
-      case SortOption.TRUE_POINTS_ASCENDING:
-        return "True points (Ascending)"
-      case SortOption.RATIO_DESCENDING:
-        return "Ratio (Descending)"
-      case SortOption.RATIO_ASCENDING:
-        return "Ratio (Ascending)"
-      case SortOption.DISPLAY_ORDER_DESCENDING:
-        return "Display order (Descending)"
-      case SortOption.DISPLAY_ORDER_ASCENDING:
-        return "Display order (Ascending)"
+      case SortOption.RARITY:
+        return "Rarity";
+      case SortOption.DISPLAY_NAME:
+        return "Display name"
+      case SortOption.POINTS:
+        return "Points"
+      case SortOption.TYPE:
+        return "Type";
+      case SortOption.DISPLAY_ORDER:
+        return "Display order"
+      case SortOption.RANDOM:
+        return "Random";
     }
   }
 

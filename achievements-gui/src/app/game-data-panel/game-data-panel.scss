@@ -298,19 +298,29 @@
     gap: 20px;
 }
 
-.linkToAchievementButton {
+.linkToAchievementButton,
+.changeSortDirectionButton {
     background: transparent;
     border: 0px;
     text-decoration: underline;
     font-size: medium;
+}
+
+.linkToAchievementButton {
     align-self: flex-start;
 }
 
-.linkToAchievementButton:hover {
+.change-sort-direction-icon {
+    align-self: center
+}
+
+.linkToAchievementButton:hover,
+.changeSortDirectionButton:hover {
     cursor: pointer;
 }
 
-.link-icon {
+.link-icon,
+.change-sort-direction-icon {
     width: 30px;
     height: 30px;
 }
