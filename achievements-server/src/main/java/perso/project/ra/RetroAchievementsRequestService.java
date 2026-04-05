@@ -194,8 +194,11 @@ public class RetroAchievementsRequestService extends AbstractRequestService {
 
 		try {
 			// Game schema
-			final String schemaResBody = parseResponse(requestData(GAME_INFO_PROGRESS_METHOD, "g=" + gameId));
+			final String schemaResBody = parseResponse(requestData(GAME_INFO_PROGRESS_METHOD, "g=" + gameId, "a=1"));
 			final JsonNode node = mapper.readTree(schemaResBody);
+			// Award kind
+			final String awardKind = node.get("HighestAwardKind").asText();
+			existingGameData.setAwardKind(awardKind);
 			// Total players
 			final int totalPlayers = node.get("NumDistinctPlayers").asInt();
 			existingGameData.setTotalPlayers(totalPlayers);
