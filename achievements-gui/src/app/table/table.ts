@@ -215,7 +215,7 @@ export class Table {
 
   openDialog(): MatDialogRef<LoadingDialog> {
     const config: MatDialogConfig = new MatDialogConfig();
-    config.disableClose = false;
+    config.disableClose = true;
     config.autoFocus = false;
     config.restoreFocus = true;
     config.minHeight = "40vh";
