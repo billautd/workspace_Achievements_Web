@@ -6,6 +6,9 @@
             <img src="ra.png" class="ra-icon">
         </div>
         <mat-progress-bar class="data-progress-bar" mode="determinate" [value]="progressRA"></mat-progress-bar>
+        <div class="data-progress-bar-text">
+            {{progressTextRA}}
+        </div>
     </div>
     }
     @if(hasSteam()){
@@ -14,6 +17,9 @@
             <img src="steam.png" class="steam-icon">
         </div>
         <mat-progress-bar class="data-progress-bar" mode="determinate" [value]="progressSteam"></mat-progress-bar>
+        <div class="data-progress-bar-text">
+            {{progressTextSteam}}
+        </div>
     </div>
     }
     @if(hasPS3()){
@@ -21,7 +27,10 @@
         <div class="loading-icon">
             <img src="ps3.png" class="ps3-icon">
         </div>
-        <mat-progress-bar class="data-progress-bar" mode="determinate" [value]="progressPS3"></mat-progress-bar>
+        <mat-progress-bar class="data-progress-bar" mode="determinate" [value]="progressPS3"> </mat-progress-bar>
+        <div class="data-progress-bar-text">
+            {{progressTextPS3}}
+        </div>
     </div>
     }
     @if(hasPSVita()){
@@ -30,6 +39,9 @@
             <img src="psvita.png" class="psvita-icon">
         </div>
         <mat-progress-bar class="data-progress-bar" mode="determinate" [value]="progressPSVita"></mat-progress-bar>
+        <div class="data-progress-bar-text">
+            {{progressTextPSVita}}
+        </div>
     </div>
     }
     @if(hasXbox360()){
@@ -38,6 +50,9 @@
             <img src="xbox360.png" class="xbox360-icon">
         </div>
         <mat-progress-bar class="data-progress-bar" mode="determinate" [value]="progressXbox360"></mat-progress-bar>
+        <div class="data-progress-bar-text">
+            {{progressTextXbox360}}
+        </div>
     </div>
     }
 </div>

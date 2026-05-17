@@ -20,6 +20,12 @@ export class LoadingDialog {
   progressPSVita: number = 0;
   progressXbox360: number = 0;
 
+  progressTextRA: string = "";
+  progressTextSteam: string = "";
+  progressTextPS3: string = "";
+  progressTextPSVita: string = "";
+  progressTextXbox360: string = "";
+
   model: Model;
   gameDataService: GameDataService;
   raGameDataService: RAGameDataService;
@@ -51,43 +57,58 @@ export class LoadingDialog {
         raConsoleNumber++;
       }
     }
-    this.progressRA = 100 * (this.raGameDataService.consoleReqCounter / raConsoleNumber);
+    if (raConsoleNumber == 0) {
+      this.progressRA == 0;
+      this.progressTextRA = "";
+      return;
+    }
+    this.progressRA = 100 * this.raGameDataService.consoleReqCounter / raConsoleNumber;
+    this.progressTextRA = this.raGameDataService.consoleReqCounter.toString() + " / " + raConsoleNumber.toString();
   }
 
   updateSteamProgress(): void {
     const data: ConsoleData | undefined = this.model.getConsoleData().get(STEAM_CONSOLE_ID);
     if (!data) {
       this.progressSteam = 0;
+      this.progressTextSteam = "";
       return;
     }
-    this.progressSteam = 100 * (this.steamGameDataService.gameReqCounter / data.Games.size);
+    this.progressSteam = 100 * this.steamGameDataService.gameReqCounter / data.Games.size;
+    this.progressTextSteam = this.steamGameDataService.gameReqCounter.toString() + " / " + data.Games.size.toString();
+
   }
 
   updatePS3Progress(): void {
     const data: ConsoleData | undefined = this.model.getConsoleData().get(PS3_CONSOLE_ID);
     if (!data) {
       this.progressPS3 = 0;
+      this.progressTextPS3 = "";
       return;
     }
     this.progressPS3 = data.Games.size > 0 ? 100 : 0;
+    this.progressTextPS3 = (this.progressPS3 * data.Games.size / 100).toString() + " / " + data.Games.size.toString();
   }
 
   updatePSVitaProgress(): void {
     const data: ConsoleData | undefined = this.model.getConsoleData().get(PSVITA_CONSOLE_ID);
     if (!data) {
       this.progressPSVita = 0;
+      this.progressTextPSVita = "";
       return;
     }
     this.progressPSVita = data.Games.size > 0 ? 100 : 0;
+    this.progressTextPSVita = (this.progressPSVita * data.Games.size / 100).toString() + " / " + data.Games.size.toString();
   }
 
   updateXbox360Progress(): void {
     const data: ConsoleData | undefined = this.model.getConsoleData().get(XBOX360_CONSOLE_ID);
     if (!data) {
       this.progressXbox360 = 0;
+      this.progressTextXbox360 = "";
       return;
     }
     this.progressXbox360 = data.Games.size > 0 ? 100 : 0;
+    this.progressTextXbox360 = (this.progressXbox360 * data.Games.size / 100).toString() + " / " + data.Games.size.toString();
   }
 
   hasRA(): boolean {

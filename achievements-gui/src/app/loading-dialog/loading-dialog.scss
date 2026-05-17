@@ -23,7 +23,12 @@
     width: 100%;
     flex-grow: 1;
     --mat-progress-bar-active-indicator-color: var(--purple4);
-    --mat-progress-bar-active-indicator-height: 10px !important;
+    --mat-progress-bar-active-indicator-height: 25px !important;
+}
+
+.data-progress-bar-text {
+    position: absolute;
+    left: 50%;
 }
 
 .mat-mdc-progress-bar {

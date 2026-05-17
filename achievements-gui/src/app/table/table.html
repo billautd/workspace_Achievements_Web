@@ -119,7 +119,7 @@
                 Request games data
             </button>
             <button class="request-data-button" (click)="requestAllExistingData()" [disabled]="isRequestRunning">
-                Get existing games data
+                Get all existing games data
             </button>
             <section class="source-to-request" [formGroup]="sourcesToRequest">
                 <mat-checkbox class="source-to-request" formControlName="ra" (change)="updateSources()">
