@@ -175,6 +175,12 @@ export class GameDataPanel {
     }
   }
 
+  selectRandom() {
+    const notAchievementsAchs: AchievementData[] = this.sortedAchievements.filter(ach => !ach.achieved);
+    const rdmIndex = Math.floor(Math.random() * notAchievementsAchs.length);
+    this.selectAchievement(notAchievementsAchs[rdmIndex]);
+  }
+
   isMissable(ach: AchievementData): boolean {
     return ach.Type === AchievementType.MISSABLE
   }
