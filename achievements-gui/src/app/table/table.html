@@ -121,6 +121,9 @@
             <button class="request-data-button" (click)="requestAllExistingData()" [disabled]="isRequestRunning">
                 Get all existing games data
             </button>
+            <button class="request-data-button" (click)="selectRandom()" [disabled]="isRequestRunning">
+                Select random game
+            </button>
             <section class="source-to-request" [formGroup]="sourcesToRequest">
                 <mat-checkbox class="source-to-request" formControlName="ra" (change)="updateSources()">
                     RetroAchievements

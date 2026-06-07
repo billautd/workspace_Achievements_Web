@@ -213,6 +213,15 @@ export class Table {
     });
   }
 
+  selectRandom(): void {
+    const list: GameData[] = this.data.data;
+    if (list.length == 0) {
+      return;
+    }
+    const rdmIndex: number = Math.floor(Math.random() * list.length);
+    this.selectGameData(list[rdmIndex]);
+  }
+
   openDialog(): MatDialogRef<LoadingDialog> {
     const config: MatDialogConfig = new MatDialogConfig();
     config.disableClose = true;
