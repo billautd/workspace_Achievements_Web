@@ -81,4 +81,12 @@ export class Compare {
     return UtilsService.completionStatusText(status);
   }
 
+  completionStatusIcon(status: CompletionStatusType): string {
+    return UtilsService.completionStatusIcon(status);
+  }
+
+  consoleIcon(name: string): string {
+    return UtilsService.consoleIcon(name);
+  }
+
 }

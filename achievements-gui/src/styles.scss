@@ -1,11 +1,6 @@
 @use '@angular/material' as mat;
 
 :root {
-  // @include mat.progress-bar-overrides((track-height:10px,
-  //     active-indicator-height:10px,
-  //     track-color:var(--purple1),
-  //     active-indicator-color:var(--purple4)));
-
   --purple0: rgb(10, 0, 70);
   --purple1: rgb(25, 0, 117);
   --purple2: rgba(58, 41, 110, 1);

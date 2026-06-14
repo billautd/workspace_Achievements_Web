@@ -14,10 +14,20 @@
             <div class="search-game-item">
                 <div style="font-size: 18px;">{{game.Title}}</div>
                 <div class="search-game-item-details">
-                    <div style="width:20%">{{game.ConsoleName}}</div>
-                    <div style="width:13%" class="status-text" [ngClass]="completionStatusClass(game.CompletionStatus)">
-                        {{completionStatusText(game.CompletionStatus)}}</div>
-                    <div style="width:20%">{{game.NumAwardedHardcore}} / {{game.MaxPossible}}</div>
+                    <div style="display:flex; align-items:center; width:20%">
+                        <img [src]="consoleIcon(game.ConsoleName)" style="margin-right:10px">
+                        {{game.ConsoleName}}
+                    </div>
+                    <div style="display:flex; flex-grow: 0.1; align-items:center">
+                        <img [src]="completionStatusIcon(game.CompletionStatus)" style="margin-right:10px">
+                        <div class="status-text" [ngClass]="completionStatusClass(game.CompletionStatus)">
+                            {{completionStatusText(game.CompletionStatus)}}
+                        </div>
+                    </div>
+                    <div style="width:20%">
+                        <img src="medal.svg">
+                        {{game.NumAwardedHardcore}} / {{game.MaxPossible}}
+                    </div>
                 </div>
             </div>
         </mat-list-item>

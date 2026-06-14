@@ -13,7 +13,10 @@
                             <img src="copy-icon.svg" class="copy-icon">
                         </button>
                         <div style="width:60%">{{comp.name}}</div>
-                        <div style="width:30%">{{comp.consoleName}}</div>
+                        <div style="display:flex; align-items:center; width:30%">
+                            <img [src]="consoleIcon(comp.consoleName)" style="margin-right:10px">
+                            {{comp.consoleName}}
+                        </div>
                     </div>
                     }
                     @if(notInLocal.length == 0){
@@ -30,7 +33,10 @@
                             <img src="copy-icon.svg" class="copy-icon">
                         </button>
                         <div style="width:60%">{{comp.name}}</div>
-                        <div style="width:30%">{{comp.consoleName}}</div>
+                        <div style="display:flex; align-items:center; width:30%">
+                            <img [src]="consoleIcon(comp.consoleName)" style="margin-right:10px">
+                            {{comp.consoleName}}
+                        </div>
                     </div>
                     }
                     @if(notInDatabase.length == 0){
@@ -49,15 +55,22 @@
                     <img src="copy-icon.svg" class="copy-icon">
                 </button>
                 <div style="width:40%">{{comp.name}}</div>
-                <div style="width:20%">{{comp.consoleName}}</div>
-                <div class="status-text" [ngClass]="completionStatusClass(comp.playniteStatus)">
-                    {{completionStatusText(comp.playniteStatus)}}
+                <div style="display:flex; align-items:center; width:20%">
+                    <img [src]="consoleIcon(comp.consoleName)" style="margin-right:10px">
+                    {{comp.consoleName}}
+                </div>
+                <div style="display:flex;">
+                    <img [src]="completionStatusIcon(comp.playniteStatus)" style="margin-right:10px">
+                    <div class="status-text" [ngClass]="completionStatusClass(comp.playniteStatus)">
+                        {{completionStatusText(comp.playniteStatus)}}</div>
                 </div>
                 <div style="width:10%; display:flex; justify-content:center">
                     ========>
                 </div>
-                <div class="status-text" [ngClass]="completionStatusClass(comp.databaseStatus)">
-                    {{completionStatusText(comp.databaseStatus)}}
+                <div style="display:flex;">
+                    <img [src]="completionStatusIcon(comp.databaseStatus)" style="margin-right:10px">
+                    <div class="status-text" [ngClass]="completionStatusClass(comp.databaseStatus)">
+                        {{completionStatusText(comp.databaseStatus)}}</div>
                 </div>
             </div>
             }

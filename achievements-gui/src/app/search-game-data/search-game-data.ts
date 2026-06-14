@@ -34,7 +34,7 @@ export class SearchGameData {
   }
 
   applyFilter(): void {
-    if (this.filterText.trim().length < 3) {
+    if (this.filterText.trim().length < 2) {
       this.filteredGamesList = [];
       return;
     }
@@ -57,6 +57,14 @@ export class SearchGameData {
 
   completionStatusText(status: CompletionStatusType): string {
     return UtilsService.completionStatusText(status);
+  }
+
+  completionStatusIcon(status: CompletionStatusType): string {
+    return UtilsService.completionStatusIcon(status);
+  }
+
+  consoleIcon(name: string): string {
+    return UtilsService.consoleIcon(name);
   }
 
   selectGame(game: GameData) {

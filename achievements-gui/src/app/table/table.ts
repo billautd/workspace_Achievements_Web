@@ -57,9 +57,9 @@ export class Table {
   consoles = new FormControl();
   consolesList: string[] = [];
 
-  selectedCompletionStatuses: string[] = [];
+  selectedCompletionStatuses: CompletionStatusType[] = [];
   completionStatuses = new FormControl();
-  completionStatusesList: string[] = [];
+  completionStatusesList: CompletionStatusType[] = [];
 
   selectedSources: string[] = [];
   sources = new FormControl();
@@ -95,7 +95,7 @@ export class Table {
     })
 
     //Init filters list
-    this.completionStatusesList = Object.values(CompletionStatusType).map(UtilsService.completionStatusText);
+    this.completionStatusesList = Object.values(CompletionStatusType);
     this.sourcesList = [UtilsService.consoleSourceText(ConsoleSource.RETRO_ACHIEVEMENTS),
     UtilsService.consoleSourceText(ConsoleSource.STEAM),
     this.standalone
@@ -328,7 +328,7 @@ export class Table {
   updateConsolesList(): void {
     this.consolesList = [];
     this.model.getConsoleData().forEach(c => this.consolesList.push(c.Name));
-    this.consolesList.sort((o1, o2) => o1.localeCompare(o2))
+    this.consolesList.sort((o1, o2) => o1.localeCompare(o2));
   }
 
   completionStatusClass(status: CompletionStatusType): any {
@@ -337,6 +337,14 @@ export class Table {
 
   completionStatusText(status: CompletionStatusType): string {
     return UtilsService.completionStatusText(status);
+  }
+
+  completionStatusIcon(status: CompletionStatusType): string {
+    return UtilsService.completionStatusIcon(status);
+  }
+
+  consoleIcon(name: string): string {
+    return UtilsService.consoleIcon(name);
   }
 
   clearFilters(): void {

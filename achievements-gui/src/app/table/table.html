@@ -11,13 +11,17 @@
             </ng-container>
             <ng-container matColumnDef="ConsoleName">
                 <th mat-header-cell mat-sort-header *matHeaderCellDef class="consoleNameColumn">Console name</th>
-                <td mat-cell *matCellDef="let data" class="consoleNameColumn"> {{data.ConsoleName}} </td>
+                <td mat-cell *matCellDef="let data" class="consoleNameColumn">
+                    <img [src]="consoleIcon(data.ConsoleName)">
+                    {{data.ConsoleName}}
+                </td>
                 <td mat-footer-cell *matFooterCellDef class="consoleNameColumn">Total</td>
             </ng-container>
             <ng-container matColumnDef="CompletionStatus">
                 <th mat-header-cell mat-sort-header *matHeaderCellDef class="statusColumn">Status</th>
                 <td mat-cell *matCellDef="let data" class="statusColumn">
-                    <div class="status-text" [ngClass]="completionStatusClass(data.CompletionStatus)">
+                    <img [src]="completionStatusIcon(data.CompletionStatus)">
+                    <div class=" status-text" [ngClass]="completionStatusClass(data.CompletionStatus)">
                         {{completionStatusText(data.CompletionStatus)}}
                     </div>
                 </td>
@@ -26,13 +30,18 @@
 
             <ng-container matColumnDef="Achievements">
                 <th mat-header-cell mat-sort-header *matHeaderCellDef class="achievementsColumn">Achievements</th>
-                <td mat-cell *matCellDef="let data" class="achievementsColumn"> {{achievementsText(data)}} </td>
+                <td mat-cell *matCellDef="let data" class="achievementsColumn">
+                    <img src="trophy.svg">
+                    {{achievementsText(data)}}
+                </td>
                 <td mat-footer-cell *matFooterCellDef class="achievementsColumn"></td>
             </ng-container>
 
             <ng-container matColumnDef="Points">
                 <th mat-header-cell mat-sort-header *matHeaderCellDef class="pointsColumn">Points</th>
-                <td mat-cell *matCellDef="let data" class="pointsColumn"> <b>{{data.Points}}</b> ({{data.TruePoints}})
+                <td mat-cell *matCellDef="let data" class="pointsColumn">
+                    <img src="medal.svg">
+                    <b>{{data.Points}}</b> ({{data.TruePoints}})
                 </td>
                 <td mat-footer-cell *matFooterCellDef class="pointsColumn"></td>
             </ng-container>
@@ -91,7 +100,10 @@
                 <mat-label>Console</mat-label>
                 <mat-select (selectionChange)="changeSelectedConsoles($event)" [formControl]="consoles" multiple>
                     @for (console of consolesList; track console){
-                    <mat-option [value]="console">{{console}}</mat-option>
+                    <mat-option [value]="console">
+                        <img [src]="consoleIcon(console)" style="margin-right:10px">
+                        {{console}}
+                    </mat-option>
                     }
                 </mat-select>
             </mat-form-field>
@@ -100,7 +112,10 @@
                 <mat-select (selectionChange)="changeSelectedCompletionStatuses($event)"
                     [formControl]="completionStatuses" multiple>
                     @for (status of completionStatusesList; track status){
-                    <mat-option [value]="status">{{status}}</mat-option>
+                    <mat-option [value]="status">
+                        <img [src]="completionStatusIcon(status)" style="margin-right:10px">
+                        {{completionStatusText(status)}}
+                    </mat-option>
                     }
                 </mat-select>
             </mat-form-field>

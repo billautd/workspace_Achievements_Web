@@ -55,6 +55,9 @@
 
   .consoleNameColumn {
     width: 14vw;
+    display: flex;
+    gap: 8px;
+    align-items: center;
   }
 
   .nameColumn {
@@ -63,14 +66,23 @@
 
   .statusColumn {
     width: 12vw;
+    display: flex;
+    gap: 8px;
+    align-items: center;
   }
 
   .achievementsColumn {
-    width: 8vw
+    width: 8vw;
+    display: flex;
+    gap: 8px;
+    align-items: center;
   }
 
   .pointsColumn {
-    width: 9vw
+    width: 9vw;
+    display: flex;
+    gap: 8px;
+    align-items: center;
   }
 
   .ratioColumn {
