@@ -36,7 +36,7 @@ import perso.project.utils.AbstractRequestService;
 
 @ApplicationScoped
 public class SteamRequestService extends AbstractRequestService {
-	static final int RETRY_MAX = 3;
+	static final int RETRY_MAX = 5;
 	private int retryIndex = 1;
 
 	static final String STEAM_API_KEY_KEY = "STEAM_API_KEY";
