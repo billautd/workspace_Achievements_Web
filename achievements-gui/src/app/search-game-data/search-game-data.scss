@@ -1,0 +1,48 @@
+.search-dialog-parent {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1vh;
+    height: 100%;
+    width: 100%;
+}
+
+.closeButton {
+    background-color: transparent;
+    border: 0;
+    cursor: pointer;
+}
+
+.closeIcon {
+    color: white;
+}
+
+.search-dialog-games-list {
+    border-top: 1px solid var(--purple3);
+    overflow-x: auto;
+    overflow-y: scroll;
+    width: 100%;
+}
+
+.search-dialog-game {
+    min-height: 70px;
+}
+
+.search-dialog-game:hover {
+    background-color: var(--purple2);
+}
+
+.search-game-item {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.search-game-item-details {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    font-size: 14px;
+    color: #AAAAAA;
+    gap: 50px;
+}

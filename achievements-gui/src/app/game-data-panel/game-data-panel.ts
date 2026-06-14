@@ -15,6 +15,8 @@ import { UtilsService } from '../../services/utils-service';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatCheckboxChange, MatCheckboxModule } from '@angular/material/checkbox';
+import { MatDialog, MatDialogConfig, MatDialogRef } from '@angular/material/dialog';
+import { SearchGameData } from '../search-game-data/search-game-data';
 
 
 interface FilterData {
@@ -38,24 +40,7 @@ export enum SortOption {
   styleUrl: './game-data-panel.scss'
 })
 export class GameDataPanel {
-  @Input() selectedGame: GameData = {
-    Title: '',
-    ID: 0,
-    ConsoleID: 0,
-    ConsoleName: '',
-    CompletionStatus: CompletionStatusType.NOT_PLAYED,
-    MaxPossible: 0,
-    NumAwardedHardcore: 0,
-    Points: 0,
-    TruePoints: 0,
-    Ratio: 0,
-    EarnedRatio: 0,
-    AchievementData: [],
-    Percent: 0,
-    Image: '',
-    EarnedPoints: 0,
-    EarnedTruePoints: 0
-  };
+  @Input() selectedGame!: GameData | null;
 
   readonly COMMON_MAX_RARITY: number = 50;
   readonly UNCOMMON_MAX_RARITY: number = 20;
@@ -84,6 +69,9 @@ export class GameDataPanel {
   sortDirectionIcon: string = this.UP_ICON;
 
   filterText: string = "";
+
+  searchGameDialog = inject(MatDialog);
+
 
   http: HttpClient = inject(HttpClient);
 
@@ -213,6 +201,8 @@ export class GameDataPanel {
   }
 
   openAchievementURL(ach: AchievementData): void {
+    if (!this.selectedGame)
+      return;
     let url: string = "";
     let csl: ConsoleData | undefined = this.model.getConsoleData().get(this.selectedGame.ConsoleID);
     if (csl?.Source === ConsoleSource.STEAM) {
@@ -247,6 +237,8 @@ export class GameDataPanel {
   }
 
   applySortFilter(sort: SortOption): void {
+    if (!this.selectedGame)
+      return;
     let sortAlgo;
     switch (sort) {
       case SortOption.RARITY:
@@ -299,5 +291,27 @@ export class GameDataPanel {
 
   completionStatusText(status: CompletionStatusType): string {
     return UtilsService.completionStatusText(status);
+  }
+
+  openDialog(): MatDialogRef<SearchGameData> {
+    const config: MatDialogConfig = new MatDialogConfig();
+    config.disableClose = false;
+    config.autoFocus = true;
+    config.restoreFocus = true;
+    config.minWidth = "50vw";
+    config.maxWidth = "50vw";
+    config.minHeight = "80vh";
+    config.maxHeight = "80vh";
+    return this.searchGameDialog.open(SearchGameData, config);
+  }
+
+  openSearchData(): void {
+    const dialogRef: MatDialogRef<SearchGameData> = this.openDialog();
+    dialogRef.afterClosed().subscribe(game => {
+      if (!game)
+        return;
+      this.selectedGame = game;
+      this.requestGameData(game);
+    });
   }
 }

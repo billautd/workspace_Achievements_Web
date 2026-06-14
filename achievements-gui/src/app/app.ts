@@ -50,7 +50,6 @@ export class App {
 
   onSelectTableEntry(data: GameData) {
     this.tabGroup.selectedIndex = 3;
-    this.gameDataTab.disabled = false;
     this.gameData.requestGameData(data);
   }
 }

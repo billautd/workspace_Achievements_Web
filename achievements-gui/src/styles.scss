@@ -98,7 +98,6 @@ body {
   position: relative;
   text-align: left;
   text-decoration: none;
-  transition: box-shadow .15s, transform .15s;
   user-select: none;
   -webkit-user-select: none;
   touch-action: manipulation;
@@ -107,13 +106,20 @@ body {
   font-size: 18px;
 }
 
+button {
+  transition: box-shadow .15s, transform .15s;
+}
+
+button:hover:enabled {
+  transform: translateY(-2px);
+}
+
 .request-data-button:focus {
   box-shadow: #3c4fe0 0 0 0 1.5px inset, rgba(45, 35, 66, .4) 0 2px 4px, rgba(45, 35, 66, .3) 0 7px 13px -3px, #3c4fe0 0 -3px 0 inset;
 }
 
 .request-data-button:hover:enabled {
   box-shadow: rgba(45, 35, 66, .4) 0 4px 8px, rgba(45, 35, 66, .3) 0 7px 13px -3px, #3c4fe0 0 -3px 0 inset;
-  transform: translateY(-2px);
 }
 
 .request-data-button:active:enabled {

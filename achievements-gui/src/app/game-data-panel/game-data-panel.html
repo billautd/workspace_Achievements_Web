@@ -1,4 +1,9 @@
 <div class="game-data-parent">
+    <button class="search-button" (click)="openSearchData()">
+        <img src="search.svg" class="search-icon">
+        Search...
+    </button>
+    @if(selectedGame){
     <div class="game-info">
         <img class="game-header" [src]="selectedGame.Image" />
         <mat-divider vertical="true"></mat-divider>
@@ -147,9 +152,15 @@
         </div>
         }
         @else {
-        <div class=" game-no-achievement">
+        <div class="game-no-achievement">
             No achievements
         </div>
         }
     </div>
+    }
+    @else {
+    <div class="no-game-selected">
+        No game selected
+    </div>
+    }
 </div>
