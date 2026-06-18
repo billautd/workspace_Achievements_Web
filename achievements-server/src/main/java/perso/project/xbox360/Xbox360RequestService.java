@@ -77,19 +77,19 @@ public class Xbox360RequestService extends AbstractXboxRequestService {
 	@Override
 	protected void parseAchievements(final List<GameData> gameData) {
 		readStandaloneGamesByIds();
-		// Take first profile
-		final File profileFolder = xboxEmulatorData.toFile().listFiles()[0];
 		// Find folder for profile info
 		File profileInfoFolder = null;
 		String profileId = "";
-		for (final File profileSubFolder : profileFolder.listFiles()) {
-			if (profileSubFolder.listFiles().length == 1
-					&& profileSubFolder.listFiles()[0].getName().equals(PROFILE_INFO_ID)) {
-				profileId = profileSubFolder.getName();
-				profileInfoFolder = profileSubFolder.listFiles()[0].listFiles()[0];
+		for (final File profileFolder : xboxEmulatorData.toFile().listFiles()) {
+			for (final File profileSubFolder : profileFolder.listFiles()) {
+				if (profileSubFolder.listFiles().length == 1
+						&& profileSubFolder.listFiles()[0].getName().equals(PROFILE_INFO_ID)) {
+					profileId = profileSubFolder.getName();
+					profileInfoFolder = profileSubFolder.listFiles()[0].listFiles()[0];
+				}
 			}
 		}
-		if (profileInfoFolder == null) {
+		if (profileInfoFolder == null || profileId.isEmpty()) {
 			Log.error("Could not find Xenia profile");
 			return;
 		}
