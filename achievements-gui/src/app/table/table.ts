@@ -312,7 +312,7 @@ export class Table {
     const filter: FilterData = {
       text: this.filterText,
       consoles: this.selectedConsoles,
-      completionStatuses: this.selectedCompletionStatuses,
+      completionStatuses: this.selectedCompletionStatuses.map(c => this.completionStatusText(c)),
       sources: this.selectedSources
     }
     console.log("Filter is [Text : " + filter.text + "], [Consoles : " + filter.consoles + "], [Statuses : " + filter.completionStatuses + "], [Sources : " + filter.sources + "]")
