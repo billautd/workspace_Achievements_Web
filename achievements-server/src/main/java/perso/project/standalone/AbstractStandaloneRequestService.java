@@ -109,8 +109,8 @@ public abstract class AbstractStandaloneRequestService extends AbstractRequestSe
 			final CSVReader reader = new CSVReaderBuilder(fileReader).withCSVParser(rfc4180Parser).build();
 			final List<String[]> stringList = reader.readAll();
 			for (final String[] str : stringList) {
-				final String gameName = str[0];
-				final String gameIdStr = str[1];
+				final String gameName = str[0].trim();
+				final String gameIdStr = str[1].trim();
 				if (gameIdStr.isBlank()) {
 					Log.error("No game id for game " + gameName);
 					continue;
@@ -147,8 +147,8 @@ public abstract class AbstractStandaloneRequestService extends AbstractRequestSe
 			final CSVReader reader = new CSVReaderBuilder(fileReader).withCSVParser(rfc4180Parser).build();
 			final List<String[]> stringList = reader.readAll();
 			for (final String[] str : stringList) {
-				final String gameName = str[0];
-				final String gameIdStr = str[1];
+				final String gameName = str[0].trim();
+				final String gameIdStr = str[1].trim();
 				if (gameIdStr.isBlank()) {
 					Log.error("No game id for game " + gameName);
 					continue;
