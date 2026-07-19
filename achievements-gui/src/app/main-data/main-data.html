@@ -14,7 +14,7 @@
         <ng-container matColumnDef="Games">
             <th mat-header-cell mat-sort-header *matHeaderCellDef class="gamesColumn">Games</th>
             <td mat-cell *matCellDef="let data" class="gamesColumn">
-                {{gamesText(data)}}
+                <b>{{gamesText(data)}}</b>
             </td>
             <td mat-footer-cell *matFooterCellDef class="gamesColumn">{{totalGamesText()}}</td>
         </ng-container>
