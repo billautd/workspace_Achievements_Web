@@ -36,6 +36,7 @@ public class RetroAchievementsRequestService extends AbstractRequestService {
 
 	static final String CONSOLE_IDS_METHOD = "GetConsoleIDs";
 	static final String CONSOLE_GAMES_METHOD = "GetGameList";
+	static final String USER_PROGRESS_METHOD = "GetUserProgress";
 	static final String USER_COMPLETION_PROGRESS_METHOD = "GetUserCompletionProgress";
 	static final String GAME_INFO_PROGRESS_METHOD = "GetGameInfoAndUserProgress";
 
@@ -123,6 +124,9 @@ public class RetroAchievementsRequestService extends AbstractRequestService {
 				consoleData.getGameDataMap().put(data.getId(), data);
 			}
 		});
+
+		requestPoints(gameData);
+
 		return gameData;
 	}
 
@@ -142,6 +146,30 @@ public class RetroAchievementsRequestService extends AbstractRequestService {
 				Log.info("Reading " + (newCount + currentCount) + " / " + totalCount);
 				requestCompletionProgressLoop(newCount + currentCount, data);
 			}
+		} catch (JsonProcessingException e) {
+			Log.error("Error reading response body as GameData", e);
+			return null;
+		}
+		return data;
+	}
+
+	private List<GameData> requestPoints(final List<GameData> data) {
+		try {
+			final String idsToRequest = String.join(",",
+					data.stream().map(GameData::getId).map(String::valueOf).toList());
+			final String resBody = parseResponse(requestData(USER_PROGRESS_METHOD, "i=" + idsToRequest));
+			final JsonNode node = mapper.readTree(resBody);
+			node.forEachEntry((idStr, gameData) -> {
+				final int gameId = Integer.parseInt(idStr);
+				final Optional<GameData> existingGameDataOpt = data.stream().filter(g -> g.getId() == gameId)
+						.findFirst();
+				if (existingGameDataOpt.isPresent()) {
+					final GameData g = existingGameDataOpt.get();
+					g.setEarnedPoints(gameData.get("ScoreAchievedHardcore").asInt());
+				} else {
+					Log.error("Game with id " + gameId + " not found");
+				}
+			});
 		} catch (JsonProcessingException e) {
 			Log.error("Error reading response body as GameData", e);
 			return null;

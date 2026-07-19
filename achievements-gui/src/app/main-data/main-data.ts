@@ -8,186 +8,228 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectChange, MatSelectModule } from '@angular/material/select';
 import { UtilsService } from '../../services/utils-service';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatTable, MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { CompletionStatusType, GameData } from '../../model/gameData';
+import { MatSort, MatSortModule } from '@angular/material/sort';
 
 @Component({
   selector: 'app-main-data',
-  imports: [ChartCanvas, MatFormFieldModule, FormsModule, ReactiveFormsModule, MatSelectModule, MatProgressBarModule],
+  imports: [MatTableModule, MatFormFieldModule, FormsModule, ReactiveFormsModule, MatSelectModule, MatProgressBarModule, MatSortModule],
   templateUrl: './main-data.html',
   styleUrl: './main-data.scss'
 })
 export class MainData {
-  @ViewChild("steamChartCanvas") steamChartCanvas!: ChartCanvas;
-  @ViewChild("raChartCanvas") raChartCanvas!: ChartCanvas;
-  @ViewChild("standaloneChartCanvas") standaloneChartCanvas!: ChartCanvas;
-  @ViewChild("raConsoleChartCanvas") raConsoleChartCanvas!: ChartCanvas;
+  //Table data
+  @ViewChild(MatTable) table!: MatTable<GameData>;
+  @ViewChild(MatSort) sort!: MatSort;
 
-  raConsoleIds: number[] = [];
-  standaloneConsoleIds: number[] = [];
-  //To access in HTML
-  steamConsoleId: number = STEAM_CONSOLE_ID;
-
+  data: MatTableDataSource<ConsoleData> = new MatTableDataSource<ConsoleData>();
+  columnsToDisplay: string[] = ["ConsoleName", "Games", "NoAchievements", "NotPlayed", "Tried", "Beaten", "Mastered", "Achievements", "Points"];
 
   model: Model;
-  gameDataService: GameDataService;
 
+  // Expose the enum to the template
+  CompletionStatusType = CompletionStatusType;
+  ConsoleSource = ConsoleSource;
 
-  earnedAchievementsTexts: Map<number, string> = new Map();
-  totalAchievementsTexts: Map<number, string> = new Map();
-  totalAchievementsPercentages: Map<number, number> = new Map();
-  earnedPointsTexts: Map<number, string> = new Map();
-  totalPointsTexts: Map<number, string> = new Map();
-  totalPointsPercentages: Map<number, number> = new Map();
-
-  raEarnedAchievementsText: string = "";
-  raTotalAchievementsText: string = "";
-  raAchievementsPercentage: number = 0;
-  raEarnedPointsText: string = "";
-  raTotalPointsText: string = "";
-  raPointsPercentage: number = 0;
-
-  selectedRAConsole: string = "";
-  raConsoles = new FormControl();
-  raConsolesList: string[] = [];
-  selectedRAConsoleId: number = -1;
-
-  selectedStandaloneConsole: string = "";
-  standaloneConsoles = new FormControl();
-  standaloneConsolesList: string[] = [];
-  selectedStandaloneConsoleId: number = 0;
-
-  constructor(model: Model,
-    gameDataService: GameDataService
-  ) {
+  constructor(model: Model) {
     this.model = model;
-    this.gameDataService = gameDataService;
   }
 
   ngOnInit() {
     //No data is passed through this behavior subject, it's only a trigger to refresh data
     this.model.getUpdateBehaviorSubject().subscribe(() => {
-      this.updateRAConsoleIds();
-      this.updateRAConsolesList();
-      this.updateStandaloneConsoleIds();
-      this.updateStandaloneConsolesList();
-
-      this.updateAchievementsText(STEAM_CONSOLE_ID);
-      this.updateAchievementsText(this.selectedRAConsoleId);
-      this.updateAchievementsText(this.selectedStandaloneConsoleId)
-
-      this.updateRATotalAchievementsText(this.raConsoleIds);
+      this.data.data = Array.from(this.model.getConsoleData().values());
     })
-
   }
 
-  updateRAConsoleIds(): void {
-    const ids: number[] = [];
-    for (const console of this.model.getConsoleData()) {
-      if (console[1].Source == ConsoleSource.RETRO_ACHIEVEMENTS) {
-        ids.push(console[0])
+  ngAfterViewInit() {
+    this.data.sort = this.sort;
+
+    //init sorting data accessors
+    this.data.sortingDataAccessor = (item, property) => {
+      switch (property) {
+        case "ConsoleName":
+          return item.Name;
+        case "Games":
+          return Array.from(item.Games.values()).length;
+        case "NoAchievements":
+          return this.statusValue(item, CompletionStatusType.NO_ACHIEVEMENTS);
+        case "NotPlayed":
+          return this.statusValue(item, CompletionStatusType.NOT_PLAYED);
+        case "Tried":
+          return this.statusValue(item, CompletionStatusType.TRIED);
+        case "Beaten":
+          return this.statusValue(item, CompletionStatusType.BEATEN);
+        case "Mastered":
+          return this.statusValue(item, CompletionStatusType.MASTERED);
+        case "Achievements":
+          return this.achievementsValue(item);
+        case "Points":
+          return this.pointsValue(item);
+        default:
+          return item.Name;
       }
     }
-    this.raConsoleIds = ids;
   }
 
-  updateStandaloneConsoleIds(): void {
-    this.standaloneConsoleIds = [PS3_CONSOLE_ID, PSVITA_CONSOLE_ID, XBOX360_CONSOLE_ID]
+  gamesText(console: ConsoleData): string {
+    return Array.from(console.Games.values()).length.toString();
   }
 
-  updateAchievementsText(consoleId: number): void {
-    let totalAchievements = 0;
-    let earnedAchievements = 0;
-    let totalPoints = 0;
-    let earnedPoints = 0;
-
-    const consoleData: ConsoleData | undefined = this.model.getConsoleData().get(consoleId);
-
-    if (!consoleData) {
-      return;
-    }
-    for (const game of consoleData.Games) {
-      earnedAchievements += game[1].NumAwardedHardcore;
-      totalAchievements += game[1].MaxPossible;
-      earnedPoints += game[1].EarnedPoints;
-      totalPoints += game[1].Points;
-    }
-    this.totalAchievementsPercentages.set(consoleId, 100 * earnedAchievements / totalAchievements);
-    this.totalPointsPercentages.set(consoleId, 100 * earnedPoints / totalPoints);
-
-    //Texts
-    this.earnedAchievementsTexts.set(consoleId, UtilsService.spaceNumber(earnedAchievements));
-    this.totalAchievementsTexts.set(consoleId, UtilsService.spaceNumber(totalAchievements));
-    this.earnedPointsTexts.set(consoleId, UtilsService.spaceNumber(earnedPoints));
-    this.totalPointsTexts.set(consoleId, UtilsService.spaceNumber(totalPoints));
+  statusValue(console: ConsoleData, status: CompletionStatusType): number {
+    return Array.from(console.Games.values()).filter(game => game.CompletionStatus == status).length;
   }
 
-  updateRATotalAchievementsText(ids: number[]): void {
-    let totalAchievements = 0;
-    let earnedAchievements = 0;
-    let totalPoints = 0;
-    let earnedPoints = 0;
-    for (const console of this.model.getConsoleData()) {
-      if (console[1].Source != ConsoleSource.RETRO_ACHIEVEMENTS) {
-        continue;
-      }
-      if (!ids.includes(console[1].ID)) {
-        continue;
-      }
-      for (const game of console[1].Games) {
-        earnedAchievements += game[1].NumAwardedHardcore;
-        totalAchievements += game[1].MaxPossible;
-        earnedPoints += game[1].EarnedPoints;
-        totalPoints += game[1].Points;
-      }
-    }
-    this.raAchievementsPercentage = 100 * earnedAchievements / totalAchievements;
-    this.raPointsPercentage = 100 * earnedPoints / totalPoints;
-
-    //Texts
-    this.raEarnedAchievementsText = UtilsService.spaceNumber(earnedAchievements);
-    this.raTotalAchievementsText = UtilsService.spaceNumber(totalAchievements);
-    this.raEarnedPointsText = UtilsService.spaceNumber(earnedPoints);
-    this.raTotalPointsText = UtilsService.spaceNumber(totalPoints);
+  statusPercentValue(console: ConsoleData, status: CompletionStatusType): number {
+    const gamesNbr: number = Array.from(console.Games.values()).length;
+    return 100 * this.statusValue(console, status) / gamesNbr;
   }
 
-  updateRAConsolesList(): void {
-    this.raConsolesList = [];
-    this.model.getConsoleData().forEach(c => {
-      if (c.Source == ConsoleSource.RETRO_ACHIEVEMENTS) {
-        this.raConsolesList.push(c.Name);
-      }
+  statusText(console: ConsoleData, status: CompletionStatusType): string {
+    const statusGamesNbr: number = Array.from(console.Games.values()).filter(game => game.CompletionStatus == status).length;
+    return statusGamesNbr.toString();
+  }
+
+  totalStatusValue(status: CompletionStatusType): number {
+    let total: number = 0;
+    this.data.data.forEach(c => {
+      total += Array.from(c.Games.values()).filter(g => g.CompletionStatus == status).length;
+    });
+    return total;
+  }
+
+  totalStatusPercentValue(status: CompletionStatusType): number {
+    return 100 * this.totalStatusValue(status) / this.model.flattenMap().length;
+  }
+
+  achievementsValue(console: ConsoleData): number {
+    let earned: number = 0;
+    Array.from(console.Games.values()).forEach(game => {
+      earned += game.NumAwardedHardcore;
+    });
+    return earned
+  }
+
+  achievementsTotal(console: ConsoleData): number {
+    let total: number = 0;
+    Array.from(console.Games.values()).forEach(game => {
+      total += game.MaxPossible;
+    });
+    return total
+  }
+
+  achievementsPercentValue(console: ConsoleData): number {
+    return 100 * this.achievementsValue(console) / this.achievementsTotal(console);
+  }
+
+  totalAchievementsValue(): number {
+    let earned: number = 0;
+    this.data.data.forEach(console => {
+      Array.from(console.Games.values()).forEach(game => {
+        earned += game.NumAwardedHardcore;
+      });
     })
-    this.raConsolesList.sort((o1, o2) => o1.localeCompare(o2))
+    return earned
   }
 
-  updateStandaloneConsolesList(): void {
-    this.standaloneConsolesList = [
-      UtilsService.consoleSourceText(ConsoleSource.PS3),
-      UtilsService.consoleSourceText(ConsoleSource.PSVITA),
-      UtilsService.consoleSourceText(ConsoleSource.XBOX_360)
-    ];
+  totalAchievementsTotal(): number {
+    let total: number = 0;
+    this.data.data.forEach(console => {
+      Array.from(console.Games.values()).forEach(game => {
+        total += game.MaxPossible;
+      });
+    });
+    return total
   }
 
-  changeRASelectedConsole(event: MatSelectChange<any>) {
-    this.selectedRAConsole = event.value;
-    //Get console associated to name
-    for (const c of this.model.getConsoleData().values()) {
-      if (c.Source == ConsoleSource.RETRO_ACHIEVEMENTS && c.Name == this.selectedRAConsole) {
-        this.selectedRAConsoleId = c.ID;
-      }
-    }
-    this.raConsoleChartCanvas.updateChartData([this.selectedRAConsoleId]);
-    this.updateAchievementsText(this.selectedRAConsoleId);
+  totalAchievementsPercentValue(): number {
+    return 100 * this.totalAchievementsValue() / this.totalAchievementsTotal();
   }
 
-  changeStandaloneSelectedConsole(event: MatSelectChange<any>) {
-    this.selectedStandaloneConsole = event.value;
-    //Get console associated to name
-    for (const c of this.model.getConsoleData().values()) {
-      if (c.Name == this.selectedStandaloneConsole) {
-        this.selectedStandaloneConsoleId = c.ID;
-      }
-    }
-    this.standaloneChartCanvas.updateChartData([this.selectedStandaloneConsoleId]);
-    this.updateAchievementsText(this.selectedStandaloneConsoleId)
+  pointsValue(console: ConsoleData): number {
+    let earned: number = 0;
+    Array.from(console.Games.values()).forEach(game => {
+      earned += game.EarnedPoints;
+    });
+    return earned
+  }
+
+  pointsTotal(console: ConsoleData): number {
+    let total: number = 0;
+    Array.from(console.Games.values()).forEach(game => {
+      total += game.Points;
+    });
+    return total
+  }
+
+  pointsPercentValue(console: ConsoleData): number {
+    let earned: number = 0;
+    let total: number = 0;
+    Array.from(console.Games.values()).forEach(game => {
+      earned += game.EarnedPoints;
+      total += game.Points;
+    });
+    return 100 * earned / total;
+  }
+
+  totalPointsValue(): number {
+    let earned: number = 0;
+    this.data.data.forEach(console => {
+      Array.from(console.Games.values()).forEach(game => {
+        earned += game.EarnedPoints;
+      });
+    });
+    return earned
+  }
+
+  totalPointsTotal(): number {
+    let total: number = 0;
+    this.data.data.forEach(console => {
+      Array.from(console.Games.values()).forEach(game => {
+        total += game.Points;
+      });
+    });
+    return total
+  }
+
+  totalPointsPercentValue(): number {
+    let earned: number = 0;
+    let total: number = 0;
+    this.data.data.forEach(console => {
+      Array.from(console.Games.values()).forEach(game => {
+        earned += game.EarnedPoints;
+        total += game.Points;
+      });
+    });
+    return 100 * earned / total;
+  }
+
+  totalText(): string {
+    return this.data.data.length + " consoles";
+  }
+
+  totalGamesText(): string {
+    let total: number = this.model.flattenMap().length;
+    return total + " games";
+  }
+
+  /******************************/
+  /* SORTING */
+  /******************************/
+  announceSortChange() {
+    this.table.renderRows();
+  }
+
+  completionStatusText(status: CompletionStatusType): string {
+    return UtilsService.completionStatusText(status);
+  }
+
+  completionStatusIcon(status: CompletionStatusType): string {
+    return UtilsService.completionStatusIcon(status);
+  }
+
+  consoleIcon(name: string): string {
+    return UtilsService.consoleIcon(name);
   }
 }

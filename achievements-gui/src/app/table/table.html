@@ -10,12 +10,12 @@
                 <td mat-footer-cell *matFooterCellDef class="nameColumn">{{totalText()}}</td>
             </ng-container>
             <ng-container matColumnDef="ConsoleName">
-                <th mat-header-cell mat-sort-header *matHeaderCellDef class="consoleNameColumn">Console name</th>
+                <th mat-header-cell mat-sort-header *matHeaderCellDef class="consoleNameColumn">Console</th>
                 <td mat-cell *matCellDef="let data" class="consoleNameColumn">
                     <img [src]="consoleIcon(data.ConsoleName)">
                     {{data.ConsoleName}}
                 </td>
-                <td mat-footer-cell *matFooterCellDef class="consoleNameColumn">Total</td>
+                <td mat-footer-cell *matFooterCellDef class="consoleNameColumn"></td>
             </ng-container>
             <ng-container matColumnDef="CompletionStatus">
                 <th mat-header-cell mat-sort-header *matHeaderCellDef class="statusColumn">Status</th>

@@ -1,142 +1,206 @@
-<div class="data-parent">
-    <div class="data-left">
-        <div class="data-steam">
-            <img src="steam.png" class="steam-icon">
-            <div class="steam-chart">
-                <app-chart-canvas class="steam-chart" #steamChartCanvas
-                    [consoleIds]="[steamConsoleId]"></app-chart-canvas>
-            </div>
-            <div class="data-steam-earned">
-                <div class="data-earned-achievements">
-                    <div class="data-earned-title">Achievements : </div>
-                    <div class="data-progress-bar-wrapper">
-                        <mat-progress-bar class="data-progress-bar" mode="determinate"
-                            [value]="totalAchievementsPercentages.get(steamConsoleId)">
-                        </mat-progress-bar>
-                        <div class="data-progress-bar-value"> {{earnedAchievementsTexts.get(steamConsoleId)}} /
-                            {{totalAchievementsTexts.get(steamConsoleId)}}
-                        </div>
-                    </div>
-                </div>
-                <div class="data-earned-points">
-                    <div class="data-earned-title">Points : </div>
-                    <div class="data-progress-bar-wrapper">
-                        <mat-progress-bar class="data-progress-bar" mode="determinate"
-                            [value]="totalPointsPercentages.get(steamConsoleId)">
-                        </mat-progress-bar>
-                        <div class="data-progress-bar-value"> {{earnedPointsTexts.get(steamConsoleId)}} /
-                            {{totalPointsTexts.get(steamConsoleId)}}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="data-standalone">
-            <div style="display:flex; flex-direction:column">
+<div class="table-parent">
+    <mat-table class="data-table" [dataSource]="data" matSort (matSortChange)="announceSortChange()"
+        matSortActive="ConsoleName" matSortDirection="asc">
 
-                <div class="standalone-icons">
-                    <img src="ps3.png" class="ps3-icon">
-                    <img src="psvita.png" class="psvita-icon">
-                    <img src="xbox360.png" class="xbox360-icon">
-                    <mat-form-field style="align-self: center">
-                        <mat-label>Console</mat-label>
-                        <mat-select (selectionChange)="changeStandaloneSelectedConsole($event)"
-                            [formControl]="standaloneConsoles">
-                            @for (console of standaloneConsolesList; track console){
-                            <mat-option [value]="console">{{console}}</mat-option>
-                            }
-                        </mat-select>
-                    </mat-form-field>
-                </div>
+        <ng-container matColumnDef="ConsoleName">
+            <th mat-header-cell mat-sort-header *matHeaderCellDef class="consoleNameColumn">Console</th>
+            <td mat-cell *matCellDef="let data" class="consoleNameColumn">
+                <img [src]="consoleIcon(data.Name)">
+                {{data.Name}}
+            </td>
+            <td mat-footer-cell *matFooterCellDef class="consoleNameColumn">{{totalText()}}</td>
+        </ng-container>
 
-                <div class="data-specific-standalone">
-                    <div class="standalone-chart">
-                        <app-chart-canvas class="standalone-chart" #standaloneChartCanvas
-                            [consoleIds]="[selectedStandaloneConsoleId]"></app-chart-canvas>
-                    </div>
-                    <div class="data-standalone-earned">
-                        <div class="data-earned-achievements">
-                            <div class="data-earned-title">Achievements : </div>
-                            <div class="data-progress-bar-wrapper">
-                                <mat-progress-bar class="data-progress-bar" mode="determinate"
-                                    [value]="totalAchievementsPercentages.get(selectedStandaloneConsoleId)">
-                                </mat-progress-bar>
-                                <div class="data-progress-bar-value">
-                                    {{earnedAchievementsTexts.get(selectedStandaloneConsoleId)}} /
-                                    {{totalAchievementsTexts.get(selectedStandaloneConsoleId)}}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="data-earned-points">
-                            <div class="data-earned-title">Points : </div>
-                            <div class="data-progress-bar-wrapper">
-                                <mat-progress-bar class="data-progress-bar" mode="determinate"
-                                    [value]="totalPointsPercentages.get(selectedStandaloneConsoleId)">
-                                </mat-progress-bar>
-                                <div class="data-progress-bar-value">
-                                    {{earnedPointsTexts.get(selectedStandaloneConsoleId)}} /
-                                    {{totalPointsTexts.get(selectedStandaloneConsoleId)}}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="data-right">
-        <div class="data-ra">
-            <img src="ra.png" class="ra-icon">
-            <div style="display:flex; flex-direction: column; flex-grow: 1;">
-                <div class="data-total-ra">
-                    <div class="ra-chart">
-                        <app-chart-canvas class="ra-chart" #raChartCanvas
-                            [consoleIds]="raConsoleIds"></app-chart-canvas>
-                    </div>
-                    <div class="data-ra-earned">
-                        <div class="data-earned-achievements">
-                            <div class="data-earned-title">Achievements : </div>
-                            <div class="data-progress-bar-wrapper">
-                                <mat-progress-bar class="data-progress-bar" mode="determinate"
-                                    [value]="raAchievementsPercentage">
-                                </mat-progress-bar>
-                                <div class="data-progress-bar-value"> {{raEarnedAchievementsText}} /
-                                    {{raTotalAchievementsText}}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+        <ng-container matColumnDef="Games">
+            <th mat-header-cell mat-sort-header *matHeaderCellDef class="gamesColumn">Games</th>
+            <td mat-cell *matCellDef="let data" class="gamesColumn">
+                {{gamesText(data)}}
+            </td>
+            <td mat-footer-cell *matFooterCellDef class="gamesColumn">{{totalGamesText()}}</td>
+        </ng-container>
 
-                <mat-form-field style="align-self: center; ">
-                    <mat-label>Console</mat-label>
-                    <mat-select (selectionChange)="changeRASelectedConsole($event)" [formControl]="raConsoles">
-                        @for (console of raConsolesList; track console){
-                        <mat-option [value]="console">{{console}}</mat-option>
-                        }
-                    </mat-select>
-                </mat-form-field>
-                <div class="data-specific-ra">
-                    <div class="ra-chart">
-                        <app-chart-canvas class="ra-chart" #raConsoleChartCanvas
-                            [consoleIds]="[selectedRAConsoleId]"></app-chart-canvas>
-                    </div>
-                    <div class="data-ra-earned">
-                        <div class="data-earned-achievements">
-                            <div class="data-earned-title">Achievements : </div>
-                            <div class="data-progress-bar-wrapper">
-                                <mat-progress-bar class="data-progress-bar" mode="determinate"
-                                    [value]="totalAchievementsPercentages.get(selectedRAConsoleId)">
-                                </mat-progress-bar>
-                                <div class="data-progress-bar-value">
-                                    {{earnedAchievementsTexts.get(selectedRAConsoleId)}} /
-                                    {{totalAchievementsTexts.get(selectedRAConsoleId)}}
-                                </div>
-                            </div>
-                        </div>
+        <ng-container matColumnDef="NoAchievements">
+            <th mat-header-cell mat-sort-header *matHeaderCellDef class="noAchievementsColumn">
+                {{completionStatusText(CompletionStatusType.NO_ACHIEVEMENTS)}}</th>
+            <td mat-cell *matCellDef="let data" class="noAchievementsColumn">
+                @if(data.Source == ConsoleSource.STEAM){
+                <img [src]="completionStatusIcon(CompletionStatusType.NO_ACHIEVEMENTS)">
+                <div class="data-progress-bar-wrapper">
+                    <mat-progress-bar class="data-progress-bar" mode="determinate"
+                        [value]="statusPercentValue(data, CompletionStatusType.NO_ACHIEVEMENTS)">
+                    </mat-progress-bar>
+                    <div class="data-progress-bar-value"> {{statusText(data, CompletionStatusType.NO_ACHIEVEMENTS)}}
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
+                }
+                @else {
+                <div style="display:flex; flex-grow:1;justify-content: center;">-</div>
+                }
+            </td>
+            <td mat-footer-cell *matFooterCellDef class="noAchievementsColumn">
+                <img [src]="completionStatusIcon(CompletionStatusType.NO_ACHIEVEMENTS)">
+                <div class="data-progress-bar-wrapper">
+                    <mat-progress-bar class="data-progress-bar" mode="determinate"
+                        [value]="totalStatusPercentValue(CompletionStatusType.NO_ACHIEVEMENTS)">
+                    </mat-progress-bar>
+                    <div class="data-progress-bar-value"> {{totalStatusValue( CompletionStatusType.NO_ACHIEVEMENTS)}}
+                    </div>
+                </div>
+            </td>
+        </ng-container>
+
+        <ng-container matColumnDef="NotPlayed">
+            <th mat-header-cell mat-sort-header *matHeaderCellDef class="notPlayedColumn">
+                {{completionStatusText(CompletionStatusType.NOT_PLAYED)}}</th>
+            <td mat-cell *matCellDef="let data" class="notPlayedColumn">
+                <img [src]="completionStatusIcon(CompletionStatusType.NOT_PLAYED)">
+                <div class="data-progress-bar-wrapper">
+                    <mat-progress-bar class="data-progress-bar" mode="determinate"
+                        [value]="statusPercentValue(data, CompletionStatusType.NOT_PLAYED)">
+                    </mat-progress-bar>
+                    <div class="data-progress-bar-value"> {{statusText(data, CompletionStatusType.NOT_PLAYED)}}</div>
+                </div>
+            </td>
+            <td mat-footer-cell *matFooterCellDef class="notPlayedColumn">
+                <img [src]="completionStatusIcon(CompletionStatusType.NOT_PLAYED)">
+                <div class="data-progress-bar-wrapper">
+                    <mat-progress-bar class="data-progress-bar" mode="determinate"
+                        [value]="totalStatusPercentValue(CompletionStatusType.NOT_PLAYED)">
+                    </mat-progress-bar>
+                    <div class="data-progress-bar-value"> {{totalStatusValue( CompletionStatusType.NOT_PLAYED)}}
+                    </div>
+                </div>
+            </td>
+        </ng-container>
+
+        <ng-container matColumnDef="Tried">
+            <th mat-header-cell mat-sort-header *matHeaderCellDef class="triedColumn">
+                {{completionStatusText(CompletionStatusType.TRIED)}}</th>
+            <td mat-cell *matCellDef="let data" class="triedColumn">
+                <img [src]="completionStatusIcon(CompletionStatusType.TRIED)">
+                <div class="data-progress-bar-wrapper">
+                    <mat-progress-bar class="data-progress-bar" mode="determinate"
+                        [value]="statusPercentValue(data, CompletionStatusType.TRIED)">
+                    </mat-progress-bar>
+                    <div class="data-progress-bar-value"> {{statusText(data, CompletionStatusType.TRIED)}}</div>
+                </div>
+            </td>
+            <td mat-footer-cell *matFooterCellDef class="triedColumn">
+                <img [src]="completionStatusIcon(CompletionStatusType.TRIED)">
+                <div class="data-progress-bar-wrapper">
+                    <mat-progress-bar class="data-progress-bar" mode="determinate"
+                        [value]="totalStatusPercentValue(CompletionStatusType.TRIED)">
+                    </mat-progress-bar>
+                    <div class="data-progress-bar-value"> {{totalStatusValue( CompletionStatusType.TRIED)}}
+                    </div>
+                </div>
+            </td>
+        </ng-container>
+
+        <ng-container matColumnDef="Beaten">
+            <th mat-header-cell mat-sort-header *matHeaderCellDef class="beatenColumn">
+                {{completionStatusText(CompletionStatusType.BEATEN)}}</th>
+            <td mat-cell *matCellDef="let data" class="beatenColumn">
+                <img [src]="completionStatusIcon(CompletionStatusType.BEATEN)">
+                <div class="data-progress-bar-wrapper">
+                    <mat-progress-bar class="data-progress-bar" mode="determinate"
+                        [value]="statusPercentValue(data, CompletionStatusType.BEATEN)">
+                    </mat-progress-bar>
+                    <div class="data-progress-bar-value"> {{statusText(data, CompletionStatusType.BEATEN)}}</div>
+                </div>
+            </td>
+            <td mat-footer-cell *matFooterCellDef class="beatenColumn">
+                <img [src]="completionStatusIcon(CompletionStatusType.BEATEN)">
+                <div class="data-progress-bar-wrapper">
+                    <mat-progress-bar class="data-progress-bar" mode="determinate"
+                        [value]="totalStatusPercentValue(CompletionStatusType.BEATEN)">
+                    </mat-progress-bar>
+                    <div class="data-progress-bar-value"> {{totalStatusValue( CompletionStatusType.BEATEN)}}
+                    </div>
+                </div>
+            </td>
+        </ng-container>
+
+        <ng-container matColumnDef="Mastered">
+            <th mat-header-cell mat-sort-header *matHeaderCellDef class="masteredColumn">
+                {{completionStatusText(CompletionStatusType.MASTERED)}}</th>
+            <td mat-cell *matCellDef="let data" class="masteredColumn">
+                <img [src]="completionStatusIcon(CompletionStatusType.MASTERED)">
+                <div class="data-progress-bar-wrapper">
+                    <mat-progress-bar class="data-progress-bar" mode="determinate"
+                        [value]="statusPercentValue(data, CompletionStatusType.MASTERED)">
+                    </mat-progress-bar>
+                    <div class="data-progress-bar-value"> {{statusText(data, CompletionStatusType.MASTERED)}}</div>
+                </div>
+            </td>
+            <td mat-footer-cell *matFooterCellDef class="masteredColumn">
+                <img [src]="completionStatusIcon(CompletionStatusType.MASTERED)">
+                <div class="data-progress-bar-wrapper">
+                    <mat-progress-bar class="data-progress-bar" mode="determinate"
+                        [value]="totalStatusPercentValue(CompletionStatusType.MASTERED)">
+                    </mat-progress-bar>
+                    <div class="data-progress-bar-value"> {{totalStatusValue( CompletionStatusType.MASTERED)}}
+                    </div>
+                </div>
+            </td>
+        </ng-container>
+
+        <ng-container matColumnDef="Achievements">
+            <th mat-header-cell mat-sort-header *matHeaderCellDef class="achievementsColumn">Achievements</th>
+            <td mat-cell *matCellDef="let data" class="achievementsColumn">
+                <div class="data-progress-bar-wrapper">
+                    <mat-progress-bar class="data-progress-bar" mode="determinate"
+                        [value]="achievementsPercentValue(data)">
+                    </mat-progress-bar>
+                    <div class="achievements-progress-bar-value">
+                        <div style="justify-self: end; padding-right: 10px;">{{achievementsValue(data)}}</div>
+                        <div style="justify-self: center;">/</div>
+                        <div style="justify-self: start; padding-left: 10px;">{{achievementsTotal(data)}}</div>
+                    </div>
+                </div>
+            </td>
+            <td mat-footer-cell *matFooterCellDef class="achievementsColumn">
+                <div class="data-progress-bar-wrapper">
+                    <mat-progress-bar class="data-progress-bar" mode="determinate"
+                        [value]="totalAchievementsPercentValue()">
+                    </mat-progress-bar>
+                    <div class="achievements-progress-bar-value">
+                        <div style="justify-self: end; padding-right: 10px;">{{totalAchievementsValue()}}</div>
+                        <div style="justify-self: center;">/</div>
+                        <div style="justify-self: start; padding-left: 10px;">{{totalAchievementsTotal()}}</div>
+                    </div>
+                </div>
+            </td>
+        </ng-container>
+
+        <ng-container matColumnDef="Points">
+            <th mat-header-cell mat-sort-header *matHeaderCellDef class="pointsColumn">Points</th>
+            <td mat-cell *matCellDef="let data" class="pointsColumn">
+                <div class="data-progress-bar-wrapper">
+                    <mat-progress-bar class="data-progress-bar" mode="determinate" [value]="pointsPercentValue(data)">
+                    </mat-progress-bar>
+                    <div class="achievements-progress-bar-value">
+                        <div style="justify-self: end; padding-right: 10px;">{{pointsValue(data)}}</div>
+                        <div style="justify-self: center;">/</div>
+                        <div style="justify-self: start; padding-left: 10px;">{{pointsTotal(data)}}</div>
+                    </div>
+                </div>
+            </td>
+            <td mat-footer-cell *matFooterCellDef class="pointsColumn">
+                <div class="data-progress-bar-wrapper">
+                    <mat-progress-bar class="data-progress-bar" mode="determinate" [value]="totalPointsPercentValue()">
+                    </mat-progress-bar>
+                    <div class="achievements-progress-bar-value">
+                        <div style="justify-self: end; padding-right: 10px;">{{totalPointsValue()}}</div>
+                        <div style="justify-self: center;">/</div>
+                        <div style="justify-self: start; padding-left: 10px;">{{totalPointsTotal()}}</div>
+                    </div>
+                </div>
+            </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="columnsToDisplay; sticky:true"></tr>
+        <tr mat-row *matRowDef="let row columns:columnsToDisplay;"></tr>
+        <tr mat-footer-row *matFooterRowDef="columnsToDisplay; sticky:true"></tr>
+    </mat-table>
 </div>
