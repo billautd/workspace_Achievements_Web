@@ -47,7 +47,10 @@ export class GameDataPanel {
   readonly RARE_MAX_RARITY: number = 10;
   readonly SUPER_RARE_MAX_RARITY: number = 5;
 
-  readonly TIMER: number = 3 * 60 * 1000;
+  currentTime: number = 0; //Milliseconds
+  readonly TIMER: number = 2 * 60 * 1000; //Milliseconds
+  readonly INTERVAL: number = 1000; //Milliseconds
+  progress: number = 0;
 
   readonly UP_ICON: string = "up_arrow.svg"
   readonly DOWN_ICON: string = "down_arrow.svg"
@@ -88,12 +91,27 @@ export class GameDataPanel {
   setupTimer(): void {
     setInterval(() => {
       if (this.isAutoRefresh) {
-        console.log("Sending refresh");
-        this.refreshData();
+        this.incrementTimer()
+        if (this.currentTime > this.TIMER) {
+          console.log("Sending refresh");
+          this.refreshData();
+          this.resetTimer();
+        }
       } else {
-        console.log("No auto refresh")
+        console.log("No auto refresh");
+        this.resetTimer();
       }
-    }, this.TIMER);
+    }, this.INTERVAL);
+  }
+
+  incrementTimer() {
+    this.currentTime += this.INTERVAL;
+    this.progress = 100 * this.currentTime / this.TIMER
+  }
+
+  resetTimer() {
+    this.progress = 0;
+    this.currentTime = 0;
   }
 
   requestGameData(data: GameData): void {

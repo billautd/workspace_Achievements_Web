@@ -68,6 +68,10 @@
             style="align-self:center; margin-left:auto; margin-right:8vh">
             Auto-refresh
         </mat-checkbox>
+        @if(isAutoRefresh){
+        <mat-progress-bar class="timer-progress-bar" mode="determinate" [value]="progress">
+        </mat-progress-bar>
+        }
     </div>
     }
     <div class="game-achievements-data">

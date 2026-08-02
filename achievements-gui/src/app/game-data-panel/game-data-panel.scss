@@ -78,6 +78,7 @@
 .game-achievements-sort {
     display: flex;
     height: 6vh;
+    align-items: center;
 }
 
 .game-achievements-list {
@@ -221,6 +222,18 @@
     border-radius: 20px;
     align-items: end;
     width: 100%;
+    border: 1px solid var(--purple4);
+    --mat-progress-bar-active-indicator-color: var(--purple4);
+    --mat-progress-bar-active-indicator-height: 30px !important;
+}
+
+.timer-progress-bar {
+    display: flex;
+    width: 150px;
+    height: 20px;
+    flex-direction: row;
+    border-radius: 20px;
+    align-items: end;
     border: 1px solid var(--purple4);
     --mat-progress-bar-active-indicator-color: var(--purple4);
     --mat-progress-bar-active-indicator-height: 30px !important;
