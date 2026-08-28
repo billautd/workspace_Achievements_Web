@@ -42,26 +42,12 @@ public class Xbox360RequestService extends AbstractXboxRequestService {
 	private Path xbox360HTMLPath;
 
 	@Inject
-	@ConfigProperty(name = "xbox360.beaten.path")
-	private Path xbox360BeatenPath;
-
-	@Inject
-	@ConfigProperty(name = "xbox360.mastered.path")
-	private Path xbox360MasteredPath;
+	@ConfigProperty(name = "xbox360.local.data.path")
+	private Path xbox360LocalDataPath;
 
 	@Override
 	protected Path getHTMLPath() {
 		return xbox360HTMLPath;
-	}
-
-	@Override
-	protected Path getGamesBeatenPath() {
-		return xbox360BeatenPath;
-	}
-
-	@Override
-	protected Path getGamesMasteredPath() {
-		return xbox360MasteredPath;
 	}
 
 	@Override
@@ -72,6 +58,11 @@ public class Xbox360RequestService extends AbstractXboxRequestService {
 	@Override
 	protected int getId() {
 		return Model.XBOX360_CONSOLE_ID;
+	}
+
+	@Override
+	protected Path getLocalDataPath() {
+		return xbox360LocalDataPath;
 	}
 
 	@Override
@@ -194,7 +185,8 @@ public class Xbox360RequestService extends AbstractXboxRequestService {
 		return gameData;
 	}
 
-	private GameData parseAchievementData(final GameData gameData) {
+	@Override
+	protected GameData parseAchievementData(final GameData gameData) {
 		gameData.setTotalAchievements(gameData.getAchievementData().size());
 		gameData.setAwardedAchievements(
 				(int) gameData.getAchievementData().stream().filter(ach -> ach.isAchieved()).count());
@@ -239,6 +231,9 @@ public class Xbox360RequestService extends AbstractXboxRequestService {
 			Log.error("No Xbox 360 game found for id " + gameId);
 			return null;
 		}
+
+		// First, re-read local files
+		getLocalData();
 
 		parseAchievements(
 				model.getConsoleDataMap().get(Model.XBOX360_CONSOLE_ID).getGameDataMap().values().stream().toList());

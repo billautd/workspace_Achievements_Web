@@ -19,6 +19,7 @@ import jakarta.inject.Inject;
 import perso.project.model.ConsoleData;
 import perso.project.model.GameData;
 import perso.project.model.MainModel;
+import perso.project.model.enums.ConsoleSourceEnum;
 
 public abstract class AbstractRequestService {
 	protected ObjectMapper mapper;
@@ -26,6 +27,8 @@ public abstract class AbstractRequestService {
 
 	@Inject
 	protected MainModel model;
+
+	protected abstract ConsoleSourceEnum getSource();
 
 	protected AbstractRequestService() {
 		setupMapper();

@@ -95,6 +95,18 @@ public class SteamResources extends AbstractResources {
 		return getExistingData(steamRequestService, steamDatabasePath);
 	}
 
+	@GET
+	@Path("/set_as_beaten/{game_id}")
+	public void setGameAsBeaten(@PathParam("game_id") final int gameId) {
+		steamRequestService.setGameAsBeaten(gameId);
+	}
+
+	@GET
+	@Path("/set_as_mastered/{game_id}")
+	public void setGameAsMastered(@PathParam("game_id") final int gameId) {
+		steamRequestService.setGameAsMastered(gameId);
+	}
+
 	@Override
 	protected ConsoleSourceEnum getSource() {
 		return ConsoleSourceEnum.STEAM;

@@ -45,26 +45,12 @@ public class PS3RequestService extends AbstractPSNRequestService {
 	private Path ps3EmulatorData;
 
 	@Inject
-	@ConfigProperty(name = "ps3.beaten.path")
-	private Path ps3BeatenPath;
-
-	@Inject
-	@ConfigProperty(name = "ps3.mastered.path")
-	private Path ps3MasteredPath;
+	@ConfigProperty(name = "ps3.local.data.path")
+	private Path ps3LocalDataPath;
 
 	@Override
 	protected Path getHTMLPath() {
 		return ps3HTMLPath;
-	}
-
-	@Override
-	protected Path getGamesBeatenPath() {
-		return ps3BeatenPath;
-	}
-
-	@Override
-	protected Path getGamesMasteredPath() {
-		return ps3MasteredPath;
 	}
 
 	@Override
@@ -75,6 +61,11 @@ public class PS3RequestService extends AbstractPSNRequestService {
 	@Override
 	protected int getId() {
 		return Model.PS3_CONSOLE_ID;
+	}
+
+	@Override
+	protected Path getLocalDataPath() {
+		return ps3LocalDataPath;
 	}
 
 	/**
@@ -207,7 +198,8 @@ public class PS3RequestService extends AbstractPSNRequestService {
 		return gameData;
 	}
 
-	private GameData parseAchievementData(final GameData gameData) {
+	@Override
+	protected GameData parseAchievementData(final GameData gameData) {
 		gameData.setTotalAchievements(gameData.getAchievementData().size());
 		gameData.setAwardedAchievements(
 				(int) gameData.getAchievementData().stream().filter(ach -> ach.isAchieved()).count());
@@ -252,6 +244,9 @@ public class PS3RequestService extends AbstractPSNRequestService {
 			Log.error("No PS3 game found for id " + gameId);
 			return null;
 		}
+
+		// First, re-read local files
+		getLocalData();
 
 		parseAchievements(
 				model.getConsoleDataMap().get(Model.PS3_CONSOLE_ID).getGameDataMap().values().stream().toList());

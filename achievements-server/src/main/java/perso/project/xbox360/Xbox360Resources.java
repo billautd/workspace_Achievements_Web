@@ -71,6 +71,18 @@ public class Xbox360Resources extends AbstractStandaloneResources {
 		return xbox360RequestService.getMapper().writeValueAsString(data);
 	}
 
+	@GET
+	@Path("/set_as_beaten/{game_id}")
+	public void setGameAsBeaten(@PathParam("game_id") final int gameId) {
+		xbox360RequestService.setGameAsBeaten(gameId);
+	}
+
+	@GET
+	@Path("/set_as_mastered/{game_id}")
+	public void setGameAsMastered(@PathParam("game_id") final int gameId) {
+		xbox360RequestService.setGameAsMastered(gameId);
+	}
+
 	@Override
 	protected ConsoleSourceEnum getSource() {
 		return ConsoleSourceEnum.XBOX_360;

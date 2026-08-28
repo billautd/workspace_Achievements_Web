@@ -13,15 +13,12 @@ import { MatSelectChange, MatSelectModule } from '@angular/material/select';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { UtilsService } from '../../services/utils-service';
 import { MatIconModule } from '@angular/material/icon';
+import { MatMenuModule } from '@angular/material/menu';
 import { MatInputModule } from '@angular/material/input';
 import { MatCheckboxChange, MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDialog, MatDialogConfig, MatDialogRef } from '@angular/material/dialog';
 import { SearchGameData } from '../search-game-data/search-game-data';
 
-
-interface FilterData {
-  text: string;
-}
 
 export enum SortOption {
   RARITY = "RARITY",
@@ -35,12 +32,31 @@ export enum SortOption {
 @Component({
   selector: 'app-game-data',
   imports: [CommonModule, MatProgressBarModule, MatDividerModule, MatIconModule,
-    MatFormFieldModule, MatSelectModule, FormsModule, ReactiveFormsModule, MatInputModule, MatCheckboxModule],
+    MatFormFieldModule, MatSelectModule, FormsModule, ReactiveFormsModule, MatInputModule, MatCheckboxModule,
+    MatMenuModule],
   templateUrl: './game-data-panel.html',
   styleUrl: './game-data-panel.scss'
 })
 export class GameDataPanel {
-  @Input() selectedGame!: GameData | null;
+  private _selectedGame!: GameData | null;
+
+  @Input()
+  set selectedGame(game: GameData | null) {
+    this._selectedGame = game;
+    if (!game)
+      return;
+    let csl: ConsoleData | undefined = this.model.getConsoleData().get(game.ConsoleID);
+    if (!csl)
+      return;
+
+    this.canSetGameAsBeaten = csl.Source == ConsoleSource.PS3 || csl.Source == ConsoleSource.PSVITA || csl.Source == ConsoleSource.XBOX_360 || csl.Source == ConsoleSource.STEAM;
+    this.canSetGameAsMastered = game.MaxPossible == 0 && (csl.Source == ConsoleSource.PS3 || csl.Source == ConsoleSource.PSVITA || csl.Source == ConsoleSource.XBOX_360 || csl.Source == ConsoleSource.STEAM);
+    this.canAddStandaloneId = csl.Source == ConsoleSource.PS3 || csl.Source == ConsoleSource.PSVITA || csl.Source == ConsoleSource.XBOX_360;
+  }
+
+  get selectedGame(): GameData | null {
+    return this._selectedGame;
+  }
 
   readonly COMMON_MAX_RARITY: number = 50;
   readonly UNCOMMON_MAX_RARITY: number = 20;
@@ -60,6 +76,10 @@ export class GameDataPanel {
   isRequestRunning: boolean = false;
 
   isAutoRefresh: boolean = false;
+
+  canSetGameAsBeaten: boolean = false;
+  canSetGameAsMastered: boolean = false;
+  canAddStandaloneId: boolean = false;
 
   model: Model;
   gameDataService: GameDataService;
@@ -331,5 +351,23 @@ export class GameDataPanel {
       this.selectedGame = game;
       this.requestGameData(game);
     });
+  }
+
+  setGameAsBeaten(): void {
+    if (!this.selectedGame)
+      return;
+    this.gameDataService.setGameAsBeaten(this.selectedGame, this.model).then(
+      () => this.refreshData()
+    );
+  }
+
+  setGameAsMastered(): void {
+    if (!this.selectedGame)
+      return;
+  }
+
+  addStandaloneGameId(): void {
+    if (!this.selectedGame)
+      return;
   }
 }

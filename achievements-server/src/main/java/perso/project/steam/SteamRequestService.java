@@ -1,13 +1,9 @@
 package perso.project.steam;
 
-import java.io.FileReader;
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,11 +13,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.opencsv.CSVReader;
-import com.opencsv.CSVReaderBuilder;
-import com.opencsv.RFC4180Parser;
-import com.opencsv.RFC4180ParserBuilder;
-import com.opencsv.exceptions.CsvException;
 
 import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -32,10 +23,10 @@ import perso.project.model.GameData;
 import perso.project.model.Model;
 import perso.project.model.enums.CompletionStatusEnum;
 import perso.project.model.enums.ConsoleSourceEnum;
-import perso.project.utils.AbstractRequestService;
+import perso.project.utils.AbstractSingleIdRequestService;
 
 @ApplicationScoped
-public class SteamRequestService extends AbstractRequestService {
+public class SteamRequestService extends AbstractSingleIdRequestService {
 	static final int RETRY_MAX = 5;
 	private int retryIndex = 1;
 
@@ -69,16 +60,8 @@ public class SteamRequestService extends AbstractRequestService {
 	String steamAccessToken;
 
 	@Inject
-	@ConfigProperty(name = "steam.beaten.path")
-	private java.nio.file.Path steamBeatenPath;
-
-	@Inject
-	@ConfigProperty(name = "steam.mastered.path")
-	private java.nio.file.Path steamMasteredPath;
-
-	@Inject
-	@ConfigProperty(name = "steam.removed.path")
-	private java.nio.file.Path steamRemovedPath;
+	@ConfigProperty(name = "steam.local.data.path")
+	private java.nio.file.Path steamLocalDataPath;
 
 	/**
 	 * Creates <b>blocking</b> HTTP request
@@ -125,11 +108,6 @@ public class SteamRequestService extends AbstractRequestService {
 			steamConsoleData = model.getConsoleDataMap().get(Model.STEAM_CONSOLE_ID);
 		}
 		return List.of(steamConsoleData);
-	}
-
-	public void getLocalData() {
-		getSteamGames_Beaten(steamBeatenPath);
-		getSteamGames_Mastered(steamMasteredPath);
 	}
 
 	public List<GameData> getOwnedGames() {
@@ -416,93 +394,8 @@ public class SteamRequestService extends AbstractRequestService {
 		return gameData;
 	}
 
-	/**
-	 * Reads SteamBeaten file and update or add list
-	 * 
-	 * @param path
-	 * @return
-	 */
-	public List<GameData> getSteamGames_Beaten(final Path path) {
-		Log.info("Reading " + path);
-		final List<GameData> beatenList = new ArrayList<>();
-		final RFC4180Parser rfc4180Parser = new RFC4180ParserBuilder().build();
-		try (final FileReader fileReader = new FileReader(path.toFile(), StandardCharsets.UTF_8)) {
-			final CSVReader reader = new CSVReaderBuilder(fileReader).withCSVParser(rfc4180Parser).build();
-			final List<String[]> stringList = reader.readAll();
-			for (final String[] str : stringList) {
-				final String gameName = str[0];
-				final String gameIdStr = str[1];
-				if (gameIdStr.isBlank()) {
-					Log.error("No game id for game " + gameName);
-					continue;
-				}
-				final int gameId = Integer.parseInt(gameIdStr);
-				GameData gameData = model.getConsoleDataMap().get(Model.STEAM_CONSOLE_ID).getGameDataMap().get(gameId);
-				if (gameData == null) {
-					gameData = new GameData();
-					gameData.setTitle(gameName);
-					gameData.setId(gameId);
-					gameData.setConsoleId(Model.STEAM_CONSOLE_ID);
-					gameData.setConsoleName("Steam");
-				}
-				gameData.setLocalData(true);
-				gameData.setCompletionStatus(CompletionStatusEnum.BEATEN);
-				parseAchievementData(gameData);
-
-				model.getConsoleDataMap().get(Model.STEAM_CONSOLE_ID).getGameDataMap().put(gameId, gameData);
-				beatenList.add(gameData);
-			}
-			return beatenList;
-		} catch (final IOException | CsvException e) {
-			Log.error("Cannot read Steam beaten file at " + path);
-			return null;
-		}
-	}
-
-	/**
-	 * Reads SteamMastered file and update or add list
-	 * 
-	 * @param path
-	 * @return
-	 */
-	public List<GameData> getSteamGames_Mastered(final Path path) {
-		Log.info("Reading " + path);
-		final List<GameData> masteredList = new ArrayList<>();
-		final RFC4180Parser rfc4180Parser = new RFC4180ParserBuilder().build();
-		try (final FileReader fileReader = new FileReader(path.toFile(), StandardCharsets.UTF_8)) {
-			final CSVReader reader = new CSVReaderBuilder(fileReader).withCSVParser(rfc4180Parser).build();
-			final List<String[]> stringList = reader.readAll();
-			for (final String[] str : stringList) {
-				final String gameName = str[0];
-				final String gameIdStr = str[1];
-				if (gameIdStr.isBlank()) {
-					Log.error("No game id for game " + gameName);
-					continue;
-				}
-				final int gameId = Integer.parseInt(gameIdStr);
-				GameData gameData = model.getConsoleDataMap().get(Model.STEAM_CONSOLE_ID).getGameDataMap().get(gameId);
-				if (gameData == null) {
-					gameData = new GameData();
-					gameData.setTitle(gameName);
-					gameData.setId(gameId);
-					gameData.setConsoleId(Model.STEAM_CONSOLE_ID);
-					gameData.setConsoleName("Steam");
-				}
-				gameData.setLocalData(true);
-				gameData.setCompletionStatus(CompletionStatusEnum.MASTERED);
-				parseAchievementData(gameData);
-
-				model.getConsoleDataMap().get(Model.STEAM_CONSOLE_ID).getGameDataMap().put(gameId, gameData);
-				masteredList.add(gameData);
-			}
-			return masteredList;
-		} catch (final IOException | CsvException e) {
-			Log.error("Cannot read Steam mastered file at " + path);
-			return null;
-		}
-	}
-
-	private GameData parseAchievementData(final GameData gameData) {
+	@Override
+	protected GameData parseAchievementData(final GameData gameData) {
 		gameData.setTotalAchievements(gameData.getAchievementData().size());
 		gameData.setAwardedAchievements(
 				(int) gameData.getAchievementData().stream().filter(ach -> ach.isAchieved()).count());
@@ -597,5 +490,20 @@ public class SteamRequestService extends AbstractRequestService {
 	@Override
 	public ObjectMapper getMapper() {
 		return mapper;
+	}
+
+	@Override
+	protected int getId() {
+		return Model.STEAM_CONSOLE_ID;
+	}
+
+	@Override
+	protected ConsoleSourceEnum getSource() {
+		return ConsoleSourceEnum.STEAM;
+	}
+
+	@Override
+	protected Path getLocalDataPath() {
+		return steamLocalDataPath;
 	}
 }

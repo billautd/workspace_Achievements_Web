@@ -45,26 +45,12 @@ public class PSVitaRequestService extends AbstractPSNRequestService {
 	private Path psVitaHTMLPath;
 
 	@Inject
-	@ConfigProperty(name = "psvita.beaten.path")
-	private Path psVitaBeatenPath;
-
-	@Inject
-	@ConfigProperty(name = "psvita.mastered.path")
-	private Path psVitaMasteredPath;
+	@ConfigProperty(name = "psvita.local.data.path")
+	private Path psVitaLocalDataPath;
 
 	@Override
 	protected Path getHTMLPath() {
 		return psVitaHTMLPath;
-	}
-
-	@Override
-	protected Path getGamesBeatenPath() {
-		return psVitaBeatenPath;
-	}
-
-	@Override
-	protected Path getGamesMasteredPath() {
-		return psVitaMasteredPath;
 	}
 
 	@Override
@@ -75,6 +61,11 @@ public class PSVitaRequestService extends AbstractPSNRequestService {
 	@Override
 	protected int getId() {
 		return Model.PSVITA_CONSOLE_ID;
+	}
+
+	@Override
+	protected Path getLocalDataPath() {
+		return psVitaLocalDataPath;
 	}
 
 	@Override
@@ -129,6 +120,9 @@ public class PSVitaRequestService extends AbstractPSNRequestService {
 			Log.error("No user data file for UUID2 " + gameUUID);
 			return existingGameData;
 		}
+
+		// First, re-read local files
+		getLocalData();
 
 		readGameDataFile(gameDataFile.toFile(), existingGameData.getUUID());
 		readAchievementsFile(existingGameData, userDataFile.toFile());
@@ -227,7 +221,8 @@ public class PSVitaRequestService extends AbstractPSNRequestService {
 		return gameData;
 	}
 
-	private GameData parseAchievementData(final GameData gameData) {
+	@Override
+	protected GameData parseAchievementData(final GameData gameData) {
 		gameData.setTotalAchievements(gameData.getAchievementData().size());
 		gameData.setAwardedAchievements(
 				(int) gameData.getAchievementData().stream().filter(ach -> ach.isAchieved()).count());

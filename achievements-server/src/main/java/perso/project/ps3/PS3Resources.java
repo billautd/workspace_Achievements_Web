@@ -71,6 +71,18 @@ public class PS3Resources extends AbstractStandaloneResources {
 		return ps3RequestService.getMapper().writeValueAsString(data);
 	}
 
+	@GET
+	@Path("/set_as_beaten/{game_id}")
+	public void setGameAsBeaten(@PathParam("game_id") final int gameId) {
+		ps3RequestService.setGameAsBeaten(gameId);
+	}
+
+	@GET
+	@Path("/set_as_mastered/{game_id}")
+	public void setGameAsMastered(@PathParam("game_id") final int gameId) {
+		ps3RequestService.setGameAsMastered(gameId);
+	}
+
 	@Override
 	protected ConsoleSourceEnum getSource() {
 		return ConsoleSourceEnum.PS3;

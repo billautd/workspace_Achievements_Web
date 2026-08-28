@@ -7,6 +7,11 @@
     gap: 5px;
 }
 
+.game-data-top-bar {
+    display: flex;
+    flex-direction: row;
+}
+
 .game-header {
     height: 100%;
 }
@@ -387,4 +392,25 @@
     width: 30px;
     height: 30px;
     color: #FF0000;
+}
+
+.menu-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--purple3);
+    background-color: var(--purple1);
+    border-radius: 10px;
+    width: 50px;
+    height: 50px;
+}
+
+.menu-button:hover:enabled {
+    border: 3px solid var(--purple2);
+}
+
+.menu-icon {
+    width: 20px;
+    height: 20px;
+    color: #FFFFFF;
 }

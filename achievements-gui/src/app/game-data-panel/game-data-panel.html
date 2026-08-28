@@ -1,4 +1,5 @@
 <div class="game-data-parent">
+
     <button class="search-button" (click)="openSearchData()">
         <img src="search.svg" class="search-icon">
         Search...
@@ -38,6 +39,20 @@
                 Refresh data
             </button>
         </div>
+        <div class="game-data-top-bar">
+            <button class="menu-button" [matMenuTriggerFor]="menu">
+                <img src="menu.svg" class="menu-icon">
+            </button>
+        </div>
+        <mat-menu #menu="matMenu">
+            <button mat-menu-item (click)="setGameAsBeaten()" [disabled]="!canSetGameAsBeaten">
+                Set game as "Beaten"
+            </button>
+            <button mat-menu-item (click)="setGameAsMastered()" [disabled]="!canSetGameAsMastered">
+                Set game as "Mastered"
+            </button>
+        </mat-menu>
+
     </div>
     @if(selectedGame.AchievementData.length > 0){
     <div class="game-achievements-sort">

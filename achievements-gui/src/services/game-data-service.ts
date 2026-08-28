@@ -137,6 +137,18 @@ export class GameDataService {
     return this.getService(consoleData.Source)?.requestFullGameData(consoleId, data.ID, model, this.http)
   }
 
+  async setGameAsBeaten(data: GameData, model: Model): Promise<any> {
+    console.log("Setting game " + data.Title + " as Beaten");
+
+    let consoleId: number = data.ConsoleID;
+    let consoleData: ConsoleData | undefined = model.getConsoleData().get(consoleId);
+    if (!consoleData) {
+      console.log("No console data found for game " + data.Title)
+      return;
+    }
+    return this.getService(consoleData.Source)?.setGameAsBeaten(consoleId, data.ID, model, this.http)
+  }
+
   getService(source: ConsoleSource): AbstractSpecificGameDataService | null {
     switch (source) {
       case ConsoleSource.PS3:

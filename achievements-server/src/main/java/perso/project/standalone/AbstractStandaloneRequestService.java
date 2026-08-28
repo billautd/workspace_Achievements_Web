@@ -1,9 +1,7 @@
 package perso.project.standalone;
 
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,21 +13,15 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.opencsv.CSVReader;
-import com.opencsv.CSVReaderBuilder;
-import com.opencsv.RFC4180Parser;
-import com.opencsv.RFC4180ParserBuilder;
-import com.opencsv.exceptions.CsvException;
 
 import io.quarkus.logging.Log;
 import jakarta.inject.Inject;
 import perso.project.model.ConsoleData;
 import perso.project.model.GameData;
 import perso.project.model.enums.CompletionStatusEnum;
-import perso.project.model.enums.ConsoleSourceEnum;
-import perso.project.utils.AbstractRequestService;
+import perso.project.utils.AbstractSingleIdRequestService;
 
-public abstract class AbstractStandaloneRequestService extends AbstractRequestService {
+public abstract class AbstractStandaloneRequestService extends AbstractSingleIdRequestService {
 	static final String HTM_EXTENSION = "htm";
 	protected int id = 1;
 
@@ -39,14 +31,6 @@ public abstract class AbstractStandaloneRequestService extends AbstractRequestSe
 
 	protected abstract Path getHTMLPath();
 
-	protected abstract Path getGamesBeatenPath();
-
-	protected abstract Path getGamesMasteredPath();
-
-	protected abstract ConsoleSourceEnum getSource();
-
-	protected abstract int getId();
-
 	protected abstract void parseDocument(final File htmlFile, final List<GameData> gameData, final Document document);
 
 	protected abstract void parseAchievements(final List<GameData> gameData);
@@ -54,8 +38,7 @@ public abstract class AbstractStandaloneRequestService extends AbstractRequestSe
 	public List<GameData> getAllData() {
 		Log.info("Getting all " + getSource() + " games");
 		getGameDataFromHTML(getHTMLPath());
-		getGames_Beaten(getGamesBeatenPath());
-		getGames_Mastered(getGamesMasteredPath());
+		getLocalData();
 		final List<GameData> gameData = model.getConsoleDataMap().get(getId()).getGameDataMap().values().stream()
 				.toList();
 		Log.info("Processing " + gameData.size() + " " + getSource() + " games");
@@ -99,82 +82,6 @@ public abstract class AbstractStandaloneRequestService extends AbstractRequestSe
 			saConsoleData = model.getConsoleDataMap().get(getId());
 		}
 		return List.of(saConsoleData);
-	}
-
-	public List<GameData> getGames_Beaten(final Path path) {
-		Log.info("Reading " + path);
-		final List<GameData> beatenList = new ArrayList<>();
-		final RFC4180Parser rfc4180Parser = new RFC4180ParserBuilder().build();
-		try (final FileReader fileReader = new FileReader(path.toFile(), StandardCharsets.UTF_8)) {
-			final CSVReader reader = new CSVReaderBuilder(fileReader).withCSVParser(rfc4180Parser).build();
-			final List<String[]> stringList = reader.readAll();
-			for (final String[] str : stringList) {
-				final String gameName = str[0].trim();
-				final String gameIdStr = str[1].trim();
-				if (gameIdStr.isBlank()) {
-					Log.error("No game id for game " + gameName);
-					continue;
-				}
-				final int gameId = Integer.parseInt(gameIdStr);
-				GameData gameData = model.getConsoleDataMap().get(getId()).getGameDataMap().get(gameId);
-				if (gameData == null) {
-					gameData = new GameData();
-					gameData.setTitle(gameName);
-					gameData.setId(gameId);
-					gameData.setConsoleId(getId());
-					gameData.setConsoleName(getSource().getName());
-				}
-				gameData.setLocalData(true);
-				gameData.setCompletionStatus(CompletionStatusEnum.BEATEN);
-				setGameAchievementPercent(gameData);
-
-				model.getConsoleDataMap().get(getId()).getGameDataMap().put(gameId, gameData);
-				beatenList.add(gameData);
-				Log.info(gameName + " (" + gameId + ") for " + getSource() + " is Beaten");
-			}
-			return beatenList;
-		} catch (final IOException | CsvException e) {
-			Log.error("Cannot read " + getSource() + " beaten file at " + path);
-			return null;
-		}
-	}
-
-	public List<GameData> getGames_Mastered(final Path path) {
-		Log.info("Reading " + path);
-		final List<GameData> masteredList = new ArrayList<>();
-		final RFC4180Parser rfc4180Parser = new RFC4180ParserBuilder().build();
-		try (final FileReader fileReader = new FileReader(path.toFile(), StandardCharsets.UTF_8)) {
-			final CSVReader reader = new CSVReaderBuilder(fileReader).withCSVParser(rfc4180Parser).build();
-			final List<String[]> stringList = reader.readAll();
-			for (final String[] str : stringList) {
-				final String gameName = str[0].trim();
-				final String gameIdStr = str[1].trim();
-				if (gameIdStr.isBlank()) {
-					Log.error("No game id for game " + gameName);
-					continue;
-				}
-				final int gameId = Integer.parseInt(gameIdStr);
-				GameData gameData = model.getConsoleDataMap().get(getId()).getGameDataMap().get(gameId);
-				if (gameData == null) {
-					gameData = new GameData();
-					gameData.setTitle(gameName);
-					gameData.setId(gameId);
-					gameData.setConsoleId(getId());
-					gameData.setConsoleName(getSource().getName());
-				}
-				gameData.setLocalData(true);
-				gameData.setCompletionStatus(CompletionStatusEnum.MASTERED);
-				setGameAchievementPercent(gameData);
-
-				model.getConsoleDataMap().get(getId()).getGameDataMap().put(gameId, gameData);
-				masteredList.add(gameData);
-				Log.info(gameName + " (" + gameId + ") for " + getSource() + " is Mastered");
-			}
-			return masteredList;
-		} catch (final IOException | CsvException e) {
-			Log.error("Cannot read " + getSource() + " mastered file at " + path);
-			return null;
-		}
 	}
 
 	public GameData parseCompletionStatus(final GameData gameData) {

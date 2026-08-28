@@ -71,6 +71,18 @@ public class PSVitaResources extends AbstractStandaloneResources {
 		return psVitaRequestService.getMapper().writeValueAsString(data);
 	}
 
+	@GET
+	@Path("/set_as_beaten/{game_id}")
+	public void setGameAsBeaten(@PathParam("game_id") final int gameId) {
+		psVitaRequestService.setGameAsBeaten(gameId);
+	}
+
+	@GET
+	@Path("/set_as_mastered/{game_id}")
+	public void setGameAsMastered(@PathParam("game_id") final int gameId) {
+		psVitaRequestService.setGameAsMastered(gameId);
+	}
+
 	@Override
 	protected ConsoleSourceEnum getSource() {
 		return ConsoleSourceEnum.PSVITA;

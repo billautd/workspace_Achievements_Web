@@ -350,4 +350,9 @@ public class RetroAchievementsRequestService extends AbstractRequestService {
 	public ObjectMapper getMapper() {
 		return mapper;
 	}
+
+	@Override
+	protected ConsoleSourceEnum getSource() {
+		return ConsoleSourceEnum.RETRO_ACHIEVEMENTS;
+	}
 }

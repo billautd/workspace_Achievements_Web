@@ -24,6 +24,7 @@ export abstract class AbstractSpecificGameDataService {
   COMPARE_DATA_METHOD: string = "compare_data/";
   EXISTING_DATA_METHOD: string = "existing_data/";
   WRITE_DATABASE_METHOD: string = "write_database/";
+  SET_AS_BEATEN: string = "set_as_beaten/";
 
   /**
  * 
@@ -79,5 +80,9 @@ export abstract class AbstractSpecificGameDataService {
     model.refreshData([fullGameData]);
 
     return fullGameData;
+  }
+
+  async setGameAsBeaten(consoleId: number, gameId: number, model: Model, http: HttpClient) {
+    await firstValueFrom(http.get<GameData[]>(environment.API_URL + this.getMainPath() + this.SET_AS_BEATEN + gameId));
   }
 }
