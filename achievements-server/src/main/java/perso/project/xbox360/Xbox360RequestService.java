@@ -173,6 +173,7 @@ public class Xbox360RequestService extends AbstractXboxRequestService {
 			ach.setDisplayOrder(ach.getId());
 			ach.setAchieved((flags & UNLOCKED_FLAG) == UNLOCKED_FLAG);
 			ach.setPoints(points);
+			ach.setUnlockPercentage(100);
 			ach.setRealPoints(ach.getPoints());
 			ach.setDisplayName(GenericUtils.hexToAscii(title));
 			ach.setDescription(GenericUtils.hexToAscii(description));

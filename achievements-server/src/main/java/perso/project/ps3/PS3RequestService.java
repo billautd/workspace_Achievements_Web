@@ -150,6 +150,13 @@ public class PS3RequestService extends AbstractPSNRequestService {
 		case "P" -> 300;
 		default -> 0;
 		});
+		ach.setUnlockPercentage(switch (trophyNode.get("ttype").asText()) {
+		case "B" -> 50;
+		case "S" -> 20;
+		case "G" -> 10;
+		case "P" -> 1;
+		default -> 0;
+		});
 		// Ratio is 1, no data for unlock percentage
 		ach.setRealPoints(ach.getPoints());
 

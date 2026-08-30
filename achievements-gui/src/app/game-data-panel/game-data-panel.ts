@@ -64,7 +64,7 @@ export class GameDataPanel {
   readonly SUPER_RARE_MAX_RARITY: number = 5;
 
   currentTime: number = 0; //Milliseconds
-  readonly TIMER: number = 2 * 60 * 1000; //Milliseconds
+  readonly TIMER: number = 1 * 60 * 1000; //Milliseconds
   readonly INTERVAL: number = 1000; //Milliseconds
   progress: number = 0;
 
