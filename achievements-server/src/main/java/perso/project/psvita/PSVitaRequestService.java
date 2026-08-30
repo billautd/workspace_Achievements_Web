@@ -133,7 +133,7 @@ public class PSVitaRequestService extends AbstractPSNRequestService {
 	}
 
 	private Optional<GameData> readGameDataFile(final File gameDataFile, final String gameUUID) {
-		final String gameName = model.getStandaloneGamesByIds().get(gameUUID);
+		final String gameName = model.getStandaloneGamesByIds().get(getSource()).get(gameUUID);
 		if (gameName == null) {
 			Log.error("Cannot find PSVita game for UUID " + gameUUID);
 			return Optional.empty();

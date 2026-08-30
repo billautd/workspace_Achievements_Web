@@ -94,7 +94,7 @@ public class Xbox360RequestService extends AbstractXboxRequestService {
 			}
 
 			final String gameUUID = FilenameUtils.removeExtension(gameDataFile.getName());
-			final String gameName = model.getStandaloneGamesByIds().get(gameUUID);
+			final String gameName = model.getStandaloneGamesByIds().get(getSource()).get(gameUUID);
 			if (gameName == null) {
 				Log.error("No Xbox360 game found for UUID " + gameUUID);
 				continue;

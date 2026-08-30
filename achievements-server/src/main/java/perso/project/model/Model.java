@@ -22,7 +22,7 @@ public class Model {
 
 	private final Map<String, PlayniteGameData> playniteData = new HashMap<>();
 
-	private final Map<String, String> standaloneGamesByIds = new HashMap<>();
+	private final Map<ConsoleSourceEnum, Map<String, String>> standaloneGamesByIds = new HashMap<>();
 
 	public Map<Integer, ConsoleData> getConsoleDataMap() {
 		return consoleDataMap;
@@ -32,7 +32,7 @@ public class Model {
 		return playniteData;
 	}
 
-	public Map<String, String> getStandaloneGamesByIds() {
+	public Map<ConsoleSourceEnum, Map<String, String>> getStandaloneGamesByIds() {
 		return standaloneGamesByIds;
 	}
 

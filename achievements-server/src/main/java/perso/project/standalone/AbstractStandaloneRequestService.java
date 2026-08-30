@@ -19,6 +19,7 @@ import jakarta.inject.Inject;
 import perso.project.model.ConsoleData;
 import perso.project.model.GameData;
 import perso.project.model.enums.CompletionStatusEnum;
+import perso.project.model.enums.ConsoleSourceEnum;
 import perso.project.utils.AbstractSingleIdRequestService;
 
 public abstract class AbstractStandaloneRequestService extends AbstractSingleIdRequestService {
@@ -105,8 +106,9 @@ public abstract class AbstractStandaloneRequestService extends AbstractSingleIdR
 
 	protected void readStandaloneGamesByIds() {
 		try {
-			final Map<String, String> values = mapper.readValue(standaloneGamesByIdsPath.toFile(),
-					new TypeReference<Map<String, String>>() {
+			final Map<ConsoleSourceEnum, Map<String, String>> values = mapper.readValue(
+					standaloneGamesByIdsPath.toFile(),
+					new TypeReference<Map<ConsoleSourceEnum, Map<String, String>>>() {
 					});
 			model.getStandaloneGamesByIds().clear();
 			values.forEach(model.getStandaloneGamesByIds()::put);

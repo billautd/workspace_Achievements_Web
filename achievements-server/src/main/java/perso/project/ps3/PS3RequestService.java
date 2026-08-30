@@ -27,6 +27,7 @@ import perso.project.standalone.AbstractPSNRequestService;
 public class PS3RequestService extends AbstractPSNRequestService {
 	static final String TROPHY_SPLIT_1 = "0000000400000050000000";
 	static final String TROPHY_SPLIT_2 = "0000000600000060000000";
+	static final String TROPUSR_MAGIC = "818f54ad";
 	static final String UNLOCKED_STRING = "00000001";
 	static final int MIN_LENGTH = 58;
 	static final String USER_TROPHY_DATA_NAME = "TROPUSR.DAT";
@@ -101,7 +102,7 @@ public class PS3RequestService extends AbstractPSNRequestService {
 	}
 
 	private Optional<GameData> readGameDataFile(final File gameDataFile, final String gameUUID) {
-		final String gameName = model.getStandaloneGamesByIds().get(gameUUID);
+		final String gameName = model.getStandaloneGamesByIds().get(getSource()).get(gameUUID);
 		if (gameName == null) {
 			Log.error("Cannot find PSVita game for UUID " + gameUUID);
 			return Optional.empty();
@@ -175,7 +176,7 @@ public class PS3RequestService extends AbstractPSNRequestService {
 			Log.trace("Hex str split : " + allSplits);
 
 			for (final String hexData : allSplits) {
-				if (hexData.length() < MIN_LENGTH) {
+				if (hexData.length() < MIN_LENGTH || hexData.startsWith(TROPUSR_MAGIC)) {
 					continue;
 				}
 				final int achievementId = Integer.parseInt(hexData.substring(0, 2), 16);
