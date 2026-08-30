@@ -288,6 +288,7 @@ public class SteamRequestService extends AbstractSingleIdRequestService {
 						gameData.getAchievementData().add(achievement);
 					}
 					achievement.setDisplayOrder(gameData.getAchievementData().indexOf(achievement));
+					achievement.setId(achievement.getDisplayOrder());
 				});
 			}
 			retryIndex = 1;

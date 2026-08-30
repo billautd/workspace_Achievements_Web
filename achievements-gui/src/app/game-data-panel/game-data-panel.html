@@ -94,9 +94,9 @@
         <div class="game-achievements-list">
             @for (ach of sortedAchievements; track ach){
             @if(ach.achieved){
-            <button class="game-achievement-box" (click)="selectAchievement(ach)">
+            <button class="game-achievement-box" (click)=" selectAchievement(ach)">
                 <img class="game-achievement-icon" [ngClass]="achievementIconClass(ach.percent)"
-                    [src]="ach.achieved ? ach.icon : ach.icongray" />
+                    [class.ach-selected]="isAchievementSelected(ach)" [src]=" ach.achieved ? ach.icon : ach.icongray" />
                 @if(isMissable(ach)){
                 <img src="missable.svg" class="missable-icon" />
                 }
@@ -115,7 +115,7 @@
             @if(!ach.achieved){
             <button class="game-achievement-box" (click)="selectAchievement(ach)">
                 <img class="game-achievement-icon" [ngClass]="achievementIconClass(ach.percent)"
-                    [src]="ach.achieved ? ach.icon : ach.icongray" />
+                    [class.ach-selected]="isAchievementSelected(ach)" [src]="ach.achieved ? ach.icon : ach.icongray" />
                 @if(isMissable(ach)){
                 <img src="missable.svg" class="missable-icon" />
                 }

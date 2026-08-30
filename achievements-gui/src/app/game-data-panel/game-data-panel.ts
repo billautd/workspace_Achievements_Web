@@ -136,21 +136,43 @@ export class GameDataPanel {
 
   requestGameData(data: GameData): void {
     this.isRequestRunning = true;
+    const selAchId: number | undefined = this.selectedAchievement?.ID;
     this.gameDataService.requestGameData(data, this.model).then(newData => {
       this.selectedGame = newData
-      this.clearAchievement();
+      this.selectAchievementId(selAchId);
       this.applySortFilter(this.sortOptions.value ? this.sortOptions.value : this.defaultSort)
       this.isRequestRunning = false;
     });
   }
 
+  selectAchievementId(id: number | undefined): void {
+    console.log("Select id " + id);
+    if (!id)
+      this.clearAchievement();
+    const achFound: AchievementData[] = this.sortedAchievements.filter(ach => ach.ID === id);
+    if (achFound.length != 1) {
+      console.log("Multiple achievements found for id " + id);
+      return;
+    }
+    this.selectedAchievement = achFound[0];
+  }
 
   selectAchievement(ach: AchievementData): void {
+    console.log("Select ach " + ach);
+    if (this.selectedAchievement === ach) {
+      this.clearAchievement();
+      return;
+    }
     this.selectedAchievement = ach;
   }
 
   clearAchievement() {
+    console.log("clear");
     this.selectedAchievement = null;
+  }
+
+  isAchievementSelected(ach: AchievementData): boolean {
+    return ach.ID == this.selectedAchievement?.ID;
   }
 
   setAutoRefresh(event: MatCheckboxChange): void {

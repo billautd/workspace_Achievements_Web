@@ -123,6 +123,11 @@
     border: 0px;
 }
 
+.ach-selected {
+    outline: 2px solid white;
+    outline-offset: 3px;
+}
+
 .game-achievement-icon,
 .game-achievement-description-icon {
     border-radius: 7px;
