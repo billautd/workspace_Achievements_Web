@@ -48,8 +48,14 @@
             <button mat-menu-item (click)="setGameAsBeaten()" [disabled]="!canSetGameAsBeaten">
                 Set game as "Beaten"
             </button>
+            <button mat-menu-item (click)="removeGameFromBeaten()" [disabled]="!canRemoveGameFromBeaten">
+                Remove game from "Beaten"
+            </button>
             <button mat-menu-item (click)="setGameAsMastered()" [disabled]="!canSetGameAsMastered">
                 Set game as "Mastered"
+            </button>
+            <button mat-menu-item (click)="removeGameFromMastered()" [disabled]="!canRemoveGameFromMastered">
+                Remove game from "Mastered"
             </button>
         </mat-menu>
 

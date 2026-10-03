@@ -49,8 +49,14 @@ export class GameDataPanel {
     if (!csl)
       return;
 
-    this.canSetGameAsBeaten = csl.Source == ConsoleSource.PS3 || csl.Source == ConsoleSource.PSVITA || csl.Source == ConsoleSource.XBOX_360 || csl.Source == ConsoleSource.STEAM;
-    this.canSetGameAsMastered = game.MaxPossible == 0 && (csl.Source == ConsoleSource.PS3 || csl.Source == ConsoleSource.PSVITA || csl.Source == ConsoleSource.XBOX_360 || csl.Source == ConsoleSource.STEAM);
+    this.canSetGameAsBeaten = game.CompletionStatus != CompletionStatusType.BEATEN &&
+      (csl.Source == ConsoleSource.PS3 || csl.Source == ConsoleSource.PSVITA || csl.Source == ConsoleSource.XBOX_360 || csl.Source == ConsoleSource.STEAM);
+    this.canRemoveGameFromBeaten = game.CompletionStatus == CompletionStatusType.BEATEN &&
+      (csl.Source == ConsoleSource.PS3 || csl.Source == ConsoleSource.PSVITA || csl.Source == ConsoleSource.XBOX_360 || csl.Source == ConsoleSource.STEAM);
+    this.canSetGameAsMastered = game.CompletionStatus != CompletionStatusType.MASTERED && game.MaxPossible == 0 &&
+      (csl.Source == ConsoleSource.PS3 || csl.Source == ConsoleSource.PSVITA || csl.Source == ConsoleSource.XBOX_360 || csl.Source == ConsoleSource.STEAM);
+    this.canRemoveGameFromMastered = game.CompletionStatus == CompletionStatusType.MASTERED && game.MaxPossible == 0 &&
+      (csl.Source == ConsoleSource.PS3 || csl.Source == ConsoleSource.PSVITA || csl.Source == ConsoleSource.XBOX_360 || csl.Source == ConsoleSource.STEAM);
     this.canAddStandaloneId = csl.Source == ConsoleSource.PS3 || csl.Source == ConsoleSource.PSVITA || csl.Source == ConsoleSource.XBOX_360;
   }
 
@@ -78,7 +84,9 @@ export class GameDataPanel {
   isAutoRefresh: boolean = false;
 
   canSetGameAsBeaten: boolean = false;
+  canRemoveGameFromBeaten: boolean = false;
   canSetGameAsMastered: boolean = false;
+  canRemoveGameFromMastered: boolean = false;
   canAddStandaloneId: boolean = false;
 
   model: Model;
@@ -386,10 +394,24 @@ export class GameDataPanel {
   setGameAsMastered(): void {
     if (!this.selectedGame)
       return;
+    this.gameDataService.setGameAsMastered(this.selectedGame, this.model).then(
+      () => this.refreshData()
+    );
   }
 
-  addStandaloneGameId(): void {
+  removeGameFromBeaten(): void {
     if (!this.selectedGame)
       return;
+    this.gameDataService.removeGameFromBeaten(this.selectedGame, this.model).then(
+      () => this.refreshData()
+    );
+  }
+
+  removeGameFromMastered(): void {
+    if (!this.selectedGame)
+      return;
+    this.gameDataService.removeGameFromMastered(this.selectedGame, this.model).then(
+      () => this.refreshData()
+    );
   }
 }

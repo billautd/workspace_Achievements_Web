@@ -149,6 +149,42 @@ export class GameDataService {
     return this.getService(consoleData.Source)?.setGameAsBeaten(consoleId, data.ID, model, this.http)
   }
 
+  async setGameAsMastered(data: GameData, model: Model): Promise<any> {
+    console.log("Setting game " + data.Title + " as Mastered");
+
+    let consoleId: number = data.ConsoleID;
+    let consoleData: ConsoleData | undefined = model.getConsoleData().get(consoleId);
+    if (!consoleData) {
+      console.log("No console data found for game " + data.Title)
+      return;
+    }
+    return this.getService(consoleData.Source)?.setGameAsMastered(consoleId, data.ID, model, this.http)
+  }
+
+  async removeGameFromBeaten(data: GameData, model: Model): Promise<any> {
+    console.log("Removing game " + data.Title + " from Beaten");
+
+    let consoleId: number = data.ConsoleID;
+    let consoleData: ConsoleData | undefined = model.getConsoleData().get(consoleId);
+    if (!consoleData) {
+      console.log("No console data found for game " + data.Title)
+      return;
+    }
+    return this.getService(consoleData.Source)?.removeGameFromBeaten(consoleId, data.ID, model, this.http)
+  }
+
+  async removeGameFromMastered(data: GameData, model: Model): Promise<any> {
+    console.log("Removing game " + data.Title + " from Mastered");
+
+    let consoleId: number = data.ConsoleID;
+    let consoleData: ConsoleData | undefined = model.getConsoleData().get(consoleId);
+    if (!consoleData) {
+      console.log("No console data found for game " + data.Title)
+      return;
+    }
+    return this.getService(consoleData.Source)?.removeGameFromMastered(consoleId, data.ID, model, this.http)
+  }
+
   getService(source: ConsoleSource): AbstractSpecificGameDataService | null {
     switch (source) {
       case ConsoleSource.PS3:

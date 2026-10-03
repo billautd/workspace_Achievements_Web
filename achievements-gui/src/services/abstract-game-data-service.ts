@@ -25,6 +25,9 @@ export abstract class AbstractSpecificGameDataService {
   EXISTING_DATA_METHOD: string = "existing_data/";
   WRITE_DATABASE_METHOD: string = "write_database/";
   SET_AS_BEATEN: string = "set_as_beaten/";
+  SET_AS_MASTERED: string = "set_as_mastered/";
+  REMOVE_FROM_BEATEN: string = "remove_from_beaten/";
+  REMOVE_FROM_MASTERED: string = "remove_from_mastered/";
 
   /**
  * 
@@ -84,5 +87,17 @@ export abstract class AbstractSpecificGameDataService {
 
   async setGameAsBeaten(consoleId: number, gameId: number, model: Model, http: HttpClient) {
     await firstValueFrom(http.get<GameData[]>(environment.API_URL + this.getMainPath() + this.SET_AS_BEATEN + gameId));
+  }
+
+  async setGameAsMastered(consoleId: number, gameId: number, model: Model, http: HttpClient) {
+    await firstValueFrom(http.get<GameData[]>(environment.API_URL + this.getMainPath() + this.SET_AS_MASTERED + gameId));
+  }
+
+  async removeGameFromBeaten(consoleId: number, gameId: number, model: Model, http: HttpClient) {
+    await firstValueFrom(http.get<GameData[]>(environment.API_URL + this.getMainPath() + this.REMOVE_FROM_BEATEN + gameId));
+  }
+
+  async removeGameFromMastered(consoleId: number, gameId: number, model: Model, http: HttpClient) {
+    await firstValueFrom(http.get<GameData[]>(environment.API_URL + this.getMainPath() + this.REMOVE_FROM_MASTERED + gameId));
   }
 }
