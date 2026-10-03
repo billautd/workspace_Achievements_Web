@@ -157,8 +157,18 @@ public class PS3RequestService extends AbstractPSNRequestService {
 		case "P" -> 1;
 		default -> 0;
 		});
-		// Ratio is 1, no data for unlock percentage
-		ach.setRealPoints(ach.getPoints());
+
+		// Retro achievements formula
+		// p = points
+		// a = achievers
+		// t = total users who have played the game
+		// r = 0.6
+		// RP = p * r + ( p * ( t / a ) * ( 1 - r ) )
+		// This formula is the same but replaces t / a by 100/percentage
+		double ratio = 0.6;
+		int truePoints = (int) Math
+				.round((ach.getPoints() * ratio) + ach.getPoints() * (100 / ach.getUnlockPercentage()) * (1 - ratio));
+		ach.setRealPoints(truePoints);
 
 		return ach;
 	}
